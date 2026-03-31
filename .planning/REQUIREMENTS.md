@@ -7,9 +7,9 @@
 
 ### Project Setup
 
-- [ ] **SETUP-01**: Vue 3 + TypeScript + Vite + Tailwind v4 project initialized with same conventions as vcf-sizer
-- [ ] **SETUP-02**: ESLint + Prettier configured with same rules as vcf-sizer
-- [ ] **SETUP-03**: Vitest configured for unit testing the sizing engine
+- [x] **SETUP-01**: Vue 3 + TypeScript + Vite + Tailwind v4 project initialized with same conventions as vcf-sizer
+- [x] **SETUP-02**: ESLint + Prettier configured with same rules as vcf-sizer
+- [x] **SETUP-03**: Vitest configured for unit testing the sizing engine
 - [ ] **SETUP-04**: vue-i18n configured with EN/FR/IT/DE locale files (lazy-loaded)
 - [ ] **SETUP-05**: Pinia configured with `inputStore` (refs) and `calculationStore` (computed) pattern
 

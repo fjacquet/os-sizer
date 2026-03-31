@@ -15,7 +15,7 @@
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-PLAN-scaffold.md — Project scaffold: Vue 3 + Vite + Tailwind v4 + ESLint + Prettier + Vitest + Wave-0 test stubs
+- [x] 01-PLAN-scaffold.md — Project scaffold: Vue 3 + Vite + Tailwind v4 + ESLint + Prettier + Vitest + Wave-0 test stubs (COMPLETE: 2026-03-31)
 - [ ] 01-PLAN-stores.md — Pinia store skeletons: inputStore (refs), calculationStore (computed-only), uiStore (4-step wizard)
 - [ ] 01-PLAN-i18n.md — vue-i18n setup: 4 locale files, lazy-loading, LanguageSwitcher, Vite 8 rolldown compatibility
 
