@@ -34,10 +34,10 @@ Plans:
 
 **Requirements covered:** ENG-01 – ENG-09, REC-01 – REC-03, QA-01 – QA-03
 
-**Plans:** 6 plans
+**Plans:** 1/6 plans executed
 
 Plans:
-- [ ] 02-01-PLAN.md — Core types, constants, defaults, barrel index, Wave-0 test stubs
+- [x] 02-01-PLAN.md — Core types, constants, defaults, barrel index, Wave-0 test stubs
 - [ ] 02-02-PLAN.md — CP sizing, allocatable RAM, worker count, infra node formulas (TDD)
 - [ ] 02-03-PLAN.md — 8 topology calculator functions + dispatcher (TDD)
 - [ ] 02-04-PLAN.md — ODF, infra node, RHACM add-on calculators (TDD)

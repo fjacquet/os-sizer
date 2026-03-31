@@ -15,7 +15,7 @@
 
 ### Sizing Engine — Core Types & Formulas
 
-- [ ] **ENG-01**: TypeScript types defined for all 8 topologies: `StandardHA`, `Compact3Node`, `SNO`, `TNA`, `TNF`, `HCP`, `MicroShift`, `ManagedCloud`
+- [x] **ENG-01**: TypeScript types defined for all 8 topologies: `StandardHA`, `Compact3Node`, `SNO`, `TNA`, `TNF`, `HCP`, `MicroShift`, `ManagedCloud`
 - [ ] **ENG-02**: Control plane node sizing formula (scales with worker count: 24→4vCPU/16GB, 120→8vCPU/32GB, 252→16vCPU/64GB, 501→16vCPU/96GB)
 - [ ] **ENG-03**: Worker count calculation formula: `max(cpu_limited, ram_limited, pod_density_limited)` with 70% target utilization
 - [ ] **ENG-04**: Allocatable RAM formula with tiered kernel reservation (25%/20%/10%/6% model)
@@ -32,7 +32,7 @@
   - MicroShift: 2 vCPU / 2 GB + workload overhead
 - [ ] **ENG-07**: ODF add-on sizing: 16 vCPU / 64 GB × 3 storage nodes minimum; +2 CPU/+5 GB per additional OSD
 - [ ] **ENG-08**: RHACM hub sizing: 3 workers × 16 vCPU / 64 GB (handles ~500 clusters)
-- [ ] **ENG-09**: All engine functions are pure TypeScript with no Vue imports, fully unit-tested
+- [x] **ENG-09**: All engine functions are pure TypeScript with no Vue imports, fully unit-tested
 
 ### Sizing Engine — Architecture Recommendation
 
