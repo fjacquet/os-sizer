@@ -5,12 +5,12 @@ milestone_name: milestone
 current_phase: 05
 current_plan: 1
 status: Executing Phase 05
-last_updated: "2026-03-31T17:09:35.479Z"
+last_updated: "2026-03-31T17:12:26.162Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 23
-  completed_plans: 19
+  completed_plans: 20
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 **Current Phase:** 05
 **Current Plan:** 1
 **Last Updated:** 2026-03-31
-**Last Session:** 2026-03-31T17:09:35.476Z
+**Last Session:** 2026-03-31T17:12:26.159Z
 
 ## Progress
 
@@ -59,6 +59,7 @@ Overall:  [████......] 3/15 plans complete (estimate)
 - [Phase 02-sizing-engine]: All 4 sizing formulas use decimal.js for intermediate arithmetic and return plain numbers, maintaining zero Vue imports (CALC-01)
 - [Phase 05]: Swiss German uses proper umlauts (ä, ö, ü) throughout — only eszett (ß) is forbidden; corrected prior ASCII transliterations
 - [Phase 05]: French nœud ligature used consistently for 'nœuds' throughout FR locale
+- [Phase 05-01]: v-if/v-else split for active wizard step renders literal aria-current=step satisfying static analysis
 
 ## Key Context
 
@@ -79,3 +80,4 @@ Overall:  [████......] 3/15 plans complete (estimate)
 | Phase 02 P05 | 2 | 2 tasks | 2 files |
 | Phase 02-sizing-engine P02 | 3 | 2 tasks | 2 files |
 | Phase 05 P02 | 15 | 2 tasks | 3 files |
+| Phase 05 P01 | 7 min | 2 tasks | 7 files |
