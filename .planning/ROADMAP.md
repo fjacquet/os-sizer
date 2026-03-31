@@ -161,7 +161,7 @@ Plans:
 
 **Gap Closure:** Closes QA-04 from v1.0 audit
 
-**Plans:** 0/1 plans complete
+**Plans:** 1 plan
 
 Plans:
 
@@ -185,7 +185,7 @@ Plans:
 
 **Gap Closure:** Closes tech debt from v1.0 audit
 
-**Plans:** 0/1 plans complete
+**Plans:** 1 plan
 
 Plans:
 
