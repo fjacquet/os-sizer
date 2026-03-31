@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n'
 import type { TopologyRecommendation, TopologyType } from '@/engine/types'
 
-const props = defineProps<{
+defineProps<{
   recommendation: TopologyRecommendation
   selected: boolean
   topologyLabelKey: string
