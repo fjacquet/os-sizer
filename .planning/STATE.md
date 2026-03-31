@@ -2,24 +2,24 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 02
+current_phase: 05
 current_plan: 1
-status: Executing Phase 02
-last_updated: "2026-03-31T14:17:57.393Z"
+status: Executing Phase 05
+last_updated: "2026-03-31T17:09:35.479Z"
 progress:
   total_phases: 5
-  completed_phases: 1
-  total_plans: 9
-  completed_plans: 6
+  completed_phases: 2
+  total_plans: 23
+  completed_plans: 19
 ---
 
 # Project State
 
 **Project:** os-sizer
-**Current Phase:** 02
+**Current Phase:** 05
 **Current Plan:** 1
 **Last Updated:** 2026-03-31
-**Last Session:** 2026-03-31T14:17:57.390Z
+**Last Session:** 2026-03-31T17:09:35.476Z
 
 ## Progress
 
@@ -37,9 +37,9 @@ Overall:  [████......] 3/15 plans complete (estimate)
 - [x] Phase 1 Plan 1: Project Foundation Scaffold (COMPLETE)
 - [x] Phase 1 Plan 2: Pinia Stores (inputStore, uiStore, calculationStore) (COMPLETE)
 - [x] Phase 1 Plan 3: i18n Setup (FR, EN, IT, DE locales) (COMPLETE)
-- [ ] Phase 2: Sizing Engine
-- [ ] Phase 3: Wizard UI
-- [ ] Phase 4: Results, Exports & Sharing
+- [x] Phase 2: Sizing Engine (COMPLETE — 85/85 tests)
+- [x] Phase 3: Wizard UI (COMPLETE — Steps 1-4 + i18n)
+- [x] Phase 4: Results, Exports & Sharing (COMPLETE — 117/117 tests)
 - [ ] Phase 5: Polish & Release
 
 ## Decisions Made
@@ -57,6 +57,8 @@ Overall:  [████......] 3/15 plans complete (estimate)
 - [Phase 02]: fitScore=0 used as hard-exclusion sentinel for incompatible topology combinations
 - [Phase 02-sizing-engine]: allocatableRamGB(16) is 13.4 GB not 12.4 GB — plan arithmetic comment had typo; formula (2.6 GB reserved) is correct per hardware-sizing.md specification
 - [Phase 02-sizing-engine]: All 4 sizing formulas use decimal.js for intermediate arithmetic and return plain numbers, maintaining zero Vue imports (CALC-01)
+- [Phase 05]: Swiss German uses proper umlauts (ä, ö, ü) throughout — only eszett (ß) is forbidden; corrected prior ASCII transliterations
+- [Phase 05]: French nœud ligature used consistently for 'nœuds' throughout FR locale
 
 ## Key Context
 
@@ -76,3 +78,4 @@ Overall:  [████......] 3/15 plans complete (estimate)
 | Phase 02 P01 | 5 min | 2 tasks | 9 files |
 | Phase 02 P05 | 2 | 2 tasks | 2 files |
 | Phase 02-sizing-engine P02 | 3 | 2 tasks | 2 files |
+| Phase 05 P02 | 15 | 2 tasks | 3 files |

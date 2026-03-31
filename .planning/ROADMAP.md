@@ -82,13 +82,14 @@ Plans:
 
 **Requirements covered:** RES-01 – RES-07, SHARE-01 – SHARE-03, EXP-01 – EXP-03, QA-05
 
-### Plans
+**Plans:** 5 plans in 4 waves
 
-1. **Results page — BoM table & summary** — On-screen BoM table (node type, count, vCPU, RAM, storage), total resource summary, architecture overview card, warnings for below-minimum inputs
-2. **Charts** — Bar/donut charts via vue-chartjs showing resource distribution; responsive layout
-3. **URL sharing** — lz-string + Zod schema URL encoding of all inputs; copy-to-clipboard button; decode on page load
-4. **PPTX export** — pptxgenjs: architecture summary slide + BoM table slide; dynamically imported; branded template
-5. **PDF & CSV exports** — jsPDF + jspdf-autotable for PDF (dynamic import); plain TypeScript blob download for CSV; both triggered from results page export menu
+Plans:
+- [ ] 04-01-PLAN.md — Results page shell: BoM table, totals summary, architecture overview, warnings, App.vue step 4 wiring (Wave 1)
+- [ ] 04-02-PLAN.md — Charts: vue-chartjs vCPU bar, RAM bar, Storage donut in ChartsSection grid (Wave 2, parallel)
+- [ ] 04-03-PLAN.md — URL sharing: lz-string + Zod encoding, hydrateFromUrl in main.ts, ExportToolbar with Share button (Wave 2, parallel)
+- [ ] 04-04-PLAN.md — PPTX export: pptxgenjs dynamic import, 2-slide report, ExportToolbar wired (Wave 3)
+- [ ] 04-05-PLAN.md — PDF (jsPDF+autotable dynamic import) + CSV (blob download) exports; jspdf install (Wave 4)
 
 ### Success Criteria
 
@@ -107,12 +108,13 @@ Plans:
 
 **Requirements covered:** QA-05 (final pass), all i18n locales verified
 
-### Plans
+**Plans:** 1/4 plans executed
 
-1. **Responsive design & accessibility** — Mobile-friendly layout, keyboard navigation, ARIA labels, color contrast check
-2. **i18n QA pass** — Review all 4 locales for completeness, grammar, and technical accuracy; fix any gaps
-3. **CI setup** — GitHub Actions: lint + type-check + test on PR; build check on main
-4. **Deployment** — GitHub Pages (`.nojekyll`, static build) matching vcf-sizer deployment pattern
+Plans:
+- [ ] 05-01-PLAN.md — Responsive design and accessibility: mobile layout, ARIA labels, keyboard navigation (Wave 1)
+- [x] 05-02-PLAN.md — i18n QA pass: key completeness, grammar, technical accuracy, Swiss locale review (Wave 1)
+- [ ] 05-03-PLAN.md — CI setup: GitHub Actions lint + type-check + test + build on PR/push (Wave 2)
+- [ ] 05-04-PLAN.md — Deployment: GitHub Pages with .nojekyll, static build, deploy workflow (Wave 3)
 
 ### Success Criteria
 
