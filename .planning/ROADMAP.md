@@ -137,11 +137,11 @@ Plans:
 
 **Gap Closure:** Closes integration gaps from v1.0 audit
 
-**Plans:** 0/1 plans complete
+**Plans:** 1/1 plans complete
 
 Plans:
 
-- [ ] 06-01-PLAN.md — Wire calcODF/calcRHACM into calcCluster; add maxNodes slider to Step1; verify add-on nodes in BomTable, charts, and all 3 exports
+- [x] 06-01-PLAN.md — Wire calcODF/calcRHACM into calcCluster; add maxNodes slider to Step1; verify add-on nodes in BomTable, charts, and all 3 exports
 
 ### Success Criteria
 

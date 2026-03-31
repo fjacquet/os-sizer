@@ -30,8 +30,8 @@
   - TNF: 2 full CPs, no arbiter, Redfish BMC required
   - HCP: 78 pods / 5 vCPU / 18 GiB per hosted CP at idle
   - MicroShift: 2 vCPU / 2 GB + workload overhead
-- [ ] **ENG-07**: ODF add-on sizing: 16 vCPU / 64 GB × 3 storage nodes minimum; +2 CPU/+5 GB per additional OSD <!-- gap-closure Phase 6 -->
-- [ ] **ENG-08**: RHACM hub sizing: 3 workers × 16 vCPU / 64 GB (handles ~500 clusters) <!-- gap-closure Phase 6 -->
+- [x] **ENG-07**: ODF add-on sizing: 16 vCPU / 64 GB × 3 storage nodes minimum; +2 CPU/+5 GB per additional OSD <!-- gap-closure Phase 6 -->
+- [x] **ENG-08**: RHACM hub sizing: 3 workers × 16 vCPU / 64 GB (handles ~500 clusters) <!-- gap-closure Phase 6 -->
 - [x] **ENG-09**: All engine functions are pure TypeScript with no Vue imports, fully unit-tested
 
 ### Sizing Engine — Architecture Recommendation
@@ -46,7 +46,7 @@
 - [ ] **FORM-02**: Environment constraint inputs: datacenter / edge / far-edge / cloud, connectivity (connected / air-gapped), HA level required
 - [ ] **FORM-03**: Workload profile inputs: number of applications, total pods, average CPU per pod (millicores), average RAM per pod (MiB)
 - [ ] **FORM-04**: Architecture selection: auto-recommended or manual override from all 8 topologies
-- [ ] **FORM-05**: Optional add-ons toggle: ODF storage, infra nodes, GPU nodes, RHACM hub <!-- gap-closure Phase 6 -->
+- [x] **FORM-05**: Optional add-ons toggle: ODF storage, infra nodes, GPU nodes, RHACM hub <!-- gap-closure Phase 6 -->
 - [ ] **FORM-06**: SNO profile selector: Standard / Edge / Telecom-vDU (different hardware minimums)
 - [ ] **FORM-07**: HCP inputs: number of hosted clusters, target QPS per cluster
 - [ ] **FORM-08**: All inputs validated with Zod; errors displayed inline
@@ -54,11 +54,11 @@
 
 ### Results Display
 
-- [ ] **RES-01**: On-screen Bill of Materials table: node type, count, vCPU, RAM, storage per node type <!-- gap-closure Phase 6 -->
+- [x] **RES-01**: On-screen Bill of Materials table: node type, count, vCPU, RAM, storage per node type <!-- gap-closure Phase 6 -->
 - [ ] **RES-02**: Total resource summary: total vCPU, total RAM, total storage
 - [ ] **RES-03**: Architecture overview card with topology name, HA level, and key constraints
 - [ ] **RES-04**: Infra nodes displayed as separate line item when enabled <!-- gap-closure Phase 8 -->
-- [ ] **RES-05**: ODF nodes displayed as separate line item when enabled <!-- gap-closure Phase 6 -->
+- [x] **RES-05**: ODF nodes displayed as separate line item when enabled <!-- gap-closure Phase 6 -->
 - [ ] **RES-06**: Warnings shown when inputs fall below official Red Hat minimums
 - [ ] **RES-07**: Charts (bar/donut) showing resource distribution across node types
 
@@ -126,16 +126,16 @@
 | ENG-01, 02, 03, 05, 09 | Phase 2 | Complete |
 | ENG-04 | Phase 8 (gap closure) | Pending |
 | ENG-06 | Phase 8 (gap closure) | Pending |
-| ENG-07 | Phase 6 (gap closure) | Pending |
-| ENG-08 | Phase 6 (gap closure) | Pending |
+| ENG-07 | Phase 6 (gap closure) | Complete |
+| ENG-08 | Phase 6 (gap closure) | Complete |
 | REC-01, 03 | Phase 2 | Complete |
-| REC-02 | Phase 6 (gap closure) | Pending |
+| REC-02 | Phase 6 (gap closure) | Complete |
 | FORM-01, 02, 03, 04, 06, 07, 08, 09 | Phase 3 | Complete |
-| FORM-05 | Phase 6 (gap closure) | Pending |
+| FORM-05 | Phase 6 (gap closure) | Complete |
 | RES-02, 03, 06, 07 | Phase 4 | Complete |
-| RES-01 | Phase 6 (gap closure) | Pending |
+| RES-01 | Phase 6 (gap closure) | Complete |
 | RES-04 | Phase 8 (gap closure) | Pending |
-| RES-05 | Phase 6 (gap closure) | Pending |
+| RES-05 | Phase 6 (gap closure) | Complete |
 | SHARE-01 – SHARE-03 | Phase 4 | Complete |
 | EXP-01 – EXP-03 | Phase 4 | Complete |
 | I18N-01 – I18N-07 | Phase 1–4 | Complete |
