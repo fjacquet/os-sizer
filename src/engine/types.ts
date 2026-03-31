@@ -46,6 +46,11 @@ export interface ClusterConfig {
   hcpQpsPerCluster: number         // default 1000
   workload: WorkloadProfile
   addOns: AddOnConfig
+  // Environment constraint fields — used by recommendation engine
+  environment: EnvironmentType     // default 'datacenter'
+  haRequired: boolean              // default true
+  airGapped: boolean               // default false
+  maxNodes: number | null          // default null (no limit)
 }
 
 export interface ClusterSizing {

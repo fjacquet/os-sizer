@@ -20,7 +20,7 @@
 - [x] **ENG-03**: Worker count calculation formula: `max(cpu_limited, ram_limited, pod_density_limited)` with 70% target utilization
 - [x] **ENG-04**: Allocatable RAM formula with tiered kernel reservation (25%/20%/10%/6% model)
 - [x] **ENG-05**: Infrastructure node sizing formula (scales with worker count: 27→4CPU/24GB, 120→8CPU/48GB, 252→16CPU/128GB)
-- [ ] **ENG-06**: Minimum hardware constants per topology:
+- [ ] **ENG-06**: Minimum hardware constants per topology: <!-- gap-closure Phase 8 -->
   - Standard HA CP: 4 vCPU / 16 GB / 100 GB SSD / 300 IOPS
   - Worker minimum: 2 vCPU / 8 GB / 100 GB
   - SNO standard: 8 vCPU / 16 GB / 120 GB
@@ -30,8 +30,8 @@
   - TNF: 2 full CPs, no arbiter, Redfish BMC required
   - HCP: 78 pods / 5 vCPU / 18 GiB per hosted CP at idle
   - MicroShift: 2 vCPU / 2 GB + workload overhead
-- [ ] **ENG-07**: ODF add-on sizing: 16 vCPU / 64 GB × 3 storage nodes minimum; +2 CPU/+5 GB per additional OSD
-- [ ] **ENG-08**: RHACM hub sizing: 3 workers × 16 vCPU / 64 GB (handles ~500 clusters)
+- [x] **ENG-07**: ODF add-on sizing: 16 vCPU / 64 GB × 3 storage nodes minimum; +2 CPU/+5 GB per additional OSD <!-- gap-closure Phase 6 -->
+- [x] **ENG-08**: RHACM hub sizing: 3 workers × 16 vCPU / 64 GB (handles ~500 clusters) <!-- gap-closure Phase 6 -->
 - [x] **ENG-09**: All engine functions are pure TypeScript with no Vue imports, fully unit-tested
 
 ### Sizing Engine — Architecture Recommendation
@@ -46,7 +46,7 @@
 - [ ] **FORM-02**: Environment constraint inputs: datacenter / edge / far-edge / cloud, connectivity (connected / air-gapped), HA level required
 - [ ] **FORM-03**: Workload profile inputs: number of applications, total pods, average CPU per pod (millicores), average RAM per pod (MiB)
 - [ ] **FORM-04**: Architecture selection: auto-recommended or manual override from all 8 topologies
-- [ ] **FORM-05**: Optional add-ons toggle: ODF storage, infra nodes, GPU nodes, RHACM hub
+- [x] **FORM-05**: Optional add-ons toggle: ODF storage, infra nodes, GPU nodes, RHACM hub <!-- gap-closure Phase 6 -->
 - [ ] **FORM-06**: SNO profile selector: Standard / Edge / Telecom-vDU (different hardware minimums)
 - [ ] **FORM-07**: HCP inputs: number of hosted clusters, target QPS per cluster
 - [ ] **FORM-08**: All inputs validated with Zod; errors displayed inline
@@ -54,11 +54,11 @@
 
 ### Results Display
 
-- [ ] **RES-01**: On-screen Bill of Materials table: node type, count, vCPU, RAM, storage per node type
+- [x] **RES-01**: On-screen Bill of Materials table: node type, count, vCPU, RAM, storage per node type <!-- gap-closure Phase 6 -->
 - [ ] **RES-02**: Total resource summary: total vCPU, total RAM, total storage
 - [ ] **RES-03**: Architecture overview card with topology name, HA level, and key constraints
-- [ ] **RES-04**: Infra nodes displayed as separate line item when enabled
-- [ ] **RES-05**: ODF nodes displayed as separate line item when enabled
+- [ ] **RES-04**: Infra nodes displayed as separate line item when enabled <!-- gap-closure Phase 8 -->
+- [x] **RES-05**: ODF nodes displayed as separate line item when enabled <!-- gap-closure Phase 6 -->
 - [ ] **RES-06**: Warnings shown when inputs fall below official Red Hat minimums
 - [ ] **RES-07**: Charts (bar/donut) showing resource distribution across node types
 
@@ -89,8 +89,8 @@
 - [ ] **QA-01**: Unit tests for all engine sizing formulas (vitest)
 - [ ] **QA-02**: Unit tests for recommendation engine
 - [ ] **QA-03**: Unit tests for Zod validation schemas
-- [ ] **QA-04**: Component tests for wizard step navigation
-- [ ] **QA-05**: Test coverage for edge cases: minimums enforcement, topology-specific constraints
+- [x] **QA-04**: Component tests for wizard step navigation <!-- gap-closure Phase 7 -->
+- [x] **QA-05**: Test coverage for edge cases: minimums enforcement, topology-specific constraints
 
 ## v2 Requirements
 
@@ -122,19 +122,31 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SETUP-01 – SETUP-05 | Phase 1 | Pending |
-| ENG-01 – ENG-09 | Phase 2 | Pending |
-| REC-01 – REC-03 | Phase 2 | Pending |
-| FORM-01 – FORM-09 | Phase 3 | Pending |
-| RES-01 – RES-07 | Phase 4 | Pending |
-| SHARE-01 – SHARE-03 | Phase 4 | Pending |
-| EXP-01 – EXP-03 | Phase 4 | Pending |
-| I18N-01 – I18N-07 | Phase 3–4 | Pending |
-| QA-01 – QA-05 | Phase 2–4 | Pending |
+| SETUP-01 – SETUP-05 | Phase 1 | Complete |
+| ENG-01, 02, 03, 05, 09 | Phase 2 | Complete |
+| ENG-04 | Phase 8 (gap closure) | Pending |
+| ENG-06 | Phase 8 (gap closure) | Pending |
+| ENG-07 | Phase 6 (gap closure) | Complete |
+| ENG-08 | Phase 6 (gap closure) | Complete |
+| REC-01, 03 | Phase 2 | Complete |
+| REC-02 | Phase 6 (gap closure) | Complete |
+| FORM-01, 02, 03, 04, 06, 07, 08, 09 | Phase 3 | Complete |
+| FORM-05 | Phase 6 (gap closure) | Complete |
+| RES-02, 03, 06, 07 | Phase 4 | Complete |
+| RES-01 | Phase 6 (gap closure) | Complete |
+| RES-04 | Phase 8 (gap closure) | Pending |
+| RES-05 | Phase 6 (gap closure) | Complete |
+| SHARE-01 – SHARE-03 | Phase 4 | Complete |
+| EXP-01 – EXP-03 | Phase 4 | Complete |
+| I18N-01 – I18N-07 | Phase 1–4 | Complete |
+| QA-01, 02, 03, 05 | Phase 2–5 | Complete |
+| QA-04 | Phase 7 (gap closure) | Complete |
 
 **Coverage:**
+
 - v1 requirements: 52 total
-- Mapped to phases: 52
+- Complete: 41
+- Gap closure pending (phases 6–8): 11
 - Unmapped: 0
 
 ---

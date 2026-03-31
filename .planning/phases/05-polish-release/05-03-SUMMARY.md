@@ -32,6 +32,7 @@ metrics:
 ## What Was Built
 
 A CI workflow at `.github/workflows/ci.yml` that:
+
 - Triggers on pull_request and push to the `main` branch
 - Runs on `ubuntu-latest`
 - Uses Node 22 with npm cache for fast installs
@@ -48,6 +49,7 @@ This ensures regressions are caught before merge and the production build stays 
 ## Verification
 
 All acceptance criteria met:
+
 - `.github/workflows/ci.yml` exists
 - Contains `npm run lint`
 - Contains `npm run type-check`

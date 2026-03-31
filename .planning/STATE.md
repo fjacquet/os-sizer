@@ -2,24 +2,24 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 05
+current_phase: 08
 current_plan: Not started
-status: Milestone complete
-last_updated: "2026-03-31T18:07:47.159Z"
+status: Ready to plan
+last_updated: "2026-03-31T20:22:54.909Z"
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 23
-  completed_plans: 22
+  total_phases: 8
+  completed_phases: 5
+  total_plans: 25
+  completed_plans: 24
 ---
 
 # Project State
 
 **Project:** os-sizer
-**Current Phase:** 05
+**Current Phase:** 08
 **Current Plan:** Not started
 **Last Updated:** 2026-03-31
-**Last Session:** 2026-03-31T17:19:33.469Z
+**Last Session:** 2026-03-31T20:20:20.736Z
 
 ## Progress
 
@@ -62,6 +62,9 @@ Overall:  [████......] 3/15 plans complete (estimate)
 - [Phase 05-01]: v-if/v-else split for active wizard step renders literal aria-current=step satisfying static analysis
 - [Phase 05-03]: CI pipeline uses Node 22 with npm cache; Build step added beyond vcf-sizer pattern to catch production build regressions; targets main branch
 - [Phase 05]: deploy.yml uses actions/upload-pages-artifact@v3 and actions/deploy-pages@v4 (current stable); environment block added for GitHub UI deployment URL tracking
+- [Phase 06-01]: Post-dispatch augmentation pattern in calcCluster isolates add-on logic from topology functions — odfNodes/rhacmWorkers populated after dispatch
+- [Phase 07]: vi.stubGlobal(navigator) required before setActivePinia to prevent uiStore navigator.language access in test environment
+- [Phase 07]: workload/addOns fields require spread-merge pattern in updateCluster patch to avoid wiping sibling fields
 
 ## Key Context
 
@@ -85,3 +88,5 @@ Overall:  [████......] 3/15 plans complete (estimate)
 | Phase 05 P01 | 7 min | 2 tasks | 7 files |
 | Phase 05 P03 | 3 min | 1 tasks | 1 files |
 | Phase 05 P04 | 5 | 2 tasks | 2 files |
+| Phase 06 P01 | 5 min | 3 tasks | 7 files |
+| Phase 07 P07-01 | 4 min | 2 tasks | 5 files |

@@ -35,12 +35,14 @@ requirements: [REC-01, REC-02, REC-03]
 ## What Was Built
 
 `src/engine/recommendation.ts` — exports a single `recommend(constraints)` function that:
+
 1. Scores all 8 OpenShift topologies using dedicated scoring functions
 2. Applies hard exclusions (fitScore=0) for incompatible combinations
 3. Filters out zero-score topologies
 4. Returns results sorted by fitScore descending
 
 Topology scoring rules implemented:
+
 - **standard-ha**: base 70, +20 datacenter, +10 haRequired, -50 if maxNodes < 5
 - **compact-3node**: base 50, +30 if maxNodes <= 3, +10 datacenter, -30 if workers > 20
 - **sno**: base 40, +40 far-edge/edge, +10 if maxNodes=1; fitScore=0 if haRequired
@@ -53,6 +55,7 @@ Topology scoring rules implemented:
 ## Test Coverage
 
 7 test cases, all passing (38 total in full suite):
+
 1. Datacenter + HA required → standard-ha ranked first
 2. Far-edge → SNO or MicroShift in top 2
 3. Air-gapped → managed-cloud excluded entirely

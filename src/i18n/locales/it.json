@@ -72,7 +72,10 @@
     "airGapped": "Air-Gap",
     "haLevel": "Livello di alta disponibilità",
     "haRequired": "HA richiesta",
-    "haOptional": "HA opzionale"
+    "haOptional": "HA opzionale",
+    "maxNodes": "Budget massimo di nodi",
+    "maxNodesPlaceholder": "Nessun limite",
+    "maxNodesHint": "Opzionale — limita il conteggio totale dei nodi per le raccomandazioni"
   },
   "workload": {
     "label": "Profilo del carico di lavoro",

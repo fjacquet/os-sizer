@@ -90,6 +90,7 @@ completed: 2026-03-31
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Corrected test expected values for allocatableRamGB(16) and allocatableRamGB(64)**
+
 - **Found during:** RED phase (writing tests)
 - **Issue:** Plan specified 12.4 GB for 16 GB input but the documented formula yields 13.4 GB (2.6 GB reserved, not 3.6). Similarly, 64 GB input yields 58.52 GB not ~60.7 GB.
 - **Fix:** Tests use formula-derived correct values (13.4 and 58.52). The research table approximations were inconsistent with the precise formula; formula takes precedence.

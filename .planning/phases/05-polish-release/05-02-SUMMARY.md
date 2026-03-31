@@ -42,6 +42,7 @@ Discovered a **consistency issue**: earlier locale sections used ASCII translite
 Fixed all three locale files to use proper Unicode characters throughout:
 
 **French (fr.json):**
+
 - "Noeuds" → "Nœuds" (proper ligature, used throughout)
 - "heberges" → "hébergés", "controle" → "contrôle"
 - "selectionner" → "sélectionner", "Precedent" → "Précédent"
@@ -51,6 +52,7 @@ Fixed all three locale files to use proper Unicode characters throughout:
 - "Generation" → "Génération", "Apercu" → "Aperçu"
 
 **German (de.json):**
+
 - "waehlen" → "wählen", "bestaetigen" → "bestätigen"
 - "ueberschreiben" → "überschreiben", "Zurueck" → "Zurück"
 - "Konnektivitaet" → "Konnektivität", "Hochverfuegbarkeit" → "Hochverfügbarkeit"
@@ -61,6 +63,7 @@ Fixed all three locale files to use proper Unicode characters throughout:
 - No eszett characters present (Swiss German compliant)
 
 **Italian (it.json):**
+
 - "Connettivita" → "Connettività"
 - "disponibilita" → "disponibilità"
 - "Questo campo e obbligatorio" → "Questo campo è obbligatorio"
@@ -71,12 +74,14 @@ Fixed all three locale files to use proper Unicode characters throughout:
 ### Task 2: Grammar, technical accuracy, and consistency review
 
 Verified all translations against OpenShift technical terminology requirements:
+
 - "Control Plane Nodes" → FR: "Nœuds du plan de contrôle" / DE: "Steuerungsebenen-Knoten" / IT: "Nodi del piano di controllo" — all correct
 - "Worker Nodes" → FR: "Nœuds de travail" / DE: "Worker-Knoten" / IT: "Nodi worker" — all correct
 - "High Availability" → FR: "Haute Disponibilité" / DE: "Hochverfügbarkeit" / IT: "Alta Disponibilità" — all correct
 - Technology names (OpenShift, RHACM, ODF, ROSA, ARO, etc.) remain in English — correct
 
 Swiss locale specifics verified:
+
 - DE: Zero eszett characters — all replaced with "ss" equivalent or proper umlauts
 - FR: Formal Swiss French register maintained throughout
 - IT: Standard formal Italian appropriate for Ticino business documentation
@@ -100,6 +105,7 @@ npm run build: exit 0
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] Fixed pervasive accent/umlaut inconsistency across all 3 non-EN locales**
+
 - **Found during:** Task 1
 - **Issue:** Earlier sections of FR, DE, and IT locale files used ASCII workarounds (e.g., "waehlen" instead of "wählen", "Noeuds" instead of "Nœuds") while later validation sections used proper Unicode. This inconsistency would render incorrect characters in the UI.
 - **Fix:** Applied proper Unicode diacritics throughout all three files for consistency

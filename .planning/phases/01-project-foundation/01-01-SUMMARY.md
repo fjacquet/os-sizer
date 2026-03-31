@@ -69,6 +69,7 @@ Vue 3 + TypeScript + Vite 8 + Tailwind v4 + Pinia + vue-i18n project scaffold wi
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Bug] TypeScript 6.0 baseUrl deprecation error**
+
 - **Found during:** Task 3 (npm run build)
 - **Issue:** TypeScript 6.0.2 treats `baseUrl` in `paths` as deprecated, requiring `"ignoreDeprecations": "6.0"` option
 - **Fix:** Added `"ignoreDeprecations": "6.0"` to `tsconfig.app.json`
@@ -76,6 +77,7 @@ Vue 3 + TypeScript + Vite 8 + Tailwind v4 + Pinia + vue-i18n project scaffold wi
 - **Commit:** d9418e9
 
 **2. [Rule 3 - Missing file] vite-env.d.ts absent causing CSS side-effect import error**
+
 - **Found during:** Task 3 (npm run build)
 - **Issue:** `noUncheckedSideEffectImports: true` in tsconfig blocks CSS imports without `/// <reference types="vite/client" />`
 - **Fix:** Created `src/vite-env.d.ts` (verbatim from vcf-sizer pattern)
@@ -83,6 +85,7 @@ Vue 3 + TypeScript + Vite 8 + Tailwind v4 + Pinia + vue-i18n project scaffold wi
 - **Commit:** d9418e9
 
 **3. [Rule 2 - Missing critical file] .gitignore absent**
+
 - **Found during:** Task 3 (git status)
 - **Issue:** node_modules, dist, .DS_Store would be tracked without .gitignore
 - **Fix:** Created `.gitignore` excluding node_modules/, dist/, .DS_Store, .vscode/

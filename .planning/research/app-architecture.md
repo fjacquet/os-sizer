@@ -40,11 +40,13 @@ These are not optional patterns. Breaking them makes unit tests impossible (engi
 Define all input/output types as interfaces and discriminated union types in a single file. Keep them flat where possible — deep nesting makes Zod schema mirroring harder.
 
 Key pattern from vcf-sizer `types.ts`:
+
 - Input interfaces (e.g., `ComputeInputs`) are separate from result interfaces (e.g., `ComputeResult`).
 - `ValidationWarning` uses an i18n `messageKey` string, never an English string literal.
 - Domain config objects (e.g., `WorkloadDomainConfig`) are the single source of truth for what inputStore persists.
 
 For os-sizer, define equivalent types:
+
 ```typescript
 // Topology discriminated union — covers all 8 OpenShift topologies
 export type TopologyType =
@@ -178,6 +180,7 @@ export const useCalculationStore = defineStore('calculation', () => {
 Manages: locale (with auto-detection), wizard step, topology confirmation flag. The topology confirmation flag is ephemeral — NEVER serialize it to URL state.
 
 The 4-locale setup in uiStore.ts is already correct for os-sizer (EN, FR, DE, IT):
+
 ```typescript
 type AppLocale = 'en' | 'fr' | 'de' | 'it'
 const browserLocale: AppLocale = navigator.language.startsWith('fr') ? 'fr'
@@ -195,6 +198,7 @@ const browserLocale: AppLocale = navigator.language.startsWith('fr') ? 'fr'
 ### Setup pattern
 
 vcf-sizer already has all 4 locales (EN, FR, DE, IT). The setup in `src/i18n/index.ts` is directly reusable:
+
 - `legacy: false` — required for Vue 3 Composition API mode.
 - EN is bundled eagerly; FR, DE, IT are lazy-loaded via dynamic import on `setLocale()`.
 - Swiss locale codes (`fr-CH`, `de-CH`, `it-CH`) with explicit `numberFormats` — do NOT inherit from parent locale (`fr`, `de`, `it`), as inherited formats use locale-specific thousand separators that break Swiss user expectations.
@@ -204,6 +208,7 @@ vcf-sizer already has all 4 locales (EN, FR, DE, IT). The setup in `src/i18n/ind
 ### Locale file structure
 
 Keep the flat JSON structure from vcf-sizer. Nest by UI section:
+
 ```json
 {
   "app": { "title": "OpenShift Sizing Calculator" },
@@ -289,11 +294,13 @@ const emit = defineEmits<{ 'update:modelValue': [value: number] }>()
 ### `WizardStepper.vue` (src/components/shared/)
 
 3-step wizard with `canGoBack` / `canGoForward` computed gates. Step-forward gating is per-step:
+
 - Step 1: requires topology confirmation (user clicks a topology button)
 - Step 2: requires valid cluster config (no blocking validation errors)
 - Step 3: final — no forward navigation
 
 For os-sizer, the 3 wizard steps map to:
+
 1. Topology selection (which OpenShift architecture?)
 2. Cluster configuration (node specs, workload profile)
 3. Results + exports
@@ -475,6 +482,7 @@ These are the exact versions in the reference project — use same majors for co
 | vue-tsc | ^3.2.6 |
 
 **Add for os-sizer:**
+
 | Package | Version | Purpose |
 |---------|---------|---------|
 | jspdf | ^2.5.x | PDF export |
@@ -499,6 +507,7 @@ These are the exact versions in the reference project — use same majors for co
 7. **pptxgenjs hex colors:** No `#` prefix. `'003087'` not `'#003087'`. Silent failure if you include `#`.
 
 8. **vue-i18n VueI18nPlugin:** Omit the `include` option from the Vite plugin config — including it causes a rolldown/JSON conflict with Vite 8:
+
    ```typescript
    // vite.config.ts
    VueI18nPlugin({
@@ -523,6 +532,7 @@ The main domain difference: os-sizer has 8 topology types instead of vcf-sizer's
 - HCP topology has a management cluster + hosted cluster relationship analogous to vcf-sizer's management/workload domain split
 
 This suggests the calculationStore for os-sizer needs:
+
 - A `masterNodeResult` computed
 - A `workerNodeResult` computed
 - An `infraNodeResult` computed (nullable)

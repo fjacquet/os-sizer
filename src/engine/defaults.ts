@@ -24,5 +24,9 @@ export function createDefaultClusterConfig(index: number): ClusterConfig {
       rhacmEnabled: false,
       rhacmManagedClusters: 0,
     },
+    environment: 'datacenter',
+    haRequired: true,
+    airGapped: false,
+    maxNodes: null,
   }
 }
