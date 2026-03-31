@@ -16,10 +16,10 @@
 ### Sizing Engine — Core Types & Formulas
 
 - [x] **ENG-01**: TypeScript types defined for all 8 topologies: `StandardHA`, `Compact3Node`, `SNO`, `TNA`, `TNF`, `HCP`, `MicroShift`, `ManagedCloud`
-- [ ] **ENG-02**: Control plane node sizing formula (scales with worker count: 24→4vCPU/16GB, 120→8vCPU/32GB, 252→16vCPU/64GB, 501→16vCPU/96GB)
-- [ ] **ENG-03**: Worker count calculation formula: `max(cpu_limited, ram_limited, pod_density_limited)` with 70% target utilization
-- [ ] **ENG-04**: Allocatable RAM formula with tiered kernel reservation (25%/20%/10%/6% model)
-- [ ] **ENG-05**: Infrastructure node sizing formula (scales with worker count: 27→4CPU/24GB, 120→8CPU/48GB, 252→16CPU/128GB)
+- [x] **ENG-02**: Control plane node sizing formula (scales with worker count: 24→4vCPU/16GB, 120→8vCPU/32GB, 252→16vCPU/64GB, 501→16vCPU/96GB)
+- [x] **ENG-03**: Worker count calculation formula: `max(cpu_limited, ram_limited, pod_density_limited)` with 70% target utilization
+- [x] **ENG-04**: Allocatable RAM formula with tiered kernel reservation (25%/20%/10%/6% model)
+- [x] **ENG-05**: Infrastructure node sizing formula (scales with worker count: 27→4CPU/24GB, 120→8CPU/48GB, 252→16CPU/128GB)
 - [ ] **ENG-06**: Minimum hardware constants per topology:
   - Standard HA CP: 4 vCPU / 16 GB / 100 GB SSD / 300 IOPS
   - Worker minimum: 2 vCPU / 8 GB / 100 GB
