@@ -20,7 +20,7 @@
 - [x] **ENG-03**: Worker count calculation formula: `max(cpu_limited, ram_limited, pod_density_limited)` with 70% target utilization
 - [x] **ENG-04**: Allocatable RAM formula with tiered kernel reservation (25%/20%/10%/6% model)
 - [x] **ENG-05**: Infrastructure node sizing formula (scales with worker count: 27→4CPU/24GB, 120→8CPU/48GB, 252→16CPU/128GB)
-- [ ] **ENG-06**: Minimum hardware constants per topology: <!-- gap-closure Phase 8 -->
+- [x] **ENG-06**: Minimum hardware constants per topology: <!-- gap-closure Phase 8 -->
   - Standard HA CP: 4 vCPU / 16 GB / 100 GB SSD / 300 IOPS
   - Worker minimum: 2 vCPU / 8 GB / 100 GB
   - SNO standard: 8 vCPU / 16 GB / 120 GB
@@ -57,7 +57,7 @@
 - [x] **RES-01**: On-screen Bill of Materials table: node type, count, vCPU, RAM, storage per node type <!-- gap-closure Phase 6 -->
 - [ ] **RES-02**: Total resource summary: total vCPU, total RAM, total storage
 - [ ] **RES-03**: Architecture overview card with topology name, HA level, and key constraints
-- [ ] **RES-04**: Infra nodes displayed as separate line item when enabled <!-- gap-closure Phase 8 -->
+- [x] **RES-04**: Infra nodes displayed as separate line item when enabled <!-- gap-closure Phase 8 -->
 - [x] **RES-05**: ODF nodes displayed as separate line item when enabled <!-- gap-closure Phase 6 -->
 - [ ] **RES-06**: Warnings shown when inputs fall below official Red Hat minimums
 - [ ] **RES-07**: Charts (bar/donut) showing resource distribution across node types
@@ -124,8 +124,8 @@
 |-------------|-------|--------|
 | SETUP-01 – SETUP-05 | Phase 1 | Complete |
 | ENG-01, 02, 03, 05, 09 | Phase 2 | Complete |
-| ENG-04 | Phase 8 (gap closure) | Pending |
-| ENG-06 | Phase 8 (gap closure) | Pending |
+| ENG-04 | Phase 8 (gap closure) | Complete |
+| ENG-06 | Phase 8 (gap closure) | Complete |
 | ENG-07 | Phase 6 (gap closure) | Complete |
 | ENG-08 | Phase 6 (gap closure) | Complete |
 | REC-01, 03 | Phase 2 | Complete |
@@ -134,7 +134,7 @@
 | FORM-05 | Phase 6 (gap closure) | Complete |
 | RES-02, 03, 06, 07 | Phase 4 | Complete |
 | RES-01 | Phase 6 (gap closure) | Complete |
-| RES-04 | Phase 8 (gap closure) | Pending |
+| RES-04 | Phase 8 (gap closure) | Complete |
 | RES-05 | Phase 6 (gap closure) | Complete |
 | SHARE-01 – SHARE-03 | Phase 4 | Complete |
 | EXP-01 – EXP-03 | Phase 4 | Complete |

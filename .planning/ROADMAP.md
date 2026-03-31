@@ -185,11 +185,11 @@ Plans:
 
 **Gap Closure:** Closes tech debt from v1.0 audit
 
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 
-- [ ] 08-01-PLAN.md — Replace HCP inline constant with allocatableRamGB(); add Math.max() minimum enforcement to all topology functions; extend infraNodes to all topologies that support it
+- [x] 08-01-PLAN.md — Replace HCP inline constant with allocatableRamGB(); add Math.max() minimum enforcement to all topology functions; extend infraNodes to all topologies that support it
 
 ### Success Criteria
 

@@ -3,23 +3,23 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 08
-current_plan: Not started
-status: Ready to plan
-last_updated: "2026-03-31T20:22:54.909Z"
+current_plan: 1
+status: Executing Phase 08
+last_updated: "2026-03-31T20:54:27.479Z"
 progress:
   total_phases: 8
-  completed_phases: 5
-  total_plans: 25
-  completed_plans: 24
+  completed_phases: 6
+  total_plans: 26
+  completed_plans: 25
 ---
 
 # Project State
 
 **Project:** os-sizer
 **Current Phase:** 08
-**Current Plan:** Not started
+**Current Plan:** 1
 **Last Updated:** 2026-03-31
-**Last Session:** 2026-03-31T20:20:20.736Z
+**Last Session:** 2026-03-31T20:54:27.476Z
 
 ## Progress
 
@@ -65,6 +65,9 @@ Overall:  [████......] 3/15 plans complete (estimate)
 - [Phase 06-01]: Post-dispatch augmentation pattern in calcCluster isolates add-on logic from topology functions — odfNodes/rhacmWorkers populated after dispatch
 - [Phase 07]: vi.stubGlobal(navigator) required before setActivePinia to prevent uiStore navigator.language access in test environment
 - [Phase 07]: workload/addOns fields require spread-merge pattern in updateCluster patch to avoid wiping sibling fields
+- [Phase 08]: allocatableRamGB(32)=28.44 — inline constant in calcHCP replaced by formula call for engine consistency
+- [Phase 08]: calcHCP infraNodes branch added matching calcStandardHA pattern — HCP now supports infra nodes (RES-04)
+- [Phase 08]: calcTNA untouched — its infraNodes slot holds arbiter node with different semantics from infrastructure nodes
 
 ## Key Context
 
@@ -90,3 +93,4 @@ Overall:  [████......] 3/15 plans complete (estimate)
 | Phase 05 P04 | 5 | 2 tasks | 2 files |
 | Phase 06 P01 | 5 min | 3 tasks | 7 files |
 | Phase 07 P07-01 | 4 min | 2 tasks | 5 files |
+| Phase 08 P01 | 4 | 2 tasks | 2 files |
