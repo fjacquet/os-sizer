@@ -21,6 +21,7 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 <!-- Current scope. Building toward these. -->
 
 **Architecture Coverage:**
+
 - [ ] Standard HA cluster (3 masters + N workers + optional infra nodes)
 - [ ] Compact 3-node cluster (masters double as workers)
 - [ ] Single Node OpenShift (SNO) — edge profiles including telecom/vDU
@@ -31,6 +32,7 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 - [ ] Managed cloud (ROSA, ARO) — informational sizing
 
 **Sizing Engine:**
+
 - [ ] Workload profile inputs (apps, pods, CPU/RAM per workload)
 - [ ] HA/resilience inputs (node failure tolerance, site failure tolerance)
 - [ ] Environment constraints (edge, air-gapped, datacenter, cloud)
@@ -40,16 +42,19 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 - [ ] Worker node sizing based on workload profile
 
 **UI / UX:**
+
 - [ ] Guided wizard: constraints → architecture recommendation → hardware sizing
 - [ ] On-screen Bill of Materials summary
 - [ ] Shareable compressed URL (all inputs encoded)
 
 **Exports:**
+
 - [ ] PowerPoint (PPTX) export via pptxgenjs
 - [ ] PDF export
 - [ ] CSV export
 
 **Internationalization:**
+
 - [ ] English (EN)
 - [ ] French (FR)
 - [ ] Italian (IT)

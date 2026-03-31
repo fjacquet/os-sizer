@@ -140,6 +140,7 @@ Plans:
 **Plans:** 0/1 plans complete
 
 Plans:
+
 - [ ] 06-01-PLAN.md — Wire calcODF/calcRHACM into calcCluster; add maxNodes slider to Step1; verify add-on nodes in BomTable, charts, and all 3 exports
 
 ### Success Criteria
@@ -163,6 +164,7 @@ Plans:
 **Plans:** 0/1 plans complete
 
 Plans:
+
 - [ ] 07-01-PLAN.md — Component tests for Step1EnvironmentForm, Step2WorkloadForm, Step3ArchitectureForm, WizardStepper navigation
 
 ### Success Criteria
@@ -186,6 +188,7 @@ Plans:
 **Plans:** 0/1 plans complete
 
 Plans:
+
 - [ ] 08-01-PLAN.md — Replace HCP inline constant with allocatableRamGB(); add Math.max() minimum enforcement to all topology functions; extend infraNodes to all topologies that support it
 
 ### Success Criteria

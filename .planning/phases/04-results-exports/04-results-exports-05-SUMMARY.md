@@ -14,21 +14,26 @@ Implemented the final two export formats (CSV and PDF) to complete the three-for
 ## Artifacts Created
 
 ### `src/composables/useCsvExport.ts`
+
 - `buildCsvContent(sizing)` — pure function mapping ClusterSizing to CSV string; header row + one data row per non-null NodeSpec
 - `generateCsvReport()` — calls buildCsvContent, triggers immediate browser blob download (no async, no external deps)
 - Header: `Node Type,Count,vCPU,RAM (GB),Storage (GB)`
 
 ### `src/composables/usePdfExport.ts`
+
 - `buildPdfTableData(sizing)` — pure function returning `{ head, body }` arrays for jspdf-autotable; testable without jsPDF
 - `generatePdfReport()` — dynamically imports jsPDF + jspdf-autotable (kept out of main bundle), generates A4 landscape PDF with Red Hat red title/header and striped BoM table, then saves to disk
 
 ### `src/composables/__tests__/useCsvExport.test.ts`
+
 - 4 tests covering: header format, null NodeSpec skipping, correct values, all non-null entries
 
 ### `src/composables/__tests__/usePdfExport.test.ts`
+
 - 6 tests covering: head column count, body row count, string conversion, column labels, null skipping, all non-null entries
 
 ### `src/components/results/ExportToolbar.vue` (updated)
+
 - Replaced CSV stub with `generateCsvReport()` call
 - Replaced PDF stub with `generatePdfReport()` async call with `pdfLoading` state
 - Moved `pdfLoading` and `pptxLoading` ref declarations before their dependent functions

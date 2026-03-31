@@ -27,6 +27,7 @@ Zod `4.3.6` (already installed). Used `z.enum`, `z.boolean()`, `z.number().int()
 ## i18n Keys
 
 All required keys were **already present** in all 4 locale files (en/fr/de/it):
+
 - `environment.label`, `environment.datacenter`, `environment.edge`, `environment.farEdge`, `environment.cloud`
 - `environment.connectivity`, `environment.connected`, `environment.airGapped`
 - `environment.haLevel`, `environment.haRequired`, `environment.haOptional`

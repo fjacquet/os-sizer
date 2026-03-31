@@ -7,6 +7,7 @@
 ---
 
 <phase_requirements>
+
 ## Phase Requirements
 
 | ID | Description | Research Support |
@@ -63,6 +64,7 @@ No project-level `CLAUDE.md` found in `/Users/fjacquet/Projects/os-sizer/`. Cons
 ## Standard Stack
 
 ### Core
+
 | Library | Version | Purpose | Why Standard |
 |---------|---------|---------|--------------|
 | decimal.js | ^10.6.0 | All engine arithmetic | IEEE 754 correction; already in package.json |
@@ -70,11 +72,13 @@ No project-level `CLAUDE.md` found in `/Users/fjacquet/Projects/os-sizer/`. Cons
 | TypeScript | (project) | Engine type safety | Topology discriminated unions; already configured |
 
 ### Supporting
+
 | Library | Version | Purpose | When to Use |
 |---------|---------|---------|-------------|
 | zod | ^4.3.6 | Input validation schemas | QA-03: Zod schemas for ClusterConfig fields |
 
 ### Alternatives Considered
+
 | Instead of | Could Use | Tradeoff |
 |------------|-----------|----------|
 | decimal.js | Plain JS arithmetic | Plain JS has IEEE 754 errors at rounding boundaries; not acceptable in sizing tool |
@@ -83,6 +87,7 @@ No project-level `CLAUDE.md` found in `/Users/fjacquet/Projects/os-sizer/`. Cons
 **Installation:** All packages already installed in Phase 1.
 
 **Verified versions from package.json:**
+
 - decimal.js: 10.6.0 (confirmed installed)
 - vitest: 4.1.2 (confirmed installed, tests passing)
 - zod: 4.3.6 (confirmed installed)
@@ -107,6 +112,7 @@ src/engine/
 ```
 
 Plus test files co-located:
+
 ```
 src/engine/
 ├── formulas.test.ts
@@ -257,6 +263,7 @@ export interface TopologyRecommendation {
 ```
 
 Recommendation ranking logic (derived from Red Hat docs):
+
 - `standard-ha`: default for datacenter + HA required + workers >= 2
 - `compact-3node`: when node budget <= 3, datacenter, workers <= ~20
 - `sno`: when environment is edge/far-edge OR single site OR no HA required
@@ -405,6 +412,7 @@ export interface SizingResult {
 Verified patterns from vcf-sizer source:
 
 ### Decimal.js arithmetic pattern
+
 ```typescript
 // Source: vcf-sizer src/engine/compute.ts
 import Decimal from 'decimal.js'
@@ -419,6 +427,7 @@ const workers = Math.ceil(
 ```
 
 ### Exhaustive switch with never
+
 ```typescript
 // Source: vcf-sizer src/engine/storage.ts — default case pattern
 default: {
@@ -428,6 +437,7 @@ default: {
 ```
 
 ### Validation warning without English strings
+
 ```typescript
 // Source: vcf-sizer src/engine/validation.ts
 errors.push({
@@ -438,6 +448,7 @@ errors.push({
 ```
 
 ### Engine test pattern
+
 ```typescript
 // Source: vcf-sizer app-architecture.md section 8
 /// <reference types="vitest/globals" />
@@ -472,6 +483,7 @@ describe('cpSizing', () => {
 ```
 
 ### CalcStore wiring pattern (calculationStore.ts update)
+
 ```typescript
 // calculationStore.ts — replace stub with real engine call
 import { calcCluster } from '@/engine/calculators'
@@ -498,6 +510,7 @@ const clusterResults = computed<SizingResult[]>(() =>
 | OVN-K CP overhead not documented | OVN-K adds significant CP overhead at >120 workers | OCP 4.x doc update | Must expose as flag in CP sizing |
 
 **Deprecated/outdated:**
+
 - OCP 4.16 and earlier CPU reservation formula (10m/core): superseded by 12m/core in 4.17+. Use 4.17+ formula as it is the current standard.
 
 ---
@@ -569,6 +582,7 @@ All 11 existing Phase 1 tests pass (`vitest run`). No missing dependencies.
 | QA-05 | `calcStandardHA({workers:0})` → workers enforced to 2; SNO topology returns workerNodes null | unit | `npm run test` | ❌ Wave 0 |
 
 ### Sampling Rate
+
 - **Per task commit:** `npm run test` (all 11 existing + new engine tests)
 - **Per wave merge:** `npm run test` (same command)
 - **Phase gate:** Full suite green before `/gsd:verify-work`
@@ -586,6 +600,7 @@ All 11 existing Phase 1 tests pass (`vitest run`). No missing dependencies.
 ## Sources
 
 ### Primary (HIGH confidence)
+
 - `.planning/research/hardware-sizing.md` — CP scaling table, allocatable RAM formula, all topology minimums, ODF sizing, HCP scaling, infra sizing (directly from openshift-docs sources)
 - `.planning/research/app-architecture.md` — vcf-sizer engine patterns, decimal.js requirement, validation pattern, test patterns
 - `src/engine/types.ts` — Phase 1 definitions (direct source read)
@@ -596,10 +611,12 @@ All 11 existing Phase 1 tests pass (`vitest run`). No missing dependencies.
 - `vitest.config.ts` — confirmed test runner, `node` environment, include patterns
 
 ### Secondary (MEDIUM confidence)
+
 - hardware-sizing.md section 5.2 RHACM hub sizing — sourced from `github.com/stolostron/capacity-planning` (MEDIUM — community tool, not official RH doc)
 - SNO edge profile (8 vCPU / 32 GB) — project decision, no official Red Hat "edge" sub-profile specification
 
 ### Tertiary (LOW confidence)
+
 - OVN-Kubernetes overhead claim — documented in hardware-sizing.md but exact thresholds are from OCP docs that may have updated; LOW until verified against current openshift-docs `master-node-sizing.adoc`
 
 ---
@@ -607,6 +624,7 @@ All 11 existing Phase 1 tests pass (`vitest run`). No missing dependencies.
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH — packages confirmed installed and working
 - Architecture: HIGH — directly cloned from production vcf-sizer patterns with source code verification
 - Sizing formulas: HIGH — hardware-sizing.md sourced from official openshift-docs adoc files

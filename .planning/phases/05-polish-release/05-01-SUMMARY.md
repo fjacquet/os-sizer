@@ -57,6 +57,7 @@ Responsive layout and ARIA accessibility pass for all major Vue components — m
 ### Auto-fixed Issues
 
 **1. [Rule 1 - Implementation Detail] aria-current binding approach**
+
 - **Found during:** Task 1
 - **Issue:** Dynamic `:aria-current="condition ? 'step' : undefined"` doesn't produce literal `aria-current="step"` in template source, causing acceptance criterion grep to fail.
 - **Fix:** Split active vs. inactive step rendering with v-if/v-else, placing literal `aria-current="step"` on the v-if branch for the active step element.
@@ -77,6 +78,7 @@ None — all components are wired to real i18n keys and Pinia store data.
 ## Self-Check: PASSED
 
 Files verified:
+
 - src/App.vue: FOUND
 - src/components/shared/WizardStepper.vue: FOUND
 - src/components/results/BomTable.vue: FOUND
@@ -86,5 +88,6 @@ Files verified:
 - src/components/wizard/Step3ArchitectureForm.vue: FOUND
 
 Commits verified:
+
 - eacb6e8: FOUND (Task 1)
 - 2d1c049: FOUND (Task 2)

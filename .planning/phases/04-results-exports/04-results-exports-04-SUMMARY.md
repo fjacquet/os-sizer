@@ -21,6 +21,7 @@ Created `src/composables/usePptxExport.ts` with:
 ### Task 2: ExportToolbar.vue wired
 
 Updated `src/components/results/ExportToolbar.vue`:
+
 - Added import: `import { generatePptxReport } from '@/composables/usePptxExport'`
 - Replaced stub `handleExportPptx` with real async implementation using `pptxLoading` ref for loading state
 - `handleExportCsv` and `handleExportPdf` stubs left unchanged for plan 04-05
@@ -33,6 +34,7 @@ Updated `src/components/results/ExportToolbar.vue`:
 ### Tests
 
 Created `src/composables/__tests__/usePptxExport.test.ts` with 12 tests covering:
+
 - `buildArchSummaryData`: 6 rows returned, correct labels/values, HA Yes/No, stringified totals
 - `buildBomTableRows`: header with bold+fill, 2 rows for masters-only, 6 rows for all NodeSpecs non-null, null entries skipped
 

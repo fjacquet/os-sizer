@@ -24,21 +24,25 @@ status: complete
 ## i18n Keys Added (all 4 locales)
 
 ### wizard.step3
+
 - `wizard.step3.showOverride`
 - `wizard.step3.hideOverride`
 
 ### warnings
+
 - `warnings.tna.techPreview`
 - `warnings.tnf.techPreview`
 - `warnings.tnf.redfishRequired`
 - `warnings.managedCloud.noHardware`
 
 ### validation (warningKeys used by engine)
+
 - `validation.techPreviewNotForProduction`
 - `validation.redfishBmcRequired`
 - `validation.managedCloudNoHardware`
 
 ### recommendation (justificationKey values from recommendation.ts)
+
 - `recommendation.standardHa.production`
 - `recommendation.compact3Node.budgetFriendly`
 - `recommendation.sno.edgeSingleSite`

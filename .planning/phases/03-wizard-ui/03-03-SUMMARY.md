@@ -27,6 +27,7 @@ All tasks complete. `npm run type-check` exits 0. `npm run test` passes 85/85 te
 ## i18n Keys Added
 
 All 4 locale files received:
+
 - `workload.nodeVcpu` — Worker Node vCPU / vCPU du noeud worker / Worker-Knoten vCPU / vCPU nodo worker
 - `workload.nodeRam` — Worker Node RAM / RAM du noeud worker / Worker-Knoten RAM / RAM nodo worker
 

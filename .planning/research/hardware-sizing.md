@@ -18,6 +18,7 @@ These are the baseline specs from `modules/installation-minimum-resource-require
 | Compute (worker) | 2 vCPU | 8 GB | 100 GB | 300 |
 
 **Notes:**
+
 - 1 vCPU = 1 physical core when SMT/HT is disabled. With HT: (threads_per_core × cores) × sockets = vCPUs.
 - Storage is measured as the root filesystem `/var/` partition. Separate `/var/lib/etcd` disk strongly recommended for control plane nodes.
 - etcd requires **10 ms p99 fsync** latency. This drives the 300 IOPS floor; NVMe is strongly recommended in production.
@@ -71,6 +72,7 @@ Control plane nodes also serve as compute nodes (schedulable). Workers = 0.
 | Control plane + compute | 3 | 4 vCPU | 16 GB | 100 GB (SSD) |
 
 **Notes:**
+
 - Set `compute.replicas: 0` in install-config to make control plane nodes schedulable.
 - Additional subscriptions required — control plane nodes count as compute nodes.
 - etcd on the same node as workloads; NVMe is mandatory for reasonable performance.
@@ -87,6 +89,7 @@ One node combines control plane + compute. Fully supported in GA.
 | Combined master + worker | 1 | 8 vCPU | 16 GB | 120 GB |
 
 **Notes:**
+
 - No HA — single point of failure; suitable for edge and dev/test.
 - Local Volume Manager Storage (LVMS) requires a second empty disk.
 - If OpenShift Virtualization is enabled: second local storage device ≥ 50 GB required.
@@ -109,6 +112,7 @@ Optimized for 5G Radio Access Network Distributed Unit (vDU) workloads at cell s
 | Kernel | Real-time kernel (kernel-rt) required |
 
 **Key configuration requirements (OCP 4.16 `sno-configure-for-vdu`):**
+
 - CPU partitioning (reserved + isolated CPUs via PerformanceProfile)
 - Hugepages configuration
 - NUMA-aware CPU pinning
@@ -129,6 +133,7 @@ Optimized for 5G Radio Access Network Distributed Unit (vDU) workloads at cell s
 | Arbiter | 1 | 2 vCPU | 8 GB | 50 GB SSD |
 
 **How it works:**
+
 - 2 full control plane nodes run workloads.
 - 1 lightweight arbiter node stores the full etcd data set and maintains quorum to prevent split-brain.
 - Arbiter does NOT run workload pods.
@@ -148,12 +153,14 @@ Optimized for 5G Radio Access Network Distributed Unit (vDU) workloads at cell s
 | Hardware fencing device | — | — | — | — |
 
 **How it works:**
+
 - Truly 2-node: no arbiter node at all.
 - Fencing via hardware BMC with **Redfish-compatible IPMI** (STONITH — Shoot The Other Node In The Head).
 - Pacemaker/DRBD manages quorum; the surviving node fences the failed node via RedFish BMC before assuming sole control.
 - Requires identical hardware and Redfish-capable BMCs on both nodes.
 
 **Hardware requirement additions:**
+
 - Dedicated management network for BMC communication.
 - Both nodes must have RedFish-compatible BMC (e.g., iDRAC, iLO, BMC meeting Redfish v1.0+).
 - Recommended: shared storage or synchronous replication for data redundancy.
@@ -180,6 +187,7 @@ HCP decouples control plane from data plane. Control plane pods run on a **manag
 | Memory requests (baseline, idle) | 18 GiB |
 
 **Load-based scaling formula:**
+
 ```
 Additional CPU = (QPS / 1000) × 9 vCPU
 Additional RAM = (QPS / 1000) × 2.5 GB
@@ -191,6 +199,7 @@ Where QPS = API requests per second to hosted kube-apiserver:
 ```
 
 **Hosted cluster capacity on management cluster:**
+
 - Estimated max hosted clusters = (total_worker_allocatable_CPU - system_overhead) / 5 vCPU per HCP
 - More conservative estimate uses 8 vCPU + memory as limiting factor at medium load
 
@@ -219,6 +228,7 @@ Single-node, RHEL-based, minimal footprint for edge IoT/near-edge devices.
 | Practical starter VM | 2 vCPU, 3 GB RAM, 20 GB disk |
 
 **Notes:**
+
 - Workload RAM is **additive**: 2 GB system + workload requirements = total RAM needed.
 - Does not support HA — single node only.
 - Not a substitute for SNO: lacks many OCP operators and APIs.
@@ -239,18 +249,21 @@ Allocatable = Node Capacity - kube-reserved - system-reserved - eviction-thresho
 ```
 
 **CPU reservation formula (OCP 4.16 and earlier):**
+
 ```
 reserved_cpu = 60m + (additional_cores × 10m) + (HT_threads × 5m) + (NUMA_domains × 2.5m)
 Minimum enforced: 500m (0.5 CPU core)
 ```
 
 **CPU reservation formula (OCP 4.17+):**
+
 ```
 reserved_cpu = 60m + (additional_cores × 12m)
 Minimum enforced: 500m for nodes with ≤ 64 CPUs
 ```
 
 **Memory reservation formula (all versions):**
+
 ```
 reserved_mem = 25% of first 4 GiB
              + 20% of next 4 GiB (4–8 GiB range)
@@ -276,6 +289,7 @@ reserved_mem = 25% of first 4 GiB
 | Practical density limit | — | ~200 pods/node (avoid stranding compute at 250) |
 
 **Worker count formula (from workload profile):**
+
 ```
 workers_needed = ceil(total_pod_cpu_requests / (node_allocatable_cpu × target_utilization))
 
@@ -354,6 +368,7 @@ ODF requires dedicated storage nodes (or labeled worker nodes). Minimum 3 storag
 | Min disk size | 512 GB per OSD recommended | Smaller possible but not recommended |
 
 **Scaling:**
+
 - Each additional OSD added to a node: +2 CPU + 5 GiB RAM requested
 - ODF total minimum cluster: 3 nodes × (16 CPU + 64 GB) = 48 CPU + 192 GB RAM
 - For compact/3-node clusters: 3 nodes × (16 CPU + 64 GB) collocated with app workloads
@@ -380,6 +395,7 @@ RHACM hub sizing depends heavily on: number of managed clusters, number of polic
 | 2000–3500 (SNO ZTP) | 3M+3W compact | 16 vCPU | 64 GB | Red Hat lab validated at 3500 SNOs |
 
 **Key limits:**
+
 - etcd database is the primary sizing constraint. Each managed cluster + its resources add objects to hub APIServer etcd.
 - NVMe disks for etcd on hub control plane are mandatory at scale.
 - Red Hat recommends dedicated ACM hub cluster (do not co-locate unrelated workloads).
@@ -400,6 +416,7 @@ GPU nodes are standard worker nodes with one or more GPUs added. The NVIDIA GPU 
 | GPU Operator OCP version | OCP 4.18+ (GPU Operator 25.3.x, as of early 2026) |
 
 **Sizing considerations:**
+
 - GPU nodes should be sized to fully utilize the GPU — CPU and RAM should not bottleneck the accelerator.
 - Typical ratio: 8–16 vCPU and 64–256 GB RAM per GPU node (highly workload-dependent).
 - NVLink/NVSwitch topologies (e.g., DGX systems) require bare-metal and specific RHCOS configuration.

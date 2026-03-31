@@ -35,6 +35,7 @@ Wave 4: 03-05 (i18n completion)
 ```
 
 No file ownership conflicts between parallel plans:
+
 - 03-02 owns: Step1EnvironmentForm.vue, environmentSchema.ts
 - 03-03 owns: Step2WorkloadForm.vue, workloadSchema.ts
 - Both modify App.vue but at different `v-if` branches — sequential execution within wave prevents conflict (executor handles App.vue last in each plan)
