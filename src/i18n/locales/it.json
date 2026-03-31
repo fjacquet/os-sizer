@@ -1,0 +1,124 @@
+{
+  "app": {
+    "title": "Calcolatore di dimensionamento OpenShift"
+  },
+  "language": {
+    "label": "Lingua",
+    "en": "EN",
+    "fr": "FR",
+    "de": "DE",
+    "it": "IT"
+  },
+  "topology": {
+    "label": "Topologia",
+    "standardHa": "Standard HA",
+    "compact3node": "Compatto 3 nodi",
+    "sno": "OpenShift nodo singolo",
+    "twoNodeArbiter": "2 nodi + arbitro (TNA)",
+    "twoNodeFencing": "2 nodi + fencing (TNF)",
+    "hcp": "Piani di controllo ospitati (HCP)",
+    "microshift": "MicroShift",
+    "managedCloud": "Cloud gestito (ROSA/ARO)"
+  },
+  "node": {
+    "masters": "Nodi del piano di controllo",
+    "workers": "Nodi worker",
+    "infra": "Nodi infrastruttura",
+    "storage": "Nodi di archiviazione ODF",
+    "vcpu": "vCPU",
+    "ramGB": "RAM (GB)",
+    "storageGB": "Archiviazione (GB)",
+    "count": "Conteggio"
+  },
+  "wizard": {
+    "step1": {
+      "number": "1",
+      "label": "Ambiente",
+      "title": "Vincoli ambientali",
+      "topologyRequired": "Selezionare una topologia per continuare"
+    },
+    "step2": {
+      "number": "2",
+      "label": "Carico di lavoro",
+      "title": "Profilo del carico di lavoro"
+    },
+    "step3": {
+      "number": "3",
+      "label": "Architettura",
+      "title": "Selezione dell'architettura"
+    },
+    "step4": {
+      "number": "4",
+      "label": "Risultati",
+      "title": "Risultati del dimensionamento"
+    },
+    "nav": {
+      "previous": "Precedente",
+      "next": "Successivo",
+      "calculate": "Calcola"
+    }
+  },
+  "environment": {
+    "label": "Tipo di ambiente",
+    "datacenter": "Datacenter",
+    "edge": "Edge",
+    "farEdge": "Edge remoto",
+    "cloud": "Cloud",
+    "connectivity": "Connettivita",
+    "connected": "Connesso",
+    "airGapped": "Air-Gap",
+    "haLevel": "Livello di alta disponibilita",
+    "haRequired": "HA richiesta",
+    "haOptional": "HA opzionale"
+  },
+  "workload": {
+    "label": "Profilo del carico di lavoro",
+    "appCount": "Numero di applicazioni",
+    "podCount": "Pod totali",
+    "cpuPerPod": "CPU media per pod (millicores)",
+    "ramPerPod": "RAM media per pod (MiB)",
+    "addons": "Componenti aggiuntivi opzionali",
+    "odfStorage": "Archiviazione ODF",
+    "infraNodes": "Nodi infrastruttura",
+    "gpuNodes": "Nodi GPU",
+    "rhacmHub": "Hub RHACM"
+  },
+  "sno": {
+    "profile": "Profilo SNO",
+    "standard": "Standard",
+    "edge": "Edge",
+    "telecomVdu": "Telecom vDU"
+  },
+  "hcp": {
+    "clusterCount": "Numero di cluster ospitati",
+    "targetQps": "QPS obiettivo per cluster"
+  },
+  "results": {
+    "title": "Distinta materiali",
+    "totalCpu": "vCPU totali",
+    "totalRam": "RAM totale",
+    "totalStorage": "Archiviazione totale",
+    "toolbar": {
+      "share": "Condividi URL",
+      "copied": "Copiato!",
+      "exportCsv": "Esporta CSV",
+      "exportPdf": "Esporta PDF",
+      "exportPptx": "Scarica PPTX",
+      "exportPptxLoading": "Generazione in corso..."
+    }
+  },
+  "validation": {
+    "required": "Questo campo e obbligatorio",
+    "minPods": "Minimo 1 pod richiesto",
+    "minCpu": "Minimo 1 millicore richiesto",
+    "minRam": "Minimo 1 MiB richiesto"
+  },
+  "print": {
+    "header": {
+      "title": "Report di dimensionamento OpenShift"
+    },
+    "footer": {
+      "attribution": "Generato da OpenShift Sizer"
+    }
+  }
+}
