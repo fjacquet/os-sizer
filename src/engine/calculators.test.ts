@@ -391,3 +391,114 @@ describe('calcCluster dispatcher', () => {
     expect(warnings.some(w => w.code === 'MANAGED_CLOUD_NO_HARDWARE')).toBe(true)
   })
 })
+
+// ---------------------------------------------------------------------------
+// calcCluster add-on dispatch
+// ---------------------------------------------------------------------------
+
+describe('calcCluster add-on dispatch', () => {
+  it('odfEnabled=true returns odfNodes with count=3, vcpu=16, ramGB=64', () => {
+    const config = makeConfig({
+      addOns: {
+        odfEnabled: true,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: false,
+        rhacmEnabled: false,
+        rhacmManagedClusters: 0,
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.odfNodes).not.toBeNull()
+    expect(sizing.odfNodes!.count).toBe(3)
+    expect(sizing.odfNodes!.vcpu).toBe(16)
+    expect(sizing.odfNodes!.ramGB).toBe(64)
+  })
+
+  it('odfEnabled=true with odfExtraOsdCount=2 scales odfNodes vcpu and ramGB', () => {
+    const config = makeConfig({
+      addOns: {
+        odfEnabled: true,
+        odfExtraOsdCount: 2,
+        infraNodesEnabled: false,
+        rhacmEnabled: false,
+        rhacmManagedClusters: 0,
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.odfNodes).not.toBeNull()
+    // Base 16 vCPU + 2 extra OSDs * 2 vCPU/OSD = 20
+    expect(sizing.odfNodes!.vcpu).toBe(20)
+    // Base 64 GB RAM + 2 extra OSDs * 5 GB/OSD = 74
+    expect(sizing.odfNodes!.ramGB).toBe(74)
+  })
+
+  it('rhacmEnabled=true with managedClusters=50 returns rhacmWorkers small tier (count=3, vcpu=8, ramGB=32)', () => {
+    const config = makeConfig({
+      addOns: {
+        odfEnabled: false,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: false,
+        rhacmEnabled: true,
+        rhacmManagedClusters: 50,
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.rhacmWorkers).not.toBeNull()
+    expect(sizing.rhacmWorkers!.count).toBe(3)
+    expect(sizing.rhacmWorkers!.vcpu).toBe(8)
+    expect(sizing.rhacmWorkers!.ramGB).toBe(32)
+  })
+
+  it('rhacmEnabled=true with managedClusters=200 returns rhacmWorkers large tier (vcpu=16, ramGB=64)', () => {
+    const config = makeConfig({
+      addOns: {
+        odfEnabled: false,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: false,
+        rhacmEnabled: true,
+        rhacmManagedClusters: 200,
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.rhacmWorkers).not.toBeNull()
+    expect(sizing.rhacmWorkers!.vcpu).toBe(16)
+    expect(sizing.rhacmWorkers!.ramGB).toBe(64)
+  })
+
+  it('both odfEnabled and rhacmEnabled returns both non-null with totals including add-on resources', () => {
+    const config = makeConfig({
+      addOns: {
+        odfEnabled: true,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: false,
+        rhacmEnabled: true,
+        rhacmManagedClusters: 50,
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.odfNodes).not.toBeNull()
+    expect(sizing.rhacmWorkers).not.toBeNull()
+    // totals must include odfNodes and rhacmWorkers contributions
+    const expectedVcpu =
+      sizing.masterNodes.vcpu * sizing.masterNodes.count +
+      (sizing.workerNodes ? sizing.workerNodes.vcpu * sizing.workerNodes.count : 0) +
+      sizing.odfNodes!.vcpu * sizing.odfNodes!.count +
+      sizing.rhacmWorkers!.vcpu * sizing.rhacmWorkers!.count
+    expect(sizing.totals.vcpu).toBe(expectedVcpu)
+  })
+
+  it('odfEnabled=false returns odfNodes=null (no regression)', () => {
+    const config = makeConfig({
+      addOns: {
+        odfEnabled: false,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: false,
+        rhacmEnabled: false,
+        rhacmManagedClusters: 0,
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.odfNodes).toBeNull()
+    expect(sizing.rhacmWorkers).toBeNull()
+  })
+})
