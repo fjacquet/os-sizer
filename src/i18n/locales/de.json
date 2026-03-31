@@ -72,7 +72,10 @@
     "airGapped": "Luftspalt (Air-Gap)",
     "haLevel": "Hochverfügbarkeitsstufe",
     "haRequired": "HA erforderlich",
-    "haOptional": "HA optional"
+    "haOptional": "HA optional",
+    "maxNodes": "Maximales Knotenbudget",
+    "maxNodesPlaceholder": "Keine Begrenzung",
+    "maxNodesHint": "Optional — begrenzt die Gesamtknotenanzahl für Topologieempfehlungen"
   },
   "workload": {
     "label": "Arbeitslastprofil",

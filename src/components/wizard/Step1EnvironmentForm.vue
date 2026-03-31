@@ -26,6 +26,7 @@ function clusterField<K extends keyof ClusterConfig>(key: K) {
 const environment = clusterField('environment')
 const haRequired = clusterField('haRequired')
 const airGapped = clusterField('airGapped')
+const maxNodes = clusterField('maxNodes')
 
 const validationErrors = ref<string[]>([])
 
@@ -154,6 +155,26 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
           {{ t('environment.haOptional') }}
         </button>
       </div>
+    </div>
+
+    <!-- Max Nodes (optional constraint) -->
+    <div class="space-y-2">
+      <label for="max-nodes-input" class="text-sm font-medium text-gray-700">
+        {{ t('environment.maxNodes') }}
+      </label>
+      <input
+        id="max-nodes-input"
+        type="number"
+        min="1"
+        :value="maxNodes ?? ''"
+        :placeholder="t('environment.maxNodesPlaceholder')"
+        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        aria-describedby="max-nodes-hint"
+        @input="maxNodes = ($event.target as HTMLInputElement).value === '' ? null : Number(($event.target as HTMLInputElement).value)"
+      />
+      <p id="max-nodes-hint" class="text-xs text-gray-500">
+        {{ t('environment.maxNodesHint') }}
+      </p>
     </div>
 
     <!-- Validation errors -->

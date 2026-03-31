@@ -72,7 +72,10 @@
     "airGapped": "Déconnecté (air-gap)",
     "haLevel": "Niveau de haute disponibilité",
     "haRequired": "HA requise",
-    "haOptional": "HA optionnelle"
+    "haOptional": "HA optionnelle",
+    "maxNodes": "Budget maximal de nœuds",
+    "maxNodesPlaceholder": "Aucune limite",
+    "maxNodesHint": "Optionnel — limite le nombre total de nœuds pour les recommandations"
   },
   "workload": {
     "label": "Profil de charge de travail",

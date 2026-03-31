@@ -72,7 +72,10 @@
     "airGapped": "Air-Gapped",
     "haLevel": "High Availability Level",
     "haRequired": "HA Required",
-    "haOptional": "HA Optional"
+    "haOptional": "HA Optional",
+    "maxNodes": "Maximum Node Budget",
+    "maxNodesPlaceholder": "No limit",
+    "maxNodesHint": "Optional — limits total node count for topology recommendations"
   },
   "workload": {
     "label": "Workload Profile",
