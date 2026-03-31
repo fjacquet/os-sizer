@@ -108,12 +108,12 @@ Plans:
 
 **Requirements covered:** QA-05 (final pass), all i18n locales verified
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 05-01-PLAN.md — Responsive design and accessibility: mobile layout, ARIA labels, keyboard navigation (Wave 1)
 - [x] 05-02-PLAN.md — i18n QA pass: key completeness, grammar, technical accuracy, Swiss locale review (Wave 1)
-- [ ] 05-03-PLAN.md — CI setup: GitHub Actions lint + type-check + test + build on PR/push (Wave 2)
+- [x] 05-03-PLAN.md — CI setup: GitHub Actions lint + type-check + test + build on PR/push (Wave 2)
 - [ ] 05-04-PLAN.md — Deployment: GitHub Pages with .nojekyll, static build, deploy workflow (Wave 3)
 
 ### Success Criteria
