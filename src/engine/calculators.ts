@@ -3,6 +3,7 @@
 // Source: .planning/research/hardware-sizing.md
 
 import type { ClusterConfig, ClusterSizing, NodeSpec, ValidationWarning } from './types'
+import { calcODF, calcRHACM } from './addons'
 import {
   CP_MIN,
   WORKER_MIN,
@@ -371,16 +372,43 @@ export function calcManagedCloud(_config: ClusterConfig): { sizing: ClusterSizin
 
 /**
  * Route a ClusterConfig to the appropriate topology calculator.
+ * After dispatch, apply post-dispatch add-on augmentation (ENG-07, ENG-08):
+ * - odfEnabled: populate odfNodes via calcODF()
+ * - rhacmEnabled: populate rhacmWorkers via calcRHACM()
+ * - Recalculate totals to include any add-on nodes
  */
 export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+  let result: { sizing: ClusterSizing; warnings: ValidationWarning[] }
   switch (config.topology) {
-    case 'standard-ha':      return calcStandardHA(config)
-    case 'compact-3node':    return calcCompact3Node(config)
-    case 'sno':              return calcSNO(config)
-    case 'two-node-arbiter': return calcTNA(config)
-    case 'two-node-fencing': return calcTNF(config)
-    case 'hcp':              return calcHCP(config)
-    case 'microshift':       return calcMicroShift(config)
-    case 'managed-cloud':    return calcManagedCloud(config)
+    case 'standard-ha':      result = calcStandardHA(config); break
+    case 'compact-3node':    result = calcCompact3Node(config); break
+    case 'sno':              result = calcSNO(config); break
+    case 'two-node-arbiter': result = calcTNA(config); break
+    case 'two-node-fencing': result = calcTNF(config); break
+    case 'hcp':              result = calcHCP(config); break
+    case 'microshift':       result = calcMicroShift(config); break
+    case 'managed-cloud':    result = calcManagedCloud(config); break
   }
+
+  // Post-dispatch add-on augmentation (ENG-07, ENG-08)
+  const { sizing } = result
+  if (config.addOns.odfEnabled) {
+    sizing.odfNodes = calcODF(config.addOns.odfExtraOsdCount)
+  }
+  if (config.addOns.rhacmEnabled) {
+    sizing.rhacmWorkers = calcRHACM(config.addOns.rhacmManagedClusters)
+  }
+
+  // Recalculate totals to include add-on nodes
+  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled) {
+    sizing.totals = sumTotals([
+      sizing.masterNodes,
+      sizing.workerNodes,
+      sizing.infraNodes,
+      sizing.odfNodes,
+      sizing.rhacmWorkers,
+    ])
+  }
+
+  return result
 }
