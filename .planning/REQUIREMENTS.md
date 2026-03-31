@@ -10,7 +10,7 @@
 - [x] **SETUP-01**: Vue 3 + TypeScript + Vite + Tailwind v4 project initialized with same conventions as vcf-sizer
 - [x] **SETUP-02**: ESLint + Prettier configured with same rules as vcf-sizer
 - [x] **SETUP-03**: Vitest configured for unit testing the sizing engine
-- [ ] **SETUP-04**: vue-i18n configured with EN/FR/IT/DE locale files (lazy-loaded)
+- [x] **SETUP-04**: vue-i18n configured with EN/FR/IT/DE locale files (lazy-loaded)
 - [x] **SETUP-05**: Pinia configured with `inputStore` (refs) and `calculationStore` (computed) pattern
 
 ### Sizing Engine — Core Types & Formulas
@@ -76,13 +76,13 @@
 
 ### Internationalization
 
-- [ ] **I18N-01**: All UI strings externalized to vue-i18n locale files
-- [ ] **I18N-02**: English (EN) locale complete
-- [ ] **I18N-03**: French (FR) locale complete
-- [ ] **I18N-04**: Italian (IT) locale complete
-- [ ] **I18N-05**: German (DE) locale complete
-- [ ] **I18N-06**: Language switcher in header
-- [ ] **I18N-07**: VueI18nPlugin configured WITHOUT the `include` option (Vite 8 rolldown compatibility)
+- [x] **I18N-01**: All UI strings externalized to vue-i18n locale files
+- [x] **I18N-02**: English (EN) locale complete
+- [x] **I18N-03**: French (FR) locale complete
+- [x] **I18N-04**: Italian (IT) locale complete
+- [x] **I18N-05**: German (DE) locale complete
+- [x] **I18N-06**: Language switcher in header
+- [x] **I18N-07**: VueI18nPlugin configured WITHOUT the `include` option (Vite 8 rolldown compatibility)
 
 ### Quality & Testing
 
