@@ -12,7 +12,7 @@
 
 **Requirements covered:** SETUP-01 – SETUP-05, I18N-01 – I18N-07
 
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 
 Plans:
 - [x] 01-PLAN-scaffold.md — Project scaffold: Vue 3 + Vite + Tailwind v4 + ESLint + Prettier + Vitest + Wave-0 test stubs (COMPLETE: 2026-03-31)

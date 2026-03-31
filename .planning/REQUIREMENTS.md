@@ -11,7 +11,7 @@
 - [x] **SETUP-02**: ESLint + Prettier configured with same rules as vcf-sizer
 - [x] **SETUP-03**: Vitest configured for unit testing the sizing engine
 - [ ] **SETUP-04**: vue-i18n configured with EN/FR/IT/DE locale files (lazy-loaded)
-- [ ] **SETUP-05**: Pinia configured with `inputStore` (refs) and `calculationStore` (computed) pattern
+- [x] **SETUP-05**: Pinia configured with `inputStore` (refs) and `calculationStore` (computed) pattern
 
 ### Sizing Engine — Core Types & Formulas
 
