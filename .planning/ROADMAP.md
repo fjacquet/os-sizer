@@ -165,7 +165,7 @@ Plans:
 
 Plans:
 
-- [ ] 07-01-PLAN.md — Component tests for Step1EnvironmentForm, Step2WorkloadForm, Step3ArchitectureForm, WizardStepper navigation
+- [x] 07-01-PLAN.md — Component tests for Step1EnvironmentForm, Step2WorkloadForm, Step3ArchitectureForm, WizardStepper navigation
 
 ### Success Criteria
 

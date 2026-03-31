@@ -89,7 +89,7 @@
 - [ ] **QA-01**: Unit tests for all engine sizing formulas (vitest)
 - [ ] **QA-02**: Unit tests for recommendation engine
 - [ ] **QA-03**: Unit tests for Zod validation schemas
-- [ ] **QA-04**: Component tests for wizard step navigation <!-- gap-closure Phase 7 -->
+- [x] **QA-04**: Component tests for wizard step navigation <!-- gap-closure Phase 7 -->
 - [x] **QA-05**: Test coverage for edge cases: minimums enforcement, topology-specific constraints
 
 ## v2 Requirements
@@ -140,7 +140,7 @@
 | EXP-01 – EXP-03 | Phase 4 | Complete |
 | I18N-01 – I18N-07 | Phase 1–4 | Complete |
 | QA-01, 02, 03, 05 | Phase 2–5 | Complete |
-| QA-04 | Phase 7 (gap closure) | Pending |
+| QA-04 | Phase 7 (gap closure) | Complete |
 
 **Coverage:**
 
