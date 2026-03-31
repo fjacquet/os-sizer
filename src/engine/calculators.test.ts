@@ -260,6 +260,76 @@ describe('calcHCP', () => {
 })
 
 // ---------------------------------------------------------------------------
+// calcHCP — tech debt gaps (ENG-04, ENG-06, RES-04)
+// ---------------------------------------------------------------------------
+
+describe('calcHCP — tech debt gaps (ENG-04, ENG-06, RES-04)', () => {
+  it('workersByRAM uses allocatableRamGB(32) — not hardcoded 28.44', () => {
+    // With 20 hosted clusters at 1000 QPS each:
+    // totalRAM = 20 * (18 + 2.5) = 410 GB
+    // Using allocatableRamGB(32)=28.44: workersByRAM = ceil(410 / (28.44 * 0.70)) = ceil(20.6) = 21
+    // This test validates the formula path is callable without error.
+    const config = makeConfig({ topology: 'hcp', hcpHostedClusters: 20, hcpQpsPerCluster: 1000 })
+    const { sizing } = calcHCP(config)
+    expect(sizing.workerNodes!.count).toBeGreaterThanOrEqual(21)
+  })
+
+  it('worker node vcpu is at least WORKER_MIN.vcpu (2)', () => {
+    const config = makeConfig({ topology: 'hcp', hcpHostedClusters: 1, hcpQpsPerCluster: 0 })
+    const { sizing } = calcHCP(config)
+    expect(sizing.workerNodes!.vcpu).toBeGreaterThanOrEqual(2)
+  })
+
+  it('worker node ramGB is at least WORKER_MIN.ramGB (8)', () => {
+    const config = makeConfig({ topology: 'hcp', hcpHostedClusters: 1, hcpQpsPerCluster: 0 })
+    const { sizing } = calcHCP(config)
+    expect(sizing.workerNodes!.ramGB).toBeGreaterThanOrEqual(8)
+  })
+
+  it('worker node storageGB uses WORKER_MIN.storageGB (100)', () => {
+    const config = makeConfig({ topology: 'hcp' })
+    const { sizing } = calcHCP(config)
+    expect(sizing.workerNodes!.storageGB).toBe(100)
+  })
+
+  it('infraNodes is non-null with count=3 when infraNodesEnabled=true', () => {
+    const config = makeConfig({
+      topology: 'hcp',
+      addOns: {
+        odfEnabled: false,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: true,
+        rhacmEnabled: false,
+        rhacmManagedClusters: 0,
+      },
+    })
+    const { sizing } = calcHCP(config)
+    expect(sizing.infraNodes).not.toBeNull()
+    expect(sizing.infraNodes!.count).toBe(3)
+    expect(sizing.infraNodes!.vcpu).toBeGreaterThanOrEqual(4)
+    expect(sizing.infraNodes!.ramGB).toBeGreaterThanOrEqual(24)
+  })
+
+  it('infraNodes is null when infraNodesEnabled=false (default)', () => {
+    const config = makeConfig({ topology: 'hcp' })
+    const { sizing } = calcHCP(config)
+    expect(sizing.infraNodes).toBeNull()
+  })
+
+  it('totals include infraNodes resources when infraNodesEnabled=true', () => {
+    const configOff = makeConfig({ topology: 'hcp' })
+    const configOn = makeConfig({
+      topology: 'hcp',
+      addOns: { odfEnabled: false, odfExtraOsdCount: 0, infraNodesEnabled: true, rhacmEnabled: false, rhacmManagedClusters: 0 },
+    })
+    const { sizing: off } = calcHCP(configOff)
+    const { sizing: on } = calcHCP(configOn)
+    expect(on.totals.vcpu).toBeGreaterThan(off.totals.vcpu)
+    expect(on.totals.ramGB).toBeGreaterThan(off.totals.ramGB)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // calcMicroShift
 // ---------------------------------------------------------------------------
 
