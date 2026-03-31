@@ -45,7 +45,10 @@
     "step3": {
       "number": "3",
       "label": "Architecture",
-      "title": "Architecture Selection"
+      "title": "Architecture Selection",
+      "selectionRequired": "Please confirm an architecture to continue",
+      "showOverride": "Override recommendation",
+      "hideOverride": "Hide override"
     },
     "step4": {
       "number": "4",
@@ -81,7 +84,9 @@
     "odfStorage": "ODF Storage",
     "infraNodes": "Infrastructure Nodes",
     "gpuNodes": "GPU Nodes",
-    "rhacmHub": "RHACM Hub"
+    "rhacmHub": "RHACM Hub",
+    "nodeVcpu": "Worker Node vCPU",
+    "nodeRam": "Worker Node RAM"
   },
   "sno": {
     "profile": "SNO Profile",
@@ -98,6 +103,20 @@
     "totalCpu": "Total vCPU",
     "totalRam": "Total RAM",
     "totalStorage": "Total Storage",
+    "bom": {
+      "rhacmWorkers": "RHACM Hub Workers"
+    },
+    "charts": {
+      "vcpu": "vCPU Distribution",
+      "ram": "RAM Distribution (GB)",
+      "storage": "Storage Distribution (GB)"
+    },
+    "overview": {
+      "environment": "Environment",
+      "haStatus": "HA Status",
+      "haEnabled": "High Availability",
+      "haDisabled": "No HA"
+    },
     "toolbar": {
       "share": "Share URL",
       "copied": "Copied!",
@@ -111,7 +130,54 @@
     "required": "This field is required",
     "minPods": "Minimum 1 pod required",
     "minCpu": "Minimum 1 millicore required",
-    "minRam": "Minimum 1 MiB required"
+    "minRam": "Minimum 1 MiB required",
+    "techPreviewNotForProduction": "Technology Preview — not supported for production use",
+    "redfishBmcRequired": "Requires Redfish-compatible BMC on both nodes",
+    "managedCloudNoHardware": "Managed cloud topologies (ROSA/ARO) are sized by the provider — no hardware BoM is required",
+    "negativePods": "Pod count cannot be negative",
+    "workerRamBelowMin": "Worker node RAM is below the 8 GB minimum — sizing may be invalid",
+    "workerCpuBelowMin": "Worker node vCPU is below the 2 vCPU minimum — sizing may be invalid",
+    "zeroPodsWithResources": "Pod count is zero but CPU/RAM requests are set — check your workload profile",
+    "odfIncompatibleTopology": "ODF storage is not compatible with SNO, MicroShift, or Managed Cloud topologies",
+    "rhacmNoClusters": "RHACM is enabled but no managed cluster count is set — enter expected cluster count"
+  },
+  "warnings": {
+    "tna": {
+      "techPreview": "Two-Node with Arbiter is a Technology Preview feature"
+    },
+    "tnf": {
+      "techPreview": "Two-Node with Fencing is a Technology Preview feature",
+      "redfishRequired": "Requires Redfish-compatible BMC on both nodes"
+    },
+    "managedCloud": {
+      "noHardware": "Managed cloud topologies (ROSA/ARO) are sized by the provider — no hardware BoM is required"
+    }
+  },
+  "recommendation": {
+    "standardHa": {
+      "production": "Best for production workloads requiring full HA in a datacenter"
+    },
+    "compact3Node": {
+      "budgetFriendly": "Suitable for resource-constrained environments with HA — masters double as workers"
+    },
+    "sno": {
+      "edgeSingleSite": "Single node deployment for edge or far-edge locations"
+    },
+    "tna": {
+      "minimalHa": "Minimal HA with a witness/arbiter node — budget-friendly two-node cluster"
+    },
+    "tnf": {
+      "twoNodeFencing": "Two-node cluster with hardware fencing for bare-metal HA"
+    },
+    "hcp": {
+      "multiClusterEfficiency": "Efficient multi-cluster management with hosted control planes"
+    },
+    "microshift": {
+      "constrainedEdge": "Minimal footprint for far-edge IoT and device workloads"
+    },
+    "managedCloud": {
+      "noHardwareManagement": "Provider-managed OpenShift — no hardware sizing required (ROSA/ARO/OSD)"
+    }
   },
   "print": {
     "header": {

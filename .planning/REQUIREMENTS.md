@@ -90,7 +90,7 @@
 - [ ] **QA-02**: Unit tests for recommendation engine
 - [ ] **QA-03**: Unit tests for Zod validation schemas
 - [ ] **QA-04**: Component tests for wizard step navigation
-- [ ] **QA-05**: Test coverage for edge cases: minimums enforcement, topology-specific constraints
+- [x] **QA-05**: Test coverage for edge cases: minimums enforcement, topology-specific constraints
 
 ## v2 Requirements
 
