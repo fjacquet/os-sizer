@@ -12,19 +12,19 @@
   "topology": {
     "label": "Topologie",
     "standardHa": "Standard HA",
-    "compact3node": "3 noeuds compacts",
-    "sno": "OpenShift noeud unique",
-    "twoNodeArbiter": "2 noeuds + arbitre (TNA)",
-    "twoNodeFencing": "2 noeuds + isolation (TNF)",
-    "hcp": "Plans de controle heberges (HCP)",
+    "compact3node": "3 nœuds compacts",
+    "sno": "OpenShift nœud unique",
+    "twoNodeArbiter": "2 nœuds + arbitre (TNA)",
+    "twoNodeFencing": "2 nœuds + isolation (TNF)",
+    "hcp": "Plans de contrôle hébergés (HCP)",
     "microshift": "MicroShift",
-    "managedCloud": "Cloud gere (ROSA/ARO)"
+    "managedCloud": "Cloud géré (ROSA/ARO)"
   },
   "node": {
-    "masters": "Noeuds du plan de controle",
-    "workers": "Noeuds de travail",
-    "infra": "Noeuds d'infrastructure",
-    "storage": "Noeuds de stockage ODF",
+    "masters": "Nœuds du plan de contrôle",
+    "workers": "Nœuds de travail",
+    "infra": "Nœuds d'infrastructure",
+    "storage": "Nœuds de stockage ODF",
     "vcpu": "vCPU",
     "ramGB": "RAM (Go)",
     "storageGB": "Stockage (Go)",
@@ -35,7 +35,7 @@
       "number": "1",
       "label": "Environnement",
       "title": "Contraintes environnementales",
-      "topologyRequired": "Veuillez selectionner une topologie pour continuer"
+      "topologyRequired": "Veuillez sélectionner une topologie pour continuer"
     },
     "step2": {
       "number": "2",
@@ -45,15 +45,18 @@
     "step3": {
       "number": "3",
       "label": "Architecture",
-      "title": "Selection de l'architecture"
+      "title": "Sélection de l'architecture",
+      "selectionRequired": "Veuillez confirmer une architecture pour continuer",
+      "showOverride": "Remplacer la recommandation",
+      "hideOverride": "Masquer le remplacement"
     },
     "step4": {
       "number": "4",
-      "label": "Resultats",
-      "title": "Resultats du dimensionnement"
+      "label": "Résultats",
+      "title": "Résultats du dimensionnement"
     },
     "nav": {
-      "previous": "Precedent",
+      "previous": "Précédent",
       "next": "Suivant",
       "calculate": "Calculer"
     }
@@ -61,13 +64,13 @@
   "environment": {
     "label": "Type d'environnement",
     "datacenter": "Datacenter",
-    "edge": "Peripherie",
-    "farEdge": "Peripherie distante",
+    "edge": "Périphérie",
+    "farEdge": "Périphérie distante",
     "cloud": "Cloud",
-    "connectivity": "Connectivite",
-    "connected": "Connecte",
-    "airGapped": "Deconnecte (air-gap)",
-    "haLevel": "Niveau de haute disponibilite",
+    "connectivity": "Connectivité",
+    "connected": "Connecté",
+    "airGapped": "Déconnecté (air-gap)",
+    "haLevel": "Niveau de haute disponibilité",
     "haRequired": "HA requise",
     "haOptional": "HA optionnelle"
   },
@@ -79,46 +82,109 @@
     "ramPerPod": "RAM moyenne par pod (Mio)",
     "addons": "Extensions optionnelles",
     "odfStorage": "Stockage ODF",
-    "infraNodes": "Noeuds d'infrastructure",
-    "gpuNodes": "Noeuds GPU",
-    "rhacmHub": "Hub RHACM"
+    "infraNodes": "Nœuds d'infrastructure",
+    "gpuNodes": "Nœuds GPU",
+    "rhacmHub": "Hub RHACM",
+    "nodeVcpu": "vCPU du nœud worker",
+    "nodeRam": "RAM du nœud worker"
   },
   "sno": {
     "profile": "Profil SNO",
     "standard": "Standard",
-    "edge": "Peripherie",
+    "edge": "Périphérie",
     "telecomVdu": "Telecom vDU"
   },
   "hcp": {
-    "clusterCount": "Nombre de clusters heberges",
+    "clusterCount": "Nombre de clusters hébergés",
     "targetQps": "QPS cible par cluster"
   },
   "results": {
-    "title": "Nomenclature du materiel",
+    "title": "Nomenclature du matériel",
     "totalCpu": "Total vCPU",
     "totalRam": "Total RAM",
     "totalStorage": "Total stockage",
+    "bom": {
+      "rhacmWorkers": "Nœuds RHACM Hub"
+    },
+    "charts": {
+      "vcpu": "Distribution vCPU",
+      "ram": "Distribution RAM (Go)",
+      "storage": "Distribution Stockage (Go)"
+    },
+    "overview": {
+      "environment": "Environnement",
+      "haStatus": "Statut HA",
+      "haEnabled": "Haute Disponibilité",
+      "haDisabled": "Sans HA"
+    },
     "toolbar": {
       "share": "Partager l'URL",
-      "copied": "Copie !",
+      "copied": "Copié !",
       "exportCsv": "Exporter CSV",
       "exportPdf": "Exporter PDF",
-      "exportPptx": "Telecharger PPTX",
-      "exportPptxLoading": "Generation..."
+      "exportPptx": "Télécharger PPTX",
+      "exportPptxLoading": "Génération..."
     }
   },
   "validation": {
     "required": "Ce champ est obligatoire",
     "minPods": "Minimum 1 pod requis",
     "minCpu": "Minimum 1 millicore requis",
-    "minRam": "Minimum 1 Mio requis"
+    "minRam": "Minimum 1 Mio requis",
+    "techPreviewNotForProduction": "Aperçu technologique — non pris en charge en production",
+    "redfishBmcRequired": "Nécessite un BMC compatible Redfish sur les deux nœuds",
+    "managedCloudNoHardware": "Les topologies cloud gérées (ROSA/ARO) sont dimensionnées par le fournisseur — aucune nomenclature matérielle requise",
+    "negativePods": "Le nombre de pods ne peut pas être négatif",
+    "workerRamBelowMin": "La RAM du nœud worker est inférieure au minimum de 8 Go — le dimensionnement peut être invalide",
+    "workerCpuBelowMin": "Le vCPU du nœud worker est inférieur au minimum de 2 vCPU — le dimensionnement peut être invalide",
+    "zeroPodsWithResources": "Le nombre de pods est zéro mais des demandes CPU/RAM sont définies — vérifiez votre profil de charge",
+    "odfIncompatibleTopology": "Le stockage ODF n'est pas compatible avec les topologies SNO, MicroShift ou Cloud géré",
+    "rhacmNoClusters": "RHACM est activé mais aucun nombre de clusters gérés n'est défini — saisissez le nombre de clusters attendu"
+  },
+  "warnings": {
+    "tna": {
+      "techPreview": "Deux nœuds avec arbitre est une fonctionnalité en aperçu technologique"
+    },
+    "tnf": {
+      "techPreview": "Deux nœuds avec isolation est une fonctionnalité en aperçu technologique",
+      "redfishRequired": "Nécessite un BMC compatible Redfish sur les deux nœuds"
+    },
+    "managedCloud": {
+      "noHardware": "Les topologies cloud gérées (ROSA/ARO) sont dimensionnées par le fournisseur — aucune nomenclature matérielle requise"
+    }
+  },
+  "recommendation": {
+    "standardHa": {
+      "production": "Idéal pour les charges de travail de production nécessitant une HA complète en datacenter"
+    },
+    "compact3Node": {
+      "budgetFriendly": "Adapté aux environnements contraints avec HA — les maîtres servent aussi de workers"
+    },
+    "sno": {
+      "edgeSingleSite": "Déploiement à nœud unique pour les sites edge ou far-edge"
+    },
+    "tna": {
+      "minimalHa": "HA minimale avec un nœud témoin/arbitre — cluster deux nœuds économique"
+    },
+    "tnf": {
+      "twoNodeFencing": "Cluster deux nœuds avec isolation matérielle pour la HA bare-metal"
+    },
+    "hcp": {
+      "multiClusterEfficiency": "Gestion multi-cluster efficace avec des plans de contrôle hébergés"
+    },
+    "microshift": {
+      "constrainedEdge": "Empreinte minimale pour les charges de travail IoT et appareils far-edge"
+    },
+    "managedCloud": {
+      "noHardwareManagement": "OpenShift géré par le fournisseur — aucun dimensionnement matériel requis (ROSA/ARO/OSD)"
+    }
   },
   "print": {
     "header": {
       "title": "Rapport de dimensionnement OpenShift"
     },
     "footer": {
-      "attribution": "Genere par OpenShift Sizer"
+      "attribution": "Généré par OpenShift Sizer"
     }
   }
 }

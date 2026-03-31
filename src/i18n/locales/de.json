@@ -34,8 +34,8 @@
     "step1": {
       "number": "1",
       "label": "Umgebung",
-      "title": "Umgebungseinschraenkungen",
-      "topologyRequired": "Bitte waehlen Sie eine Topologie aus, um fortzufahren"
+      "title": "Umgebungseinschränkungen",
+      "topologyRequired": "Bitte wählen Sie eine Topologie aus, um fortzufahren"
     },
     "step2": {
       "number": "2",
@@ -45,7 +45,10 @@
     "step3": {
       "number": "3",
       "label": "Architektur",
-      "title": "Architekturauswahl"
+      "title": "Architekturauswahl",
+      "selectionRequired": "Bitte bestätigen Sie eine Architektur, um fortzufahren",
+      "showOverride": "Empfehlung überschreiben",
+      "hideOverride": "Überschreibung ausblenden"
     },
     "step4": {
       "number": "4",
@@ -53,7 +56,7 @@
       "title": "Dimensionierungsergebnisse"
     },
     "nav": {
-      "previous": "Zurueck",
+      "previous": "Zurück",
       "next": "Weiter",
       "calculate": "Berechnen"
     }
@@ -64,10 +67,10 @@
     "edge": "Edge",
     "farEdge": "Ferngesteuerte Edge",
     "cloud": "Cloud",
-    "connectivity": "Konnektivitaet",
+    "connectivity": "Konnektivität",
     "connected": "Verbunden",
     "airGapped": "Luftspalt (Air-Gap)",
-    "haLevel": "Hochverfuegbarkeitsstufe",
+    "haLevel": "Hochverfügbarkeitsstufe",
     "haRequired": "HA erforderlich",
     "haOptional": "HA optional"
   },
@@ -81,7 +84,9 @@
     "odfStorage": "ODF-Speicher",
     "infraNodes": "Infrastrukturknoten",
     "gpuNodes": "GPU-Knoten",
-    "rhacmHub": "RHACM-Hub"
+    "rhacmHub": "RHACM-Hub",
+    "nodeVcpu": "Worker-Knoten vCPU",
+    "nodeRam": "Worker-Knoten RAM"
   },
   "sno": {
     "profile": "SNO-Profil",
@@ -94,10 +99,24 @@
     "targetQps": "Ziel-QPS pro Cluster"
   },
   "results": {
-    "title": "Stueckliste",
+    "title": "Stückliste",
     "totalCpu": "Gesamt-vCPU",
     "totalRam": "Gesamt-RAM",
     "totalStorage": "Gesamtspeicher",
+    "bom": {
+      "rhacmWorkers": "RHACM-Hub-Worker"
+    },
+    "charts": {
+      "vcpu": "vCPU-Verteilung",
+      "ram": "RAM-Verteilung (GB)",
+      "storage": "Speicherverteilung (GB)"
+    },
+    "overview": {
+      "environment": "Umgebung",
+      "haStatus": "HA-Status",
+      "haEnabled": "Hochverfügbarkeit",
+      "haDisabled": "Ohne HA"
+    },
     "toolbar": {
       "share": "URL teilen",
       "copied": "Kopiert!",
@@ -111,7 +130,54 @@
     "required": "Dieses Feld ist erforderlich",
     "minPods": "Mindestens 1 Pod erforderlich",
     "minCpu": "Mindestens 1 Millicore erforderlich",
-    "minRam": "Mindestens 1 MiB erforderlich"
+    "minRam": "Mindestens 1 MiB erforderlich",
+    "techPreviewNotForProduction": "Technologie-Vorschau — nicht für den Produktionseinsatz unterstützt",
+    "redfishBmcRequired": "Erfordert Redfish-kompatiblen BMC auf beiden Knoten",
+    "managedCloudNoHardware": "Verwaltete Cloud-Topologien (ROSA/ARO) werden vom Anbieter dimensioniert — keine Hardware-Stückliste erforderlich",
+    "negativePods": "Pod-Anzahl darf nicht negativ sein",
+    "workerRamBelowMin": "Worker-Knoten-RAM liegt unter dem Minimum von 8 GB — Dimensionierung möglicherweise ungültig",
+    "workerCpuBelowMin": "Worker-Knoten-vCPU liegt unter dem Minimum von 2 vCPU — Dimensionierung möglicherweise ungültig",
+    "zeroPodsWithResources": "Pod-Anzahl ist null, aber CPU/RAM-Anforderungen sind gesetzt — prüfen Sie Ihr Arbeitslastprofil",
+    "odfIncompatibleTopology": "ODF-Speicher ist nicht kompatibel mit SNO-, MicroShift- oder verwalteten Cloud-Topologien",
+    "rhacmNoClusters": "RHACM ist aktiviert, aber keine Anzahl verwalteter Cluster angegeben — geben Sie die erwartete Cluster-Anzahl ein"
+  },
+  "warnings": {
+    "tna": {
+      "techPreview": "Zwei Knoten mit Schiedsrichter ist eine Technologie-Vorschau-Funktion"
+    },
+    "tnf": {
+      "techPreview": "Zwei Knoten mit Fencing ist eine Technologie-Vorschau-Funktion",
+      "redfishRequired": "Erfordert Redfish-kompatiblen BMC auf beiden Knoten"
+    },
+    "managedCloud": {
+      "noHardware": "Verwaltete Cloud-Topologien (ROSA/ARO) werden vom Anbieter dimensioniert — keine Hardware-Stückliste erforderlich"
+    }
+  },
+  "recommendation": {
+    "standardHa": {
+      "production": "Ideal für Produktionsworkloads mit vollständiger HA im Rechenzentrum"
+    },
+    "compact3Node": {
+      "budgetFriendly": "Geeignet für ressourcenbeschränkte Umgebungen mit HA — Master dienen auch als Worker"
+    },
+    "sno": {
+      "edgeSingleSite": "Einzelknoten-Bereitstellung für Edge- oder Far-Edge-Standorte"
+    },
+    "tna": {
+      "minimalHa": "Minimale HA mit einem Zeugen-/Schiedsrichterknoten — kostengünstiger Zwei-Knoten-Cluster"
+    },
+    "tnf": {
+      "twoNodeFencing": "Zwei-Knoten-Cluster mit Hardware-Fencing für Bare-Metal-HA"
+    },
+    "hcp": {
+      "multiClusterEfficiency": "Effizientes Multi-Cluster-Management mit gehosteten Steuerungsebenen"
+    },
+    "microshift": {
+      "constrainedEdge": "Minimaler Footprint für Far-Edge-IoT- und Geräte-Workloads"
+    },
+    "managedCloud": {
+      "noHardwareManagement": "Anbieter-verwaltetes OpenShift — kein Hardware-Sizing erforderlich (ROSA/ARO/OSD)"
+    }
   },
   "print": {
     "header": {

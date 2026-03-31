@@ -45,7 +45,10 @@
     "step3": {
       "number": "3",
       "label": "Architettura",
-      "title": "Selezione dell'architettura"
+      "title": "Selezione dell'architettura",
+      "selectionRequired": "Confermare un'architettura per continuare",
+      "showOverride": "Sostituisci la raccomandazione",
+      "hideOverride": "Nascondi sostituzione"
     },
     "step4": {
       "number": "4",
@@ -64,10 +67,10 @@
     "edge": "Edge",
     "farEdge": "Edge remoto",
     "cloud": "Cloud",
-    "connectivity": "Connettivita",
+    "connectivity": "Connettività",
     "connected": "Connesso",
     "airGapped": "Air-Gap",
-    "haLevel": "Livello di alta disponibilita",
+    "haLevel": "Livello di alta disponibilità",
     "haRequired": "HA richiesta",
     "haOptional": "HA opzionale"
   },
@@ -81,7 +84,9 @@
     "odfStorage": "Archiviazione ODF",
     "infraNodes": "Nodi infrastruttura",
     "gpuNodes": "Nodi GPU",
-    "rhacmHub": "Hub RHACM"
+    "rhacmHub": "Hub RHACM",
+    "nodeVcpu": "vCPU nodo worker",
+    "nodeRam": "RAM nodo worker"
   },
   "sno": {
     "profile": "Profilo SNO",
@@ -98,6 +103,20 @@
     "totalCpu": "vCPU totali",
     "totalRam": "RAM totale",
     "totalStorage": "Archiviazione totale",
+    "bom": {
+      "rhacmWorkers": "Worker RHACM Hub"
+    },
+    "charts": {
+      "vcpu": "Distribuzione vCPU",
+      "ram": "Distribuzione RAM (GB)",
+      "storage": "Distribuzione Storage (GB)"
+    },
+    "overview": {
+      "environment": "Ambiente",
+      "haStatus": "Stato HA",
+      "haEnabled": "Alta Disponibilità",
+      "haDisabled": "Senza HA"
+    },
     "toolbar": {
       "share": "Condividi URL",
       "copied": "Copiato!",
@@ -108,10 +127,57 @@
     }
   },
   "validation": {
-    "required": "Questo campo e obbligatorio",
+    "required": "Questo campo è obbligatorio",
     "minPods": "Minimo 1 pod richiesto",
     "minCpu": "Minimo 1 millicore richiesto",
-    "minRam": "Minimo 1 MiB richiesto"
+    "minRam": "Minimo 1 MiB richiesto",
+    "techPreviewNotForProduction": "Anteprima tecnologica — non supportato per uso in produzione",
+    "redfishBmcRequired": "Richiede BMC compatibile Redfish su entrambi i nodi",
+    "managedCloudNoHardware": "Le topologie cloud gestite (ROSA/ARO) sono dimensionate dal provider — nessuna distinta materiali hardware richiesta",
+    "negativePods": "Il numero di pod non può essere negativo",
+    "workerRamBelowMin": "La RAM del nodo worker è inferiore al minimo di 8 GB — il dimensionamento potrebbe essere non valido",
+    "workerCpuBelowMin": "Il vCPU del nodo worker è inferiore al minimo di 2 vCPU — il dimensionamento potrebbe essere non valido",
+    "zeroPodsWithResources": "Il numero di pod è zero ma le richieste CPU/RAM sono impostate — verificare il profilo del carico di lavoro",
+    "odfIncompatibleTopology": "Lo storage ODF non è compatibile con le topologie SNO, MicroShift o Cloud gestito",
+    "rhacmNoClusters": "RHACM è abilitato ma non è impostato alcun numero di cluster gestiti — inserire il numero di cluster previsto"
+  },
+  "warnings": {
+    "tna": {
+      "techPreview": "Due nodi con arbitro è una funzionalità in anteprima tecnologica"
+    },
+    "tnf": {
+      "techPreview": "Due nodi con fencing è una funzionalità in anteprima tecnologica",
+      "redfishRequired": "Richiede BMC compatibile Redfish su entrambi i nodi"
+    },
+    "managedCloud": {
+      "noHardware": "Le topologie cloud gestite (ROSA/ARO) sono dimensionate dal provider — nessuna distinta materiali hardware richiesta"
+    }
+  },
+  "recommendation": {
+    "standardHa": {
+      "production": "Ideale per carichi di lavoro di produzione con HA completa in datacenter"
+    },
+    "compact3Node": {
+      "budgetFriendly": "Adatto per ambienti con risorse limitate e HA — i master fungono anche da worker"
+    },
+    "sno": {
+      "edgeSingleSite": "Distribuzione a nodo singolo per siti edge o far-edge"
+    },
+    "tna": {
+      "minimalHa": "HA minimale con un nodo testimone/arbitro — cluster a due nodi economico"
+    },
+    "tnf": {
+      "twoNodeFencing": "Cluster a due nodi con fencing hardware per HA bare-metal"
+    },
+    "hcp": {
+      "multiClusterEfficiency": "Gestione multi-cluster efficiente con piani di controllo ospitati"
+    },
+    "microshift": {
+      "constrainedEdge": "Footprint minimo per carichi di lavoro IoT e dispositivi far-edge"
+    },
+    "managedCloud": {
+      "noHardwareManagement": "OpenShift gestito dal provider — nessun dimensionamento hardware richiesto (ROSA/ARO/OSD)"
+    }
   },
   "print": {
     "header": {
