@@ -5,12 +5,12 @@ milestone_name: milestone
 current_phase: 05
 current_plan: 1
 status: Executing Phase 05
-last_updated: "2026-03-31T17:15:19.073Z"
+last_updated: "2026-03-31T17:19:38.405Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 23
-  completed_plans: 21
+  completed_plans: 22
 ---
 
 # Project State
@@ -19,7 +19,7 @@ progress:
 **Current Phase:** 05
 **Current Plan:** 1
 **Last Updated:** 2026-03-31
-**Last Session:** 2026-03-31T17:15:19.071Z
+**Last Session:** 2026-03-31T17:19:33.469Z
 
 ## Progress
 
@@ -61,6 +61,7 @@ Overall:  [████......] 3/15 plans complete (estimate)
 - [Phase 05]: French nœud ligature used consistently for 'nœuds' throughout FR locale
 - [Phase 05-01]: v-if/v-else split for active wizard step renders literal aria-current=step satisfying static analysis
 - [Phase 05-03]: CI pipeline uses Node 22 with npm cache; Build step added beyond vcf-sizer pattern to catch production build regressions; targets main branch
+- [Phase 05]: deploy.yml uses actions/upload-pages-artifact@v3 and actions/deploy-pages@v4 (current stable); environment block added for GitHub UI deployment URL tracking
 
 ## Key Context
 
@@ -83,3 +84,4 @@ Overall:  [████......] 3/15 plans complete (estimate)
 | Phase 05 P02 | 15 | 2 tasks | 3 files |
 | Phase 05 P01 | 7 min | 2 tasks | 7 files |
 | Phase 05 P03 | 3 min | 1 tasks | 1 files |
+| Phase 05 P04 | 5 | 2 tasks | 2 files |
