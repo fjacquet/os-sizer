@@ -19,7 +19,7 @@ import {
   HCP_RAM_PER_1000_QPS,
   MICROSHIFT_SYS_MIN,
 } from './constants'
-import { cpSizing, workerCount as calcWorkerCount, infraNodeSizing } from './formulas'
+import { cpSizing, workerCount as calcWorkerCount, infraNodeSizing, allocatableRamGB } from './formulas'
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -257,11 +257,11 @@ export function calcTNF(_config: ClusterConfig): { sizing: ClusterSizing; warnin
  *
  * Workers (16 vCPU / 32 GB each, 70% utilization):
  *   workersByCPU = ceil(totalCPU / (16 * 0.70))
- *   workersByRAM = ceil(totalRAM / (28.44 * 0.70))  -- 28.44 = allocatable RAM from 32GB node
+ *   workersByRAM = ceil(totalRAM / (allocatableRamGB(WORKER_RAM_GB) * 0.70))
  *   workers = max(workersByCPU, workersByRAM, 3)
  */
 export function calcHCP(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
-  const { hcpHostedClusters, hcpQpsPerCluster } = config
+  const { hcpHostedClusters, hcpQpsPerCluster, addOns } = config
   const qpsFactor = hcpQpsPerCluster / 1000
 
   const cpuPerCP = HCP_CPU_PER_CP_IDLE + qpsFactor * HCP_CPU_PER_1000_QPS
@@ -272,29 +272,38 @@ export function calcHCP(config: ClusterConfig): { sizing: ClusterSizing; warning
 
   const WORKER_VCPU = 16
   const WORKER_RAM_GB = 32
-  // Allocatable RAM from a 32GB node ≈ 28.44 GB (after system reservation)
-  const WORKER_ALLOC_RAM = 28.44
   const UTIL = 0.70
 
   const workersByCPU = Math.ceil(totalCPU / (WORKER_VCPU * UTIL))
-  const workersByRAM = Math.ceil(totalRAM / (WORKER_ALLOC_RAM * UTIL))
+  const workersByRAM = Math.ceil(totalRAM / (allocatableRamGB(WORKER_RAM_GB) * UTIL))
   const workers = Math.max(workersByCPU, workersByRAM, 3)
 
   const masterNodes: NodeSpec = { ...CP_MIN }
   const workerNodes: NodeSpec = {
     count: workers,
-    vcpu: WORKER_VCPU,
-    ramGB: WORKER_RAM_GB,
-    storageGB: 100,
+    vcpu: Math.max(WORKER_VCPU, WORKER_MIN.vcpu),
+    ramGB: Math.max(WORKER_RAM_GB, WORKER_MIN.ramGB),
+    storageGB: WORKER_MIN.storageGB,
+  }
+
+  let infraNodes: NodeSpec | null = null
+  if (addOns.infraNodesEnabled) {
+    const infraSpec = infraNodeSizing(workerNodes.count)
+    infraNodes = {
+      count: 3,
+      vcpu: infraSpec.vcpu,
+      ramGB: infraSpec.ramGB,
+      storageGB: 100,
+    }
   }
 
   const sizing: ClusterSizing = {
     masterNodes,
     workerNodes,
-    infraNodes: null,
+    infraNodes,
     odfNodes: null,
     rhacmWorkers: null,
-    totals: sumTotals([masterNodes, workerNodes]),
+    totals: sumTotals([masterNodes, workerNodes, infraNodes]),
   }
 
   return { sizing, warnings: [] }
