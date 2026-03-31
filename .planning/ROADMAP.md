@@ -34,14 +34,15 @@ Plans:
 
 **Requirements covered:** ENG-01 – ENG-09, REC-01 – REC-03, QA-01 – QA-03
 
-### Plans
+**Plans:** 6 plans
 
-1. **Core types & constants** — Define `TopologyType` union, `NodeSpec`, `ClusterConfig`, `SizingResult` types; encode all Red Hat minimum hardware constants per topology
-2. **Control plane & worker formulas** — Implement CP scaling table (24/120/252/501 workers), allocatable RAM formula (tiered reservation), worker count formula (CPU/RAM/pod-density limited, 70% target utilization)
-3. **Topology calculators** — One calculator function per topology (StandardHA, Compact3Node, SNO with 3 profiles, TNA, TNF, HCP, MicroShift); each returns `SizingResult`
-4. **Add-on calculators** — ODF storage nodes (16vCPU/64GB × 3 + per-OSD scaling), infra node sizing formula, RHACM hub sizing
-5. **Recommendation engine** — Constraint-to-topology mapping; ranks topologies by fit; returns top suggestions with i18n justification keys
-6. **Engine unit tests** — Vitest tests for all formulas, constants, topology calculators, and recommendation engine; cover edge cases and minimums enforcement
+Plans:
+- [ ] 02-01-PLAN.md — Core types, constants, defaults, barrel index, Wave-0 test stubs
+- [ ] 02-02-PLAN.md — CP sizing, allocatable RAM, worker count, infra node formulas (TDD)
+- [ ] 02-03-PLAN.md — 8 topology calculator functions + dispatcher (TDD)
+- [ ] 02-04-PLAN.md — ODF, infra node, RHACM add-on calculators (TDD)
+- [ ] 02-05-PLAN.md — Recommendation engine: constraint-to-topology ranking (TDD)
+- [ ] 02-06-PLAN.md — Validation module, complete test coverage, zero-Vue enforcement
 
 ### Success Criteria
 
