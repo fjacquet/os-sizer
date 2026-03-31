@@ -12,16 +12,17 @@
 
 **Requirements covered:** SETUP-01 – SETUP-05, I18N-01 – I18N-07
 
-### Plans
+**Plans:** 3 plans
 
-1. **Scaffold project** — Initialize Vue 3 + TypeScript + Vite + Tailwind v4 from vcf-sizer conventions; configure ESLint, Prettier, Vitest; set up git hooks
-2. **Pinia stores skeleton** — Create `inputStore` (refs), `calculationStore` (computed), `uiStore` (locale, wizard step) with empty types; wire to App.vue
-3. **i18n setup** — Configure vue-i18n with lazy-loaded EN/FR/IT/DE locales; add language switcher; translate all placeholder strings; verify Vite 8 rolldown compatibility (no `include` option)
+Plans:
+- [ ] 01-PLAN-scaffold.md — Project scaffold: Vue 3 + Vite + Tailwind v4 + ESLint + Prettier + Vitest + Wave-0 test stubs
+- [ ] 01-PLAN-stores.md — Pinia store skeletons: inputStore (refs), calculationStore (computed-only), uiStore (4-step wizard)
+- [ ] 01-PLAN-i18n.md — vue-i18n setup: 4 locale files, lazy-loading, LanguageSwitcher, Vite 8 rolldown compatibility
 
 ### Success Criteria
 
 - `npm run dev` starts without errors
-- `npm run test` passes (no tests yet, but runner works)
+- `npm run test` passes (stub tests green, runner works)
 - Language switcher cycles through EN/FR/IT/DE correctly
 - Store types compile without errors
 

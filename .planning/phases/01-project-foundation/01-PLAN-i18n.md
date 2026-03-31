@@ -1,0 +1,916 @@
+---
+phase: 01-project-foundation
+plan: 03
+type: execute
+wave: 3
+depends_on:
+  - 01-PLAN-scaffold
+  - 01-PLAN-stores
+files_modified:
+  - src/i18n/index.ts
+  - src/i18n/locales/en.json
+  - src/i18n/locales/fr.json
+  - src/i18n/locales/de.json
+  - src/i18n/locales/it.json
+  - src/components/shared/LanguageSwitcher.vue
+  - src/App.vue
+autonomous: true
+requirements:
+  - SETUP-04
+  - I18N-01
+  - I18N-02
+  - I18N-03
+  - I18N-04
+  - I18N-05
+  - I18N-06
+  - I18N-07
+
+must_haves:
+  truths:
+    - "npm run build exits 0 without rolldown/JSON errors (I18N-07)"
+    - "All 4 locale JSON files exist with matching key structure"
+    - "LanguageSwitcher.vue renders EN/FR/DE/IT buttons and calls uiStore.setLocale()"
+    - "App.vue header shows LanguageSwitcher component"
+    - "loadLocale() uses explicit if/else branches, not template literal dynamic imports"
+    - "createI18n() has legacy: false for Vue 3 Composition API mode"
+    - "Number formats defined explicitly for fr-CH, de-CH, it-CH (no parent locale inheritance)"
+  artifacts:
+    - path: "src/i18n/index.ts"
+      provides: "createI18n instance and loadLocale lazy-loader"
+      contains: "legacy: false"
+    - path: "src/i18n/locales/en.json"
+      provides: "English locale — bundled eagerly"
+      contains: '"app"'
+    - path: "src/i18n/locales/fr.json"
+      provides: "French locale — lazy-loaded"
+      contains: '"app"'
+    - path: "src/i18n/locales/de.json"
+      provides: "German locale — lazy-loaded"
+      contains: '"app"'
+    - path: "src/i18n/locales/it.json"
+      provides: "Italian locale — lazy-loaded"
+      contains: '"app"'
+    - path: "src/components/shared/LanguageSwitcher.vue"
+      provides: "Language switcher component"
+      contains: "uiStore.setLocale"
+  key_links:
+    - from: "src/i18n/index.ts"
+      to: "src/i18n/locales/en.json"
+      via: "import en from './locales/en.json' (eager)"
+      pattern: "import en from"
+    - from: "src/i18n/index.ts"
+      to: "src/i18n/locales/fr.json"
+      via: "explicit if/else dynamic import in loadLocale()"
+      pattern: "if \\(locale === 'fr'\\)"
+    - from: "src/stores/uiStore.ts"
+      to: "src/i18n/index.ts"
+      via: "import { i18n, loadLocale } from '../i18n'"
+      pattern: "from '../i18n'"
+    - from: "src/App.vue"
+      to: "src/components/shared/LanguageSwitcher.vue"
+      via: "import LanguageSwitcher + <LanguageSwitcher /> in template"
+      pattern: "LanguageSwitcher"
+---
+
+<objective>
+Configure vue-i18n with 4 locales (EN/FR/DE/IT) using the exact pattern from vcf-sizer, adapted for the os-sizer domain. Replace the temporary i18n stub from plan 01 with the full implementation.
+
+Purpose: All UI strings must be externalized from day one so Phase 3 (wizard) and Phase 4 (results) can add strings without touching logic. The Vite 8 rolldown compatibility constraint (no `include` in VueI18nPlugin) must be enforced here.
+
+Output: Working language switcher in the App.vue header, 4 locale files with os-sizer domain keys, lazy-loading confirmed, and `npm run build` clean.
+</objective>
+
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/execute-plan.md
+@$HOME/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/ROADMAP.md
+@.planning/STATE.md
+@.planning/phases/01-project-foundation/01-RESEARCH.md
+@.planning/phases/01-project-foundation/01-01-scaffold-SUMMARY.md
+@.planning/phases/01-project-foundation/01-02-stores-SUMMARY.md
+
+Reference implementations (read before writing):
+/Users/fjacquet/Projects/vcf-sizer/src/i18n/index.ts
+/Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/en.json
+/Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/fr.json
+/Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/de.json
+/Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/it.json
+/Users/fjacquet/Projects/vcf-sizer/src/components/shared/LanguageSwitcher.vue
+/Users/fjacquet/Projects/vcf-sizer/src/App.vue
+
+<interfaces>
+<!-- Existing contracts this plan consumes -->
+
+From src/stores/uiStore.ts (written in plan 02):
+```typescript
+export const useUiStore: () => {
+  locale: Ref<'en' | 'fr' | 'de' | 'it'>
+  setLocale: (locale: 'en' | 'fr' | 'de' | 'it') => Promise<void>
+  currentWizardStep: Ref<1 | 2 | 3 | 4>
+  setWizardStep: (step: 1 | 2 | 3 | 4) => void
+  topologyConfirmed: Ref<boolean>
+  confirmTopology: () => void
+}
+```
+
+uiStore already imports `{ i18n, loadLocale }` from `'../i18n'` — this plan must provide those exports.
+</interfaces>
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: Write src/i18n/index.ts (full implementation, replacing stub)</name>
+  <files>src/i18n/index.ts</files>
+
+  <read_first>
+    - /Users/fjacquet/Projects/vcf-sizer/src/i18n/index.ts (copy verbatim — this file is correct as-is)
+    - /Users/fjacquet/Projects/os-sizer/src/i18n/index.ts (current stub to replace)
+  </read_first>
+
+  <action>
+Replace the temporary stub from plan 01 with the full i18n setup.
+
+Copy vcf-sizer's `src/i18n/index.ts` verbatim. The file is correct as-is for os-sizer because:
+- It already has all 4 locales (en, fr-CH, de-CH, it-CH)
+- It already uses `legacy: false` (required for Vue 3 Composition API)
+- It already uses explicit if/else branches in loadLocale (not template literals)
+- Swiss locale numberFormats are already explicit (not inherited from parent fr/de/it)
+
+Write the following to `/Users/fjacquet/Projects/os-sizer/src/i18n/index.ts`:
+
+```typescript
+import { createI18n } from 'vue-i18n'
+import en from './locales/en.json'
+
+// CRITICAL: legacy: false is REQUIRED for Vue 3 Composition API mode
+// Source: vue-i18n v11 docs — Composition API Guide
+export const i18n = createI18n({
+  legacy: false,
+  locale: 'en',
+  fallbackLocale: 'en',
+  messages: { en },
+  // Explicit Swiss locale numberFormats — do NOT inherit from parent locale (fr, de, it)
+  // Inherited formats use locale-specific thousand separators that break Swiss user expectations
+  numberFormats: {
+    'en': {
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
+      integer: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 },
+      percent: { style: 'percent', minimumFractionDigits: 1 },
+    },
+    'fr-CH': {
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
+      integer: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 },
+      percent: { style: 'percent', minimumFractionDigits: 1 },
+    },
+    'de-CH': {
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
+      integer: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 },
+      percent: { style: 'percent', minimumFractionDigits: 1 },
+    },
+    'it-CH': {
+      decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
+      integer: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 },
+      percent: { style: 'percent', minimumFractionDigits: 1 },
+    },
+  },
+})
+
+// Lazy-load non-EN locale files on demand (called from uiStore.setLocale)
+export async function loadLocale(locale: 'fr' | 'de' | 'it'): Promise<void> {
+  const localeMap: Record<string, string> = { fr: 'fr-CH', de: 'de-CH', it: 'it-CH' }
+  // Explicit if/else branches — NOT a template literal — so bundler can tree-shake
+  // Template literal: await import(`./locales/${locale}.json`) causes INEFFECTIVE_DYNAMIC_IMPORT warning
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let messages: { default: any }
+  if (locale === 'fr') messages = await import('./locales/fr.json')
+  else if (locale === 'de') messages = await import('./locales/de.json')
+  else messages = await import('./locales/it.json')
+  i18n.global.setLocaleMessage(localeMap[locale], messages.default)
+  i18n.global.locale.value = localeMap[locale] as 'fr-CH' | 'de-CH' | 'it-CH'
+}
+```
+
+CRITICAL CHECK — run after writing:
+```bash
+grep "legacy: false" /Users/fjacquet/Projects/os-sizer/src/i18n/index.ts
+grep "if (locale === 'fr')" /Users/fjacquet/Projects/os-sizer/src/i18n/index.ts
+grep "fr-CH" /Users/fjacquet/Projects/os-sizer/src/i18n/index.ts
+```
+All three must find matches.
+  </action>
+
+  <verify>
+    <automated>cd /Users/fjacquet/Projects/os-sizer && grep "legacy: false" src/i18n/index.ts && grep "if (locale === 'fr')" src/i18n/index.ts && grep "fr-CH" src/i18n/index.ts</automated>
+  </verify>
+
+  <acceptance_criteria>
+    - `grep "legacy: false" src/i18n/index.ts` finds a match
+    - `grep "if (locale === 'fr')" src/i18n/index.ts` finds a match (explicit branch, not template literal)
+    - `grep "fr-CH" src/i18n/index.ts` finds at least 2 matches (localeMap and numberFormats)
+    - `grep "template" src/i18n/index.ts` returns empty (no template literal imports)
+    - `grep "fallbackLocale: 'en'" src/i18n/index.ts` finds a match
+    - `grep "export const i18n" src/i18n/index.ts` finds a match
+    - `grep "export async function loadLocale" src/i18n/index.ts` finds a match
+  </acceptance_criteria>
+
+  <done>i18n/index.ts written with legacy:false, explicit if/else locale branches, Swiss number formats, and both i18n and loadLocale exported.</done>
+</task>
+
+<task type="auto">
+  <name>Task 2: Write 4 locale JSON files with os-sizer domain keys</name>
+  <files>
+    src/i18n/locales/en.json,
+    src/i18n/locales/fr.json,
+    src/i18n/locales/de.json,
+    src/i18n/locales/it.json
+  </files>
+
+  <read_first>
+    - /Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/en.json (structural reference — replace vcf keys with OCP keys)
+    - /Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/fr.json (translation patterns for FR)
+    - /Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/de.json (translation patterns for DE)
+    - /Users/fjacquet/Projects/vcf-sizer/src/i18n/locales/it.json (translation patterns for IT)
+    - /Users/fjacquet/Projects/os-sizer/src/i18n/locales/en.json (current minimal stub to replace)
+  </read_first>
+
+  <action>
+Replace the minimal stub en.json with the full os-sizer locale files. The key structure must be flat JSON with top-level section objects. All 4 files must have IDENTICAL key structure — only values differ.
+
+**src/i18n/locales/en.json**:
+```json
+{
+  "app": {
+    "title": "OpenShift Sizing Calculator"
+  },
+  "language": {
+    "label": "Language",
+    "en": "EN",
+    "fr": "FR",
+    "de": "DE",
+    "it": "IT"
+  },
+  "topology": {
+    "label": "Topology",
+    "standardHa": "Standard HA",
+    "compact3node": "Compact 3-Node",
+    "sno": "Single Node OpenShift",
+    "twoNodeArbiter": "Two-Node + Arbiter (TNA)",
+    "twoNodeFencing": "Two-Node + Fencing (TNF)",
+    "hcp": "Hosted Control Planes (HCP)",
+    "microshift": "MicroShift",
+    "managedCloud": "Managed Cloud (ROSA/ARO)"
+  },
+  "node": {
+    "masters": "Control Plane Nodes",
+    "workers": "Worker Nodes",
+    "infra": "Infrastructure Nodes",
+    "storage": "ODF Storage Nodes",
+    "vcpu": "vCPU",
+    "ramGB": "RAM (GB)",
+    "storageGB": "Storage (GB)",
+    "count": "Count"
+  },
+  "wizard": {
+    "step1": {
+      "number": "1",
+      "label": "Environment",
+      "title": "Environment Constraints",
+      "topologyRequired": "Please select a topology to continue"
+    },
+    "step2": {
+      "number": "2",
+      "label": "Workload",
+      "title": "Workload Profile"
+    },
+    "step3": {
+      "number": "3",
+      "label": "Architecture",
+      "title": "Architecture Selection"
+    },
+    "step4": {
+      "number": "4",
+      "label": "Results",
+      "title": "Sizing Results"
+    },
+    "nav": {
+      "previous": "Previous",
+      "next": "Next",
+      "calculate": "Calculate"
+    }
+  },
+  "environment": {
+    "label": "Environment Type",
+    "datacenter": "Datacenter",
+    "edge": "Edge",
+    "farEdge": "Far Edge",
+    "cloud": "Cloud",
+    "connectivity": "Connectivity",
+    "connected": "Connected",
+    "airGapped": "Air-Gapped",
+    "haLevel": "High Availability Level",
+    "haRequired": "HA Required",
+    "haOptional": "HA Optional"
+  },
+  "workload": {
+    "label": "Workload Profile",
+    "appCount": "Number of Applications",
+    "podCount": "Total Pods",
+    "cpuPerPod": "Average CPU per Pod (millicores)",
+    "ramPerPod": "Average RAM per Pod (MiB)",
+    "addons": "Optional Add-Ons",
+    "odfStorage": "ODF Storage",
+    "infraNodes": "Infrastructure Nodes",
+    "gpuNodes": "GPU Nodes",
+    "rhacmHub": "RHACM Hub"
+  },
+  "sno": {
+    "profile": "SNO Profile",
+    "standard": "Standard",
+    "edge": "Edge",
+    "telecomVdu": "Telecom vDU"
+  },
+  "hcp": {
+    "clusterCount": "Hosted Cluster Count",
+    "targetQps": "Target QPS per Cluster"
+  },
+  "results": {
+    "title": "Bill of Materials",
+    "totalCpu": "Total vCPU",
+    "totalRam": "Total RAM",
+    "totalStorage": "Total Storage",
+    "toolbar": {
+      "share": "Share URL",
+      "copied": "Copied!",
+      "exportCsv": "Export CSV",
+      "exportPdf": "Export PDF",
+      "exportPptx": "Download PPTX",
+      "exportPptxLoading": "Generating..."
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "minPods": "Minimum 1 pod required",
+    "minCpu": "Minimum 1 millicore required",
+    "minRam": "Minimum 1 MiB required"
+  },
+  "print": {
+    "header": {
+      "title": "OpenShift Sizing Report"
+    },
+    "footer": {
+      "attribution": "Generated by OpenShift Sizer"
+    }
+  }
+}
+```
+
+**src/i18n/locales/fr.json** (French translations — same key structure as en.json):
+```json
+{
+  "app": {
+    "title": "Calculateur de dimensionnement OpenShift"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "EN",
+    "fr": "FR",
+    "de": "DE",
+    "it": "IT"
+  },
+  "topology": {
+    "label": "Topologie",
+    "standardHa": "Standard HA",
+    "compact3node": "3 nœuds compacts",
+    "sno": "OpenShift nœud unique",
+    "twoNodeArbiter": "2 nœuds + arbitre (TNA)",
+    "twoNodeFencing": "2 nœuds + isolation (TNF)",
+    "hcp": "Plans de contrôle hébergés (HCP)",
+    "microshift": "MicroShift",
+    "managedCloud": "Cloud géré (ROSA/ARO)"
+  },
+  "node": {
+    "masters": "Nœuds du plan de contrôle",
+    "workers": "Nœuds de travail",
+    "infra": "Nœuds d'infrastructure",
+    "storage": "Nœuds de stockage ODF",
+    "vcpu": "vCPU",
+    "ramGB": "RAM (Go)",
+    "storageGB": "Stockage (Go)",
+    "count": "Nombre"
+  },
+  "wizard": {
+    "step1": {
+      "number": "1",
+      "label": "Environnement",
+      "title": "Contraintes environnementales",
+      "topologyRequired": "Veuillez sélectionner une topologie pour continuer"
+    },
+    "step2": {
+      "number": "2",
+      "label": "Charge de travail",
+      "title": "Profil de charge de travail"
+    },
+    "step3": {
+      "number": "3",
+      "label": "Architecture",
+      "title": "Sélection de l'architecture"
+    },
+    "step4": {
+      "number": "4",
+      "label": "Résultats",
+      "title": "Résultats du dimensionnement"
+    },
+    "nav": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "calculate": "Calculer"
+    }
+  },
+  "environment": {
+    "label": "Type d'environnement",
+    "datacenter": "Datacenter",
+    "edge": "Périphérie",
+    "farEdge": "Périphérie distante",
+    "cloud": "Cloud",
+    "connectivity": "Connectivité",
+    "connected": "Connecté",
+    "airGapped": "Déconnecté (air-gap)",
+    "haLevel": "Niveau de haute disponibilité",
+    "haRequired": "HA requise",
+    "haOptional": "HA optionnelle"
+  },
+  "workload": {
+    "label": "Profil de charge de travail",
+    "appCount": "Nombre d'applications",
+    "podCount": "Total des pods",
+    "cpuPerPod": "CPU moyen par pod (millicores)",
+    "ramPerPod": "RAM moyenne par pod (Mio)",
+    "addons": "Extensions optionnelles",
+    "odfStorage": "Stockage ODF",
+    "infraNodes": "Nœuds d'infrastructure",
+    "gpuNodes": "Nœuds GPU",
+    "rhacmHub": "Hub RHACM"
+  },
+  "sno": {
+    "profile": "Profil SNO",
+    "standard": "Standard",
+    "edge": "Périphérie",
+    "telecomVdu": "Télécom vDU"
+  },
+  "hcp": {
+    "clusterCount": "Nombre de clusters hébergés",
+    "targetQps": "QPS cible par cluster"
+  },
+  "results": {
+    "title": "Nomenclature du matériel",
+    "totalCpu": "Total vCPU",
+    "totalRam": "Total RAM",
+    "totalStorage": "Total stockage",
+    "toolbar": {
+      "share": "Partager l'URL",
+      "copied": "Copié !",
+      "exportCsv": "Exporter CSV",
+      "exportPdf": "Exporter PDF",
+      "exportPptx": "Télécharger PPTX",
+      "exportPptxLoading": "Génération..."
+    }
+  },
+  "validation": {
+    "required": "Ce champ est obligatoire",
+    "minPods": "Minimum 1 pod requis",
+    "minCpu": "Minimum 1 millicore requis",
+    "minRam": "Minimum 1 Mio requis"
+  },
+  "print": {
+    "header": {
+      "title": "Rapport de dimensionnement OpenShift"
+    },
+    "footer": {
+      "attribution": "Généré par OpenShift Sizer"
+    }
+  }
+}
+```
+
+**src/i18n/locales/de.json** (German translations — same key structure):
+```json
+{
+  "app": {
+    "title": "OpenShift-Dimensionierungsrechner"
+  },
+  "language": {
+    "label": "Sprache",
+    "en": "EN",
+    "fr": "FR",
+    "de": "DE",
+    "it": "IT"
+  },
+  "topology": {
+    "label": "Topologie",
+    "standardHa": "Standard HA",
+    "compact3node": "Kompakt 3-Knoten",
+    "sno": "OpenShift Einzelknoten",
+    "twoNodeArbiter": "2 Knoten + Schiedsrichter (TNA)",
+    "twoNodeFencing": "2 Knoten + Fencing (TNF)",
+    "hcp": "Gehostete Steuerungsebenen (HCP)",
+    "microshift": "MicroShift",
+    "managedCloud": "Verwaltete Cloud (ROSA/ARO)"
+  },
+  "node": {
+    "masters": "Steuerungsebenen-Knoten",
+    "workers": "Worker-Knoten",
+    "infra": "Infrastruktur-Knoten",
+    "storage": "ODF-Speicherknoten",
+    "vcpu": "vCPU",
+    "ramGB": "RAM (GB)",
+    "storageGB": "Speicher (GB)",
+    "count": "Anzahl"
+  },
+  "wizard": {
+    "step1": {
+      "number": "1",
+      "label": "Umgebung",
+      "title": "Umgebungseinschränkungen",
+      "topologyRequired": "Bitte wählen Sie eine Topologie aus, um fortzufahren"
+    },
+    "step2": {
+      "number": "2",
+      "label": "Arbeitslast",
+      "title": "Arbeitslastprofil"
+    },
+    "step3": {
+      "number": "3",
+      "label": "Architektur",
+      "title": "Architekturauswahl"
+    },
+    "step4": {
+      "number": "4",
+      "label": "Ergebnisse",
+      "title": "Dimensionierungsergebnisse"
+    },
+    "nav": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "calculate": "Berechnen"
+    }
+  },
+  "environment": {
+    "label": "Umgebungstyp",
+    "datacenter": "Rechenzentrum",
+    "edge": "Edge",
+    "farEdge": "Ferngesteuerte Edge",
+    "cloud": "Cloud",
+    "connectivity": "Konnektivität",
+    "connected": "Verbunden",
+    "airGapped": "Luftspalt (Air-Gap)",
+    "haLevel": "Hochverfügbarkeitsstufe",
+    "haRequired": "HA erforderlich",
+    "haOptional": "HA optional"
+  },
+  "workload": {
+    "label": "Arbeitslastprofil",
+    "appCount": "Anzahl der Anwendungen",
+    "podCount": "Gesamtanzahl der Pods",
+    "cpuPerPod": "Durchschnittliche CPU pro Pod (Millicores)",
+    "ramPerPod": "Durchschnittlicher RAM pro Pod (MiB)",
+    "addons": "Optionale Erweiterungen",
+    "odfStorage": "ODF-Speicher",
+    "infraNodes": "Infrastrukturknoten",
+    "gpuNodes": "GPU-Knoten",
+    "rhacmHub": "RHACM-Hub"
+  },
+  "sno": {
+    "profile": "SNO-Profil",
+    "standard": "Standard",
+    "edge": "Edge",
+    "telecomVdu": "Telekom vDU"
+  },
+  "hcp": {
+    "clusterCount": "Anzahl gehosteter Cluster",
+    "targetQps": "Ziel-QPS pro Cluster"
+  },
+  "results": {
+    "title": "Stückliste",
+    "totalCpu": "Gesamt-vCPU",
+    "totalRam": "Gesamt-RAM",
+    "totalStorage": "Gesamtspeicher",
+    "toolbar": {
+      "share": "URL teilen",
+      "copied": "Kopiert!",
+      "exportCsv": "CSV exportieren",
+      "exportPdf": "PDF exportieren",
+      "exportPptx": "PPTX herunterladen",
+      "exportPptxLoading": "Wird generiert..."
+    }
+  },
+  "validation": {
+    "required": "Dieses Feld ist erforderlich",
+    "minPods": "Mindestens 1 Pod erforderlich",
+    "minCpu": "Mindestens 1 Millicore erforderlich",
+    "minRam": "Mindestens 1 MiB erforderlich"
+  },
+  "print": {
+    "header": {
+      "title": "OpenShift-Dimensionierungsbericht"
+    },
+    "footer": {
+      "attribution": "Erstellt mit OpenShift Sizer"
+    }
+  }
+}
+```
+
+**src/i18n/locales/it.json** (Italian translations — same key structure):
+```json
+{
+  "app": {
+    "title": "Calcolatore di dimensionamento OpenShift"
+  },
+  "language": {
+    "label": "Lingua",
+    "en": "EN",
+    "fr": "FR",
+    "de": "DE",
+    "it": "IT"
+  },
+  "topology": {
+    "label": "Topologia",
+    "standardHa": "Standard HA",
+    "compact3node": "Compatto 3 nodi",
+    "sno": "OpenShift nodo singolo",
+    "twoNodeArbiter": "2 nodi + arbitro (TNA)",
+    "twoNodeFencing": "2 nodi + fencing (TNF)",
+    "hcp": "Piani di controllo ospitati (HCP)",
+    "microshift": "MicroShift",
+    "managedCloud": "Cloud gestito (ROSA/ARO)"
+  },
+  "node": {
+    "masters": "Nodi del piano di controllo",
+    "workers": "Nodi worker",
+    "infra": "Nodi infrastruttura",
+    "storage": "Nodi di archiviazione ODF",
+    "vcpu": "vCPU",
+    "ramGB": "RAM (GB)",
+    "storageGB": "Archiviazione (GB)",
+    "count": "Conteggio"
+  },
+  "wizard": {
+    "step1": {
+      "number": "1",
+      "label": "Ambiente",
+      "title": "Vincoli ambientali",
+      "topologyRequired": "Selezionare una topologia per continuare"
+    },
+    "step2": {
+      "number": "2",
+      "label": "Carico di lavoro",
+      "title": "Profilo del carico di lavoro"
+    },
+    "step3": {
+      "number": "3",
+      "label": "Architettura",
+      "title": "Selezione dell'architettura"
+    },
+    "step4": {
+      "number": "4",
+      "label": "Risultati",
+      "title": "Risultati del dimensionamento"
+    },
+    "nav": {
+      "previous": "Precedente",
+      "next": "Successivo",
+      "calculate": "Calcola"
+    }
+  },
+  "environment": {
+    "label": "Tipo di ambiente",
+    "datacenter": "Datacenter",
+    "edge": "Edge",
+    "farEdge": "Edge remoto",
+    "cloud": "Cloud",
+    "connectivity": "Connettività",
+    "connected": "Connesso",
+    "airGapped": "Air-Gap",
+    "haLevel": "Livello di alta disponibilità",
+    "haRequired": "HA richiesta",
+    "haOptional": "HA opzionale"
+  },
+  "workload": {
+    "label": "Profilo del carico di lavoro",
+    "appCount": "Numero di applicazioni",
+    "podCount": "Pod totali",
+    "cpuPerPod": "CPU media per pod (millicores)",
+    "ramPerPod": "RAM media per pod (MiB)",
+    "addons": "Componenti aggiuntivi opzionali",
+    "odfStorage": "Archiviazione ODF",
+    "infraNodes": "Nodi infrastruttura",
+    "gpuNodes": "Nodi GPU",
+    "rhacmHub": "Hub RHACM"
+  },
+  "sno": {
+    "profile": "Profilo SNO",
+    "standard": "Standard",
+    "edge": "Edge",
+    "telecomVdu": "Telecom vDU"
+  },
+  "hcp": {
+    "clusterCount": "Numero di cluster ospitati",
+    "targetQps": "QPS obiettivo per cluster"
+  },
+  "results": {
+    "title": "Distinta materiali",
+    "totalCpu": "vCPU totali",
+    "totalRam": "RAM totale",
+    "totalStorage": "Archiviazione totale",
+    "toolbar": {
+      "share": "Condividi URL",
+      "copied": "Copiato!",
+      "exportCsv": "Esporta CSV",
+      "exportPdf": "Esporta PDF",
+      "exportPptx": "Scarica PPTX",
+      "exportPptxLoading": "Generazione in corso..."
+    }
+  },
+  "validation": {
+    "required": "Questo campo è obbligatorio",
+    "minPods": "Minimo 1 pod richiesto",
+    "minCpu": "Minimo 1 millicore richiesto",
+    "minRam": "Minimo 1 MiB richiesto"
+  },
+  "print": {
+    "header": {
+      "title": "Report di dimensionamento OpenShift"
+    },
+    "footer": {
+      "attribution": "Generato da OpenShift Sizer"
+    }
+  }
+}
+```
+
+After writing all 4 files, verify key parity:
+```bash
+# All 4 files should have the same number of top-level keys
+for f in en fr de it; do echo "$f: $(cat /Users/fjacquet/Projects/os-sizer/src/i18n/locales/$f.json | python3 -c 'import sys,json; d=json.load(sys.stdin); print(len(d))')"; done
+```
+All should report the same count.
+  </action>
+
+  <verify>
+    <automated>cd /Users/fjacquet/Projects/os-sizer && ls src/i18n/locales/en.json src/i18n/locales/fr.json src/i18n/locales/de.json src/i18n/locales/it.json && npm run type-check</automated>
+  </verify>
+
+  <acceptance_criteria>
+    - `ls src/i18n/locales/en.json src/i18n/locales/fr.json src/i18n/locales/de.json src/i18n/locales/it.json` all 4 files exist
+    - `grep '"app"' src/i18n/locales/en.json` finds a match
+    - `grep '"topology"' src/i18n/locales/fr.json` finds a match (key parity check)
+    - `grep '"topology"' src/i18n/locales/de.json` finds a match
+    - `grep '"topology"' src/i18n/locales/it.json` finds a match
+    - `grep "OpenShift Sizing Calculator" src/i18n/locales/en.json` finds a match
+    - `grep "Calculateur de dimensionnement" src/i18n/locales/fr.json` finds a match
+    - `grep "Dimensionierungsrechner" src/i18n/locales/de.json` finds a match
+    - `grep "dimensionamento OpenShift" src/i18n/locales/it.json` finds a match
+    - `npm run type-check` exits 0
+  </acceptance_criteria>
+
+  <done>All 4 locale files written with identical key structure. EN/FR/DE/IT translations for all os-sizer domain sections present.</done>
+</task>
+
+<task type="auto">
+  <name>Task 3: Write LanguageSwitcher.vue, update App.vue, verify build</name>
+  <files>src/components/shared/LanguageSwitcher.vue, src/App.vue</files>
+
+  <read_first>
+    - /Users/fjacquet/Projects/vcf-sizer/src/components/shared/LanguageSwitcher.vue (copy verbatim)
+    - /Users/fjacquet/Projects/os-sizer/src/App.vue (current state — add LanguageSwitcher import)
+    - /Users/fjacquet/Projects/os-sizer/src/stores/uiStore.ts (confirm setLocale signature)
+  </read_first>
+
+  <action>
+Create the `src/components/shared/` directory and write LanguageSwitcher.vue.
+
+**src/components/shared/LanguageSwitcher.vue** — copy verbatim from vcf-sizer:
+```vue
+<script setup lang="ts">
+  import { useUiStore } from '@/stores/uiStore'
+  const uiStore = useUiStore()
+  const locales = ['en', 'fr', 'de', 'it'] as const
+</script>
+
+<template>
+  <nav class="flex gap-2 items-center">
+    <button
+      v-for="loc in locales"
+      :key="loc"
+      :class="[
+        'px-2 py-1 text-sm font-mono uppercase rounded',
+        uiStore.locale === loc
+          ? 'bg-blue-600 text-white'
+          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+      ]"
+      @click="uiStore.setLocale(loc)"
+    >
+      {{ loc.toUpperCase() }}
+    </button>
+  </nav>
+</template>
+```
+
+**src/App.vue** — update to import and render LanguageSwitcher:
+```vue
+<script setup lang="ts">
+  import { useI18n } from 'vue-i18n'
+  import LanguageSwitcher from '@/components/shared/LanguageSwitcher.vue'
+  const { t } = useI18n()
+</script>
+
+<template>
+  <div class="min-h-screen bg-gray-50 font-sans">
+    <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10 print:hidden">
+      <h1 class="text-lg font-bold text-gray-900">{{ t('app.title') }}</h1>
+      <LanguageSwitcher />
+    </header>
+    <main class="p-6">
+      <p class="text-gray-500">Wizard placeholder — implemented in Phase 3.</p>
+    </main>
+  </div>
+</template>
+```
+
+After writing both files, run the full suite:
+
+```bash
+cd /Users/fjacquet/Projects/os-sizer
+npm run type-check && npm run test && npm run lint && npm run build
+```
+
+The build step is the critical I18N-07 check — it must produce `dist/` without rolldown/JSON errors.
+
+If `npm run build` fails with a rolldown error mentioning JSON files:
+1. Verify `vite.config.ts` has NO `include` in VueI18nPlugin: `grep "include" vite.config.ts` must return empty
+2. Verify the plugin call is exactly: `VueI18nPlugin({ runtimeOnly: false })`
+
+If `npm run lint` fails with "multi-word-component-names" on LanguageSwitcher.vue:
+- Confirm `'vue/multi-word-component-names': 'off'` is present in eslint.config.js rules section
+
+If `npm run type-check` fails with "Property 'locale' does not exist" in LanguageSwitcher.vue:
+- Confirm uiStore.ts exports `locale` and `setLocale` in its return statement
+  </action>
+
+  <verify>
+    <automated>cd /Users/fjacquet/Projects/os-sizer && npm run type-check && npm run test && npm run lint && npm run build</automated>
+  </verify>
+
+  <acceptance_criteria>
+    - `ls src/components/shared/LanguageSwitcher.vue` exists
+    - `grep "uiStore.setLocale" src/components/shared/LanguageSwitcher.vue` finds a match
+    - `grep "LanguageSwitcher" src/App.vue` finds at least 2 matches (import + template usage)
+    - `npm run type-check` exits 0
+    - `npm run test` exits 0
+    - `npm run lint` exits 0
+    - `npm run build` exits 0 (the critical I18N-07 verification)
+    - `ls dist/index.html` exists after build
+    - `grep "runtimeOnly: false" vite.config.ts` finds a match (confirming VueI18nPlugin config)
+    - No `tailwind.config.js` file exists in the project root
+  </acceptance_criteria>
+
+  <done>LanguageSwitcher.vue renders EN/FR/DE/IT buttons. App.vue header shows the switcher. npm run build exits 0 — VueI18nPlugin without include works with Vite 8 rolldown.</done>
+</task>
+
+</tasks>
+
+<verification>
+After all three tasks complete, run the full phase gate:
+
+```bash
+cd /Users/fjacquet/Projects/os-sizer
+npm run test && npm run type-check && npm run lint && npm run build
+```
+
+All four commands must exit 0.
+
+Key structural checks:
+- `grep "legacy: false" src/i18n/index.ts` — Composition API mode
+- `grep "if (locale === 'fr')" src/i18n/index.ts` — explicit branch, not template literal
+- `grep "include" vite.config.ts` — must return empty (no include in plugin)
+- `ls src/i18n/locales/*.json` — must list exactly 4 files (en, fr, de, it)
+- `grep "LanguageSwitcher" src/App.vue` — component wired in header
+</verification>
+
+<success_criteria>
+- npm run build exits 0 without rolldown/JSON errors (I18N-07)
+- All 4 locale files exist with identical key structure
+- LanguageSwitcher.vue renders and calls uiStore.setLocale()
+- App.vue header includes LanguageSwitcher
+- createI18n has legacy: false
+- loadLocale uses explicit if/else branches (not template literals)
+- Swiss locale number formats defined explicitly in createI18n (not inherited)
+</success_criteria>
+
+<output>
+After completion, create `/Users/fjacquet/Projects/os-sizer/.planning/phases/01-project-foundation/01-03-i18n-SUMMARY.md`
+</output>

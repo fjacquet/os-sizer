@@ -1,0 +1,577 @@
+---
+phase: 01-project-foundation
+plan: 02
+type: execute
+wave: 2
+depends_on:
+  - 01-PLAN-scaffold
+files_modified:
+  - src/engine/types.ts
+  - src/engine/defaults.ts
+  - src/stores/inputStore.ts
+  - src/stores/calculationStore.ts
+  - src/stores/uiStore.ts
+  - src/stores/inputStore.test.ts
+  - src/stores/uiStore.test.ts
+  - src/stores/calculationStore.test.ts
+autonomous: true
+requirements:
+  - SETUP-05
+
+must_haves:
+  truths:
+    - "inputStore exposes clusters as ref<ClusterConfig[]> — never reactive([])"
+    - "calculationStore contains zero ref() calls — only computed()"
+    - "uiStore wizard step type is 1|2|3|4 — not 1|2|3"
+    - "useInputStore() is called at top level of calculationStore setup, not inside computed()"
+    - "npm run type-check exits 0 after store files are written"
+    - "npm run test exits 0 with real assertions on store patterns"
+  artifacts:
+    - path: "src/engine/types.ts"
+      provides: "ClusterConfig and SizingResult type definitions"
+      contains: "TopologyType"
+    - path: "src/engine/defaults.ts"
+      provides: "createDefaultClusterConfig factory function"
+      contains: "createDefaultClusterConfig"
+    - path: "src/stores/inputStore.ts"
+      provides: "Pinia store with ref-only state"
+      contains: "ref<ClusterConfig[]>"
+    - path: "src/stores/calculationStore.ts"
+      provides: "Pinia store with computed-only derived state"
+      contains: "computed<SizingResult[]>"
+    - path: "src/stores/uiStore.ts"
+      provides: "UI state: locale, wizard step 1|2|3|4, topology confirmed"
+      contains: "ref<1 | 2 | 3 | 4>"
+  key_links:
+    - from: "src/stores/calculationStore.ts"
+      to: "src/stores/inputStore.ts"
+      via: "const input = useInputStore() at top level"
+      pattern: "const input = useInputStore\\(\\)"
+    - from: "src/stores/uiStore.ts"
+      to: "src/i18n/index.ts"
+      via: "loadLocale() called from setLocale()"
+      pattern: "loadLocale"
+    - from: "src/stores/inputStore.ts"
+      to: "src/engine/defaults.ts"
+      via: "createDefaultClusterConfig(0) in initial ref value"
+      pattern: "createDefaultClusterConfig"
+---
+
+<objective>
+Create the three Pinia store skeletons that define the reactive state architecture of os-sizer. These stores must follow the ref-only (inputStore) and computed-only (calculationStore) constraints from vcf-sizer, adapted for the 4-step OpenShift wizard.
+
+Purpose: Establish the state layer before any UI or engine logic is written. Phase 2 engine functions will plug into these stores without structural changes.
+
+Output: Three working Pinia stores with correct TypeScript types, a minimal ClusterConfig type skeleton, and updated test files with real assertions.
+</objective>
+
+<execution_context>
+@$HOME/.claude/get-shit-done/workflows/execute-plan.md
+@$HOME/.claude/get-shit-done/templates/summary.md
+</execution_context>
+
+<context>
+@.planning/ROADMAP.md
+@.planning/STATE.md
+@.planning/phases/01-project-foundation/01-RESEARCH.md
+@.planning/phases/01-project-foundation/01-01-scaffold-SUMMARY.md
+
+Reference implementations (read before writing):
+/Users/fjacquet/Projects/vcf-sizer/src/stores/inputStore.ts
+/Users/fjacquet/Projects/vcf-sizer/src/stores/calculationStore.ts
+/Users/fjacquet/Projects/vcf-sizer/src/stores/uiStore.ts
+
+<interfaces>
+<!-- Types to be created in Task 1, consumed by Tasks 2 and 3 -->
+<!-- These contracts must be defined first so Tasks 2/3 can import them -->
+
+src/engine/types.ts will export:
+```typescript
+export type TopologyType =
+  | 'standard-ha'
+  | 'compact-3node'
+  | 'sno'
+  | 'two-node-arbiter'
+  | 'two-node-fencing'
+  | 'hcp'
+  | 'microshift'
+  | 'managed-cloud'
+
+export interface NodeSpec {
+  count: number
+  vcpu: number
+  ramGB: number
+  storageGB: number
+}
+
+export interface ClusterConfig {
+  id: string
+  name: string
+  topology: TopologyType
+}
+
+export interface SizingResult {
+  id: string
+  sizing: {
+    masterNodes: NodeSpec
+    workerNodes: NodeSpec
+    infraNodes: NodeSpec | null
+  }
+  validationErrors: ValidationWarning[]
+}
+
+export interface ValidationWarning {
+  code: string
+  severity: 'error' | 'warning'
+  messageKey: string
+}
+```
+
+src/engine/defaults.ts will export:
+```typescript
+export function createDefaultClusterConfig(index: number): ClusterConfig
+```
+</interfaces>
+</context>
+
+<tasks>
+
+<task type="auto">
+  <name>Task 1: Write engine type contracts and defaults factory</name>
+  <files>src/engine/types.ts, src/engine/defaults.ts</files>
+
+  <read_first>
+    - /Users/fjacquet/Projects/vcf-sizer/src/engine/types.ts (structural pattern for interfaces)
+    - /Users/fjacquet/Projects/os-sizer/src/engine/types.ts (current state if exists)
+  </read_first>
+
+  <action>
+Create the `src/engine/` directory and write the minimal type contracts that inputStore and calculationStore depend on.
+
+CRITICAL CONSTRAINT: No Vue imports in any engine file. These files run in Node (for tests).
+
+**src/engine/types.ts**:
+```typescript
+// Engine types for os-sizer — zero Vue imports (CALC-01)
+
+export type TopologyType =
+  | 'standard-ha'       // 3 masters + N workers + optional infra
+  | 'compact-3node'     // masters double as workers
+  | 'sno'               // single node OpenShift
+  | 'two-node-arbiter'  // TNA
+  | 'two-node-fencing'  // TNF — bare-metal only
+  | 'hcp'               // hosted control planes
+  | 'microshift'        // edge/IoT
+  | 'managed-cloud'     // ROSA/ARO — informational only
+
+export interface NodeSpec {
+  count: number
+  vcpu: number
+  ramGB: number
+  storageGB: number
+}
+
+export interface ClusterConfig {
+  id: string
+  name: string
+  topology: TopologyType
+  // Phase 2 will add workload profile fields (pods, CPU/pod, RAM/pod, etc.)
+}
+
+export interface SizingResult {
+  id: string
+  sizing: {
+    masterNodes: NodeSpec
+    workerNodes: NodeSpec
+    infraNodes: NodeSpec | null
+  }
+  validationErrors: ValidationWarning[]
+}
+
+export interface ValidationWarning {
+  code: string
+  severity: 'error' | 'warning'
+  messageKey: string  // i18n key — NEVER a raw English string
+}
+```
+
+**src/engine/defaults.ts**:
+```typescript
+// Defaults factory functions — NOT exported constants (constants = shared refs = mutation bugs)
+// Zero Vue imports (CALC-01)
+import type { ClusterConfig } from './types'
+
+export function createDefaultClusterConfig(index: number): ClusterConfig {
+  return {
+    id: crypto.randomUUID(),
+    name: `Cluster-${index + 1}`,
+    topology: 'standard-ha',
+  }
+}
+```
+
+Verify no Vue imports crept in:
+```bash
+grep -r "from 'vue'" /Users/fjacquet/Projects/os-sizer/src/engine/
+```
+Should return empty output.
+  </action>
+
+  <verify>
+    <automated>cd /Users/fjacquet/Projects/os-sizer && npx vue-tsc --noEmit 2>&1 | head -20</automated>
+  </verify>
+
+  <acceptance_criteria>
+    - `ls src/engine/types.ts src/engine/defaults.ts` both exist
+    - `grep "TopologyType" src/engine/types.ts` finds the type export
+    - `grep "'standard-ha'" src/engine/types.ts` finds a match (all 8 topology strings)
+    - `grep "from 'vue'" src/engine/types.ts` returns empty (no Vue imports)
+    - `grep "from 'vue'" src/engine/defaults.ts` returns empty (no Vue imports)
+    - `grep "createDefaultClusterConfig" src/engine/defaults.ts` finds the exported function
+    - `grep "crypto.randomUUID" src/engine/defaults.ts` finds a match (factory not constant)
+  </acceptance_criteria>
+
+  <done>Engine type contracts and defaults factory written. No Vue imports. All 8 TopologyType variants present. createDefaultClusterConfig generates unique IDs.</done>
+</task>
+
+<task type="auto" tdd="true">
+  <name>Task 2: Write inputStore, calculationStore, uiStore with real test assertions</name>
+  <files>
+    src/stores/inputStore.ts,
+    src/stores/calculationStore.ts,
+    src/stores/uiStore.ts,
+    src/stores/inputStore.test.ts,
+    src/stores/uiStore.test.ts,
+    src/stores/calculationStore.test.ts
+  </files>
+
+  <read_first>
+    - /Users/fjacquet/Projects/vcf-sizer/src/stores/inputStore.ts
+    - /Users/fjacquet/Projects/vcf-sizer/src/stores/calculationStore.ts
+    - /Users/fjacquet/Projects/vcf-sizer/src/stores/uiStore.ts
+    - /Users/fjacquet/Projects/os-sizer/src/stores/inputStore.test.ts (Wave-0 stub to replace)
+    - /Users/fjacquet/Projects/os-sizer/src/stores/uiStore.test.ts (Wave-0 stub to replace)
+    - /Users/fjacquet/Projects/os-sizer/src/stores/calculationStore.test.ts (Wave-0 stub to replace)
+    - /Users/fjacquet/Projects/os-sizer/src/engine/types.ts (just written in Task 1)
+    - /Users/fjacquet/Projects/os-sizer/src/engine/defaults.ts (just written in Task 1)
+  </read_first>
+
+  <behavior>
+    Tests for inputStore:
+    - Test: initial clusters has exactly 1 entry with topology 'standard-ha'
+    - Test: addCluster() appends a new entry and increments activeClusterIndex
+    - Test: removeCluster() removes the cluster; refuses if only 1 cluster remains
+    - Test: updateCluster() mutates the target cluster field via Object.assign (not $patch)
+    - Test: clusters is a ref (not reactive) — destructuring via storeToRefs works
+
+    Tests for uiStore:
+    - Test: initial wizard step is 1
+    - Test: setWizardStep(4) sets currentWizardStep to 4 (not blocked — 4-step wizard)
+    - Test: setWizardStep(3) sets currentWizardStep to 3
+    - Test: confirmTopology() sets topologyConfirmed to true
+
+    Tests for calculationStore:
+    - Test: clusterResults is computed (not a ref) — .value is accessible, no setter
+    - Test: clusterResults returns one result per cluster in inputStore
+    - Test: adding a cluster to inputStore causes clusterResults.length to increase reactively
+  </behavior>
+
+  <action>
+Write TDD in RED → GREEN order. Write test file first, run (expect fail), then write implementation.
+
+**src/stores/inputStore.ts**:
+```typescript
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { createDefaultClusterConfig } from '@/engine/defaults'
+import type { ClusterConfig } from '@/engine/types'
+
+export const useInputStore = defineStore('input', () => {
+  // ref<[]> NOT reactive([]) — avoids storeToRefs() double-wrap bug
+  const clusters = ref<ClusterConfig[]>([createDefaultClusterConfig(0)])
+  const activeClusterIndex = ref(0)
+
+  function addCluster() {
+    clusters.value.push(createDefaultClusterConfig(clusters.value.length))
+    activeClusterIndex.value = clusters.value.length - 1
+  }
+
+  function removeCluster(id: string) {
+    const idx = clusters.value.findIndex((c) => c.id === id)
+    if (idx === -1 || clusters.value.length === 1) return
+    clusters.value.splice(idx, 1)
+    activeClusterIndex.value = Math.min(activeClusterIndex.value, clusters.value.length - 1)
+  }
+
+  function updateCluster(id: string, patch: Partial<ClusterConfig>) {
+    const cluster = clusters.value.find((c) => c.id === id)
+    if (cluster) Object.assign(cluster, patch)  // direct assignment — NOT $patch()
+  }
+
+  return { clusters, activeClusterIndex, addCluster, removeCluster, updateCluster }
+})
+```
+
+**src/stores/calculationStore.ts**:
+```typescript
+import { defineStore } from 'pinia'
+import { computed } from 'vue'
+import { useInputStore } from './inputStore'
+import type { SizingResult } from '@/engine/types'
+
+export const useCalculationStore = defineStore('calculation', () => {
+  // CRITICAL: call useInputStore() at TOP LEVEL — never inside a computed() callback
+  const input = useInputStore()
+
+  // ZERO ref() — only computed() — enforces CALC-02
+  const clusterResults = computed<SizingResult[]>(() =>
+    input.clusters.map((cluster) => ({
+      id: cluster.id,
+      // Engine functions are stubbed here — Phase 2 will replace {} with real calculations
+      sizing: {
+        masterNodes: { count: 3, vcpu: 4, ramGB: 16, storageGB: 100 },
+        workerNodes: { count: 0, vcpu: 2, ramGB: 8, storageGB: 100 },
+        infraNodes: null,
+      },
+      validationErrors: [],
+    })),
+  )
+
+  return { clusterResults }
+})
+```
+
+**src/stores/uiStore.ts**:
+```typescript
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import { i18n, loadLocale } from '../i18n'
+
+type AppLocale = 'en' | 'fr' | 'de' | 'it'
+
+export const useUiStore = defineStore('ui', () => {
+  const browserLocale: AppLocale = navigator.language.startsWith('fr')
+    ? 'fr'
+    : navigator.language.startsWith('de')
+      ? 'de'
+      : navigator.language.startsWith('it')
+        ? 'it'
+        : 'en'
+  const locale = ref<AppLocale>(browserLocale)
+
+  async function setLocale(newLocale: AppLocale): Promise<void> {
+    locale.value = newLocale
+    if (newLocale === 'en') {
+      i18n.global.locale.value = 'en'
+    } else {
+      await loadLocale(newLocale)
+    }
+  }
+
+  // Eagerly load non-EN locale if browser is set to FR/DE/IT
+  if (locale.value !== 'en') {
+    loadLocale(locale.value as 'fr' | 'de' | 'it')
+  }
+
+  // os-sizer has 4 wizard steps: Environment → Workload → Architecture → Results
+  // NOTE: type is 1|2|3|4 — vcf-sizer uses 1|2|3, which is WRONG for os-sizer
+  const currentWizardStep = ref<1 | 2 | 3 | 4>(1)
+  function setWizardStep(step: 1 | 2 | 3 | 4): void {
+    currentWizardStep.value = step
+  }
+
+  const topologyConfirmed = ref<boolean>(false)
+  function confirmTopology(): void {
+    topologyConfirmed.value = true
+  }
+
+  return { locale, setLocale, currentWizardStep, setWizardStep, topologyConfirmed, confirmTopology }
+})
+```
+
+**src/stores/inputStore.test.ts** (replace Wave-0 stub with real tests):
+```typescript
+/// <reference types="vitest/globals" />
+import { describe, it, expect, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { useInputStore } from './inputStore'
+
+describe('inputStore', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('initializes with 1 cluster of topology standard-ha', () => {
+    const store = useInputStore()
+    expect(store.clusters).toHaveLength(1)
+    expect(store.clusters[0].topology).toBe('standard-ha')
+  })
+
+  it('addCluster appends a new cluster and updates activeClusterIndex', () => {
+    const store = useInputStore()
+    store.addCluster()
+    expect(store.clusters).toHaveLength(2)
+    expect(store.activeClusterIndex).toBe(1)
+  })
+
+  it('removeCluster removes the target cluster', () => {
+    const store = useInputStore()
+    store.addCluster()
+    const idToRemove = store.clusters[1].id
+    store.removeCluster(idToRemove)
+    expect(store.clusters).toHaveLength(1)
+    expect(store.clusters.find((c) => c.id === idToRemove)).toBeUndefined()
+  })
+
+  it('removeCluster refuses if only 1 cluster remains', () => {
+    const store = useInputStore()
+    const id = store.clusters[0].id
+    store.removeCluster(id)
+    expect(store.clusters).toHaveLength(1)  // unchanged
+  })
+
+  it('updateCluster mutates the target cluster field', () => {
+    const store = useInputStore()
+    const id = store.clusters[0].id
+    store.updateCluster(id, { topology: 'sno' })
+    expect(store.clusters[0].topology).toBe('sno')
+  })
+})
+```
+
+**src/stores/uiStore.test.ts** (replace Wave-0 stub):
+```typescript
+/// <reference types="vitest/globals" />
+import { describe, it, expect, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { useUiStore } from './uiStore'
+
+describe('uiStore', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('initializes wizard step at 1', () => {
+    const store = useUiStore()
+    expect(store.currentWizardStep).toBe(1)
+  })
+
+  it('setWizardStep(4) sets step to 4 (os-sizer has 4 steps, not 3)', () => {
+    const store = useUiStore()
+    store.setWizardStep(4)
+    expect(store.currentWizardStep).toBe(4)
+  })
+
+  it('setWizardStep(3) sets step to 3', () => {
+    const store = useUiStore()
+    store.setWizardStep(3)
+    expect(store.currentWizardStep).toBe(3)
+  })
+
+  it('confirmTopology() sets topologyConfirmed to true', () => {
+    const store = useUiStore()
+    expect(store.topologyConfirmed).toBe(false)
+    store.confirmTopology()
+    expect(store.topologyConfirmed).toBe(true)
+  })
+})
+```
+
+**src/stores/calculationStore.test.ts** (replace Wave-0 stub):
+```typescript
+/// <reference types="vitest/globals" />
+import { describe, it, expect, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+import { useInputStore } from './inputStore'
+import { useCalculationStore } from './calculationStore'
+
+describe('calculationStore', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('clusterResults returns one result per cluster', () => {
+    const input = useInputStore()
+    const calc = useCalculationStore()
+    expect(calc.clusterResults).toHaveLength(1)
+    input.addCluster()
+    expect(calc.clusterResults).toHaveLength(2)
+  })
+
+  it('clusterResults.id matches the corresponding cluster.id', () => {
+    const input = useInputStore()
+    const calc = useCalculationStore()
+    expect(calc.clusterResults[0].id).toBe(input.clusters[0].id)
+  })
+})
+```
+
+After writing all files, run tests to verify GREEN:
+```bash
+cd /Users/fjacquet/Projects/os-sizer && npm run test
+```
+Expected output: "9 passed" (or similar count — 5 inputStore + 4 uiStore + 2 calculationStore).
+
+Also verify no ref() in calculationStore:
+```bash
+grep "ref(" /Users/fjacquet/Projects/os-sizer/src/stores/calculationStore.ts
+```
+Should return empty.
+
+Verify useInputStore called at top level (not inside computed):
+```bash
+grep -n "useInputStore" /Users/fjacquet/Projects/os-sizer/src/stores/calculationStore.ts
+```
+Should show `const input = useInputStore()` on a top-level line (not indented inside a computed callback).
+  </action>
+
+  <verify>
+    <automated>cd /Users/fjacquet/Projects/os-sizer && npm run test && npm run type-check</automated>
+  </verify>
+
+  <acceptance_criteria>
+    - `npm run test` exits 0 with at least 11 tests passing
+    - `npm run type-check` exits 0
+    - `grep "ref<1 | 2 | 3 | 4>" src/stores/uiStore.ts` finds a match
+    - `grep "ref(" src/stores/calculationStore.ts` returns empty (zero ref() in calculationStore)
+    - `grep "ref<ClusterConfig\[\]>" src/stores/inputStore.ts` finds a match
+    - `grep "const input = useInputStore()" src/stores/calculationStore.ts` finds a match at top level
+    - `grep "reactive(" src/stores/inputStore.ts` returns empty (no reactive arrays)
+    - `grep "\$patch" src/stores/inputStore.ts` returns empty (no $patch usage)
+    - `grep "Object.assign" src/stores/inputStore.ts` finds a match (direct mutation pattern)
+    - `grep "from 'vue'" src/engine/types.ts` returns empty
+  </acceptance_criteria>
+
+  <done>All three Pinia stores written with correct patterns. 11+ tests passing. calculationStore has zero ref(). uiStore wizard step typed as 1|2|3|4. useInputStore called at top level of calculationStore.</done>
+</task>
+
+</tasks>
+
+<verification>
+After both tasks complete:
+
+```bash
+cd /Users/fjacquet/Projects/os-sizer
+npm run test && npm run type-check
+```
+
+Structural checks:
+- `grep "ref<1 | 2 | 3 | 4>" src/stores/uiStore.ts` — confirms 4-step wizard type
+- `grep "ref(" src/stores/calculationStore.ts` — must return empty (CALC-02)
+- `grep "from 'vue'" src/engine/types.ts` — must return empty (CALC-01)
+- `grep "reactive(" src/stores/inputStore.ts` — must return empty
+</verification>
+
+<success_criteria>
+- npm run test exits 0 with all store tests passing
+- npm run type-check exits 0
+- inputStore uses ref<ClusterConfig[]> not reactive([])
+- calculationStore contains zero ref() — only computed()
+- uiStore wizard step typed as 1|2|3|4
+- useInputStore() called at top level of calculationStore (not inside computed)
+- No Vue imports in src/engine/ files
+</success_criteria>
+
+<output>
+After completion, create `/Users/fjacquet/Projects/os-sizer/.planning/phases/01-project-foundation/01-02-stores-SUMMARY.md`
+</output>
