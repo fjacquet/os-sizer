@@ -36,9 +36,9 @@
 
 ### Sizing Engine — Architecture Recommendation
 
-- [ ] **REC-01**: Recommendation engine takes user constraints and returns ranked topology suggestions with reasoning
-- [ ] **REC-02**: Constraints that drive recommendations: HA requirement, node budget, environment type (edge/datacenter/cloud), connectivity (air-gapped), workload size
-- [ ] **REC-03**: Each recommendation includes a short human-readable justification (i18n)
+- [x] **REC-01**: Recommendation engine takes user constraints and returns ranked topology suggestions with reasoning
+- [x] **REC-02**: Constraints that drive recommendations: HA requirement, node budget, environment type (edge/datacenter/cloud), connectivity (air-gapped), workload size
+- [x] **REC-03**: Each recommendation includes a short human-readable justification (i18n)
 
 ### Input Form — Wizard
 

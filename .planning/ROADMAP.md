@@ -38,10 +38,10 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Core types, constants, defaults, barrel index, Wave-0 test stubs
-- [ ] 02-02-PLAN.md — CP sizing, allocatable RAM, worker count, infra node formulas (TDD)
+- [x] 02-02-PLAN.md — CP sizing, allocatable RAM, worker count, infra node formulas (TDD)
 - [ ] 02-03-PLAN.md — 8 topology calculator functions + dispatcher (TDD)
 - [ ] 02-04-PLAN.md — ODF, infra node, RHACM add-on calculators (TDD)
-- [ ] 02-05-PLAN.md — Recommendation engine: constraint-to-topology ranking (TDD)
+- [x] 02-05-PLAN.md — Recommendation engine: constraint-to-topology ranking (TDD)
 - [ ] 02-06-PLAN.md — Validation module, complete test coverage, zero-Vue enforcement
 
 ### Success Criteria
