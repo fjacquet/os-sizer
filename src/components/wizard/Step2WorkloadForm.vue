@@ -5,6 +5,7 @@ import { useInputStore } from '@/stores/inputStore'
 import { createDefaultClusterConfig } from '@/engine/defaults'
 import { WorkloadSchema } from '@/schemas/workloadSchema'
 import NumberSliderInput from '@/components/shared/NumberSliderInput.vue'
+import { MIG_PROFILES } from '@/engine/constants'
 
 const { t } = useI18n()
 const input = useInputStore()
@@ -45,6 +46,17 @@ const odfEnabled = addOnField('odfEnabled')
 const infraNodesEnabled = addOnField('infraNodesEnabled')
 const rhacmEnabled = addOnField('rhacmEnabled')
 const rhacmManagedClusters = addOnField('rhacmManagedClusters')
+const virtEnabled = addOnField('virtEnabled')
+const gpuEnabled = addOnField('gpuEnabled')
+const gpuNodeCount = addOnField('gpuNodeCount')
+const gpuMode = addOnField('gpuMode')
+const gpuModel = addOnField('gpuModel')
+const migProfile = addOnField('migProfile')
+const rhoaiEnabled = addOnField('rhoaiEnabled')
+
+const availableMigProfiles = computed(() =>
+  gpuModel.value ? Object.keys(MIG_PROFILES[gpuModel.value as string] ?? {}) : []
+)
 
 const validationErrors = ref<string[]>([])
 
@@ -170,6 +182,132 @@ defineExpose({ validate })
             :step="1"
           />
         </div>
+        <!-- OpenShift Virtualization add-on (VIRT-01) -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            :checked="virtEnabled as boolean"
+            :aria-label="t('workload.virtAddon')"
+            class="w-4 h-4 accent-blue-600"
+            @change="virtEnabled = ($event.target as HTMLInputElement).checked"
+          />
+          <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.virtAddon') }}</span>
+        </label>
+        <!-- GPU Node Pool add-on (GPU-01) -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            :checked="gpuEnabled as boolean"
+            :aria-label="t('workload.gpuNodePool')"
+            class="w-4 h-4 accent-blue-600"
+            @change="gpuEnabled = ($event.target as HTMLInputElement).checked"
+          />
+          <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.gpuNodePool') }}</span>
+        </label>
+        <!-- GPU sub-inputs revealed when gpuEnabled -->
+        <div v-if="gpuEnabled" class="ml-6 mt-2 space-y-3">
+          <NumberSliderInput
+            :model-value="gpuNodeCount as number"
+            @update:model-value="(val: number) => { gpuNodeCount = val }"
+            :label="t('workload.gpuNodeCount')"
+            :min="1"
+            :max="32"
+            :step="1"
+          />
+          <!-- GPU Mode select (GPU-02) -->
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('workload.gpuMode') }}</label>
+            <select
+              :value="gpuMode as string"
+              :aria-label="t('workload.gpuMode')"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              @change="gpuMode = ($event.target as HTMLSelectElement).value"
+            >
+              <option value="container">{{ t('gpu.modeContainer') }}</option>
+              <option value="passthrough">{{ t('gpu.modePassthrough') }}</option>
+              <option value="vgpu">{{ t('gpu.modeVgpu') }}</option>
+            </select>
+          </div>
+          <!-- GPU Model select -->
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('workload.gpuModel') }}</label>
+            <select
+              :value="gpuModel as string"
+              :aria-label="t('workload.gpuModel')"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              @change="gpuModel = ($event.target as HTMLSelectElement).value"
+            >
+              <option value="A100-40GB">A100-40GB</option>
+              <option value="A100-80GB">A100-80GB</option>
+              <option value="H100-80GB">H100-80GB</option>
+            </select>
+          </div>
+          <!-- MIG Profile cascade select (GPU-04) -->
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('workload.migProfile') }}</label>
+            <select
+              :value="migProfile as string"
+              :aria-label="t('workload.migProfile')"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              @change="migProfile = ($event.target as HTMLSelectElement).value"
+            >
+              <option value="">{{ t('gpu.migNone') }}</option>
+              <option v-for="profile in availableMigProfiles" :key="profile" :value="profile">{{ profile }}</option>
+            </select>
+          </div>
+          <!-- GPU Passthrough live-migration warning (GPU-02 pitfall) -->
+          <div
+            v-if="gpuMode === 'passthrough'"
+            class="p-2 rounded border text-xs bg-amber-50 dark:bg-amber-900/30 border-amber-400 dark:border-amber-700 text-amber-800 dark:text-amber-300"
+            role="alert"
+          >
+            {{ t('warnings.gpu.passthroughBlocksLiveMigration') }}
+          </div>
+          <!-- vGPU density reference table (GPU-05) — only when vgpu mode selected -->
+          <div v-if="gpuMode === 'vgpu'" class="mt-2 space-y-1">
+            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ t('gpu.densityTableTitle') }}</p>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs border-collapse border border-gray-200 dark:border-gray-600">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th class="px-2 py-1 border border-gray-200 dark:border-gray-600 text-left">GPU</th>
+                    <th class="px-2 py-1 border border-gray-200 dark:border-gray-600 text-left">Profile</th>
+                    <th class="px-2 py-1 border border-gray-200 dark:border-gray-600 text-right">Instances</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(instances, profile) in MIG_PROFILES['A100-40GB']" :key="`a100-40-${profile}`">
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400">A100-40GB</td>
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 font-mono">{{ profile }}</td>
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 font-mono text-right">{{ instances }}</td>
+                  </tr>
+                  <tr v-for="(instances, profile) in MIG_PROFILES['A100-80GB']" :key="`a100-80-${profile}`">
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400">A100-80GB</td>
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 font-mono">{{ profile }}</td>
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 font-mono text-right">{{ instances }}</td>
+                  </tr>
+                  <tr v-for="(instances, profile) in MIG_PROFILES['H100-80GB']" :key="`h100-${profile}`">
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400">H100-80GB</td>
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 font-mono">{{ profile }}</td>
+                    <td class="px-2 py-1 border border-gray-200 dark:border-gray-600 font-mono text-right">{{ instances }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 italic">{{ t('gpu.densityNote') }}</p>
+          </div>
+        </div>
+        <!-- RHOAI add-on (RHOAI-01) -->
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            :checked="rhoaiEnabled as boolean"
+            :aria-label="t('workload.rhoaiAddon')"
+            class="w-4 h-4 accent-blue-600"
+            @change="rhoaiEnabled = ($event.target as HTMLInputElement).checked"
+          />
+          <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.rhoaiAddon') }}</span>
+        </label>
       </div>
     </div>
 
