@@ -59,20 +59,20 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| VIRT-01 | TBD | — |
-| VIRT-02 | TBD | — |
-| VIRT-03 | TBD | — |
-| VIRT-04 | TBD | — |
-| GPU-01 | TBD | — |
-| GPU-02 | TBD | — |
-| GPU-03 | TBD | — |
-| GPU-04 | TBD | — |
-| GPU-05 | TBD | — |
-| RHOAI-01 | TBD | — |
-| RHOAI-02 | TBD | — |
-| RHOAI-03 | TBD | — |
-| RHOAI-04 | TBD | — |
-| SNO-01 | TBD | — |
-| WARN-01 | TBD | — |
-| WARN-02 | TBD | — |
-| WARN-03 | TBD | — |
+| VIRT-01 | Phase 12 | Pending |
+| VIRT-02 | Phase 9 | Pending |
+| VIRT-03 | Phase 12 | Pending |
+| VIRT-04 | Phase 9 | Pending |
+| GPU-01 | Phase 12 | Pending |
+| GPU-02 | Phase 12 | Pending |
+| GPU-03 | Phase 12 | Pending |
+| GPU-04 | Phase 12 | Pending |
+| GPU-05 | Phase 12 | Pending |
+| RHOAI-01 | Phase 12 | Pending |
+| RHOAI-02 | Phase 11 | Pending |
+| RHOAI-03 | Phase 11 | Pending |
+| RHOAI-04 | Phase 12 | Pending |
+| SNO-01 | Phase 9 | Pending |
+| WARN-01 | Phase 10 | Pending |
+| WARN-02 | Phase 9 | Pending |
+| WARN-03 | Phase 10 | Pending |

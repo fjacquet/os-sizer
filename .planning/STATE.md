@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: OpenShift Virtualization + AI Sizing
-current_phase: not_started
+current_phase: 9
 current_plan: —
-status: Defining requirements
+status: Roadmap created — ready for Phase 9 planning
 last_updated: "2026-04-01"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -16,22 +16,32 @@ progress:
 # Project State
 
 **Project:** os-sizer
-**Current Phase:** Not started (defining requirements)
+**Current Phase:** Phase 9 — Virt Engine Foundation (not started)
 **Current Plan:** —
 **Last Updated:** 2026-04-01
-**Last Activity:** 2026-04-01 — Milestone v2.0 started
+**Last Activity:** 2026-04-01 — v2.0 roadmap created (4 phases, 17 requirements mapped)
 
 ## Progress
 
 ```
-Status: Defining requirements for v2.0
+v2.0 Milestone: 0/4 phases complete
+████░░░░░░░░░░░░░░░░  0%
+
+Phase 9:  Virt Engine Foundation      [ Not started ]
+Phase 10: GPU Node Engine             [ Not started ]
+Phase 11: RHOAI Add-On Engine         [ Not started ]
+Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 ```
 
 ## Status
 
 - [x] v1.0 complete (8 phases, 186 tests, shipped 2026-04-01)
-- [ ] v2.0 requirements defined
-- [ ] v2.0 roadmap created
+- [x] v2.0 requirements defined (17 requirements: VIRT-01..04, GPU-01..05, RHOAI-01..04, SNO-01, WARN-01..03)
+- [x] v2.0 roadmap created (4 phases, 100% coverage)
+- [ ] Phase 9: Virt Engine Foundation
+- [ ] Phase 10: GPU Node Engine
+- [ ] Phase 11: RHOAI Add-On Engine
+- [ ] Phase 12: BoM, Exports, Wizard UI + i18n
 
 ## Decisions Made
 
@@ -59,6 +69,10 @@ Status: Defining requirements for v2.0
 - [Phase 08]: allocatableRamGB(32)=28.44 — inline constant in calcHCP replaced by formula call for engine consistency
 - [Phase 08]: calcHCP infraNodes branch added matching calcStandardHA pattern — HCP now supports infra nodes (RES-04)
 - [Phase 08]: calcTNA untouched — its infraNodes slot holds arbiter node with different semantics from infrastructure nodes
+- [v2.0 Roadmap]: coarse granularity applied — research 6-phase structure compressed to 4 phases by merging SNO-virt into Phase 9 and wizard/BoM/exports into Phase 12
+- [v2.0 Roadmap]: WARN-01 and WARN-03 co-located with GPU engine (Phase 10) to prevent silent-failure mode where calculator ships without its warnings
+- [v2.0 Roadmap]: WARN-02 co-located with virt engine (Phase 9) — RWX dependency belongs in the calculator, not UI
+- [v2.0 Roadmap]: Phase 12 marked UI hint=yes — contains all wizard inputs and BoM display work
 
 ## Key Context
 
@@ -67,6 +81,9 @@ Status: Defining requirements for v2.0
 - New additions vs vcf-sizer: jsPDF+jspdf-autotable (PDF), CSV export, IT+DE locales
 - Critical pitfall: vue-i18n VueI18nPlugin must NOT use `include` option (Vite 8 rolldown bug)
 - Architecture doc: docs/Architectures de déploiement OpenShift supportées.md
+- v2.0 critical pitfall: ClusterSizing type extension (gpuNodes: NodeSpec | null, virtStorageGB) MUST land in Phase 9 first commit before any calculator work
+- v2.0 pattern: calcVirt() and calcGpuNodes() follow post-dispatch add-on pattern identical to calcODF()/calcRHACM()
+- v2.0 research flag: RHOAI overhead constants (Phase 11) are MEDIUM confidence — validate 16 vCPU / 64 GB cluster minimum against RHOAI 3.x supported configs during Phase 11 planning
 
 ## Performance Metrics
 
