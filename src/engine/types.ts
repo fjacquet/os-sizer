@@ -35,6 +35,13 @@ export interface AddOnConfig {
   infraNodesEnabled: boolean  // default false
   rhacmEnabled: boolean       // default false
   rhacmManagedClusters: number // default 0
+  // Phase 9: OpenShift Virtualization
+  virtEnabled: boolean               // OpenShift Virtualization / CNV enabled
+  vmCount: number                    // total number of VMs to host (default 50)
+  vmsPerWorker: number               // target VM density per worker node (default 10)
+  virtAvgVmVcpu: number              // average vCPU count per VM (default 4)
+  virtAvgVmRamGB: number             // average RAM per VM in GB (default 8)
+  snoVirtMode: boolean               // SNO-with-Virt profile (SNO-01)
 }
 
 export interface ClusterConfig {
@@ -59,6 +66,9 @@ export interface ClusterSizing {
   infraNodes: NodeSpec | null
   odfNodes: NodeSpec | null
   rhacmWorkers: NodeSpec | null
+  virtWorkerNodes: NodeSpec | null  // Phase 9: dedicated VM-hosting worker pool
+  gpuNodes: NodeSpec | null         // Phase 9: placeholder for Phase 10 GPU calculator
+  virtStorageGB: number             // Phase 9: estimated storage budget for VM PVCs
   totals: { vcpu: number; ramGB: number; storageGB: number }
 }
 
@@ -81,7 +91,7 @@ export interface RecommendationConstraints {
   maxNodes: number | null
   airGapped: boolean
   estimatedWorkers: number
-  addOns: { odf: boolean; rhacm: boolean }
+  addOns: { odf: boolean; rhacm: boolean; virt: boolean }
 }
 
 export interface TopologyRecommendation {
