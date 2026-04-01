@@ -90,7 +90,7 @@ Plans:
   5. All new UI strings are present and translated in EN, FR, IT, and DE locale files with no missing keys at runtime
 **Plans**: 5 plans
 Plans:
-- [ ] 12-01-PLAN.md — ClusterSizing rhoaiOverhead + calcRHOAI update + i18n all keys (Wave 1)
+- [x] 12-01-PLAN.md — ClusterSizing rhoaiOverhead + calcRHOAI update + i18n all keys (Wave 1)
 - [ ] 12-02-PLAN.md — Step2 Wizard UI: Virt toggle, GPU toggle+sub-inputs, RHOAI toggle (Wave 2)
 - [ ] 12-03-PLAN.md — Step3 Wizard UI: Virt VM sizing sub-inputs, snoVirtMode toggle (Wave 2)
 - [ ] 12-04-PLAN.md — BoM + Exports: virtWorkerNodes/gpuNodes/rhoaiOverhead rows in all 4 artifacts (Wave 3)
@@ -112,7 +112,7 @@ Plans:
 | 9. Virt Engine Foundation | v2.0 | 4/4 | Complete   | 2026-04-01 |
 | 10. GPU Node Engine | v2.0 | 3/3 | Complete   | 2026-04-01 |
 | 11. RHOAI Add-On Engine | v2.0 | 3/3 | Complete   | 2026-04-01 |
-| 12. BoM, Exports, Wizard UI + i18n | v2.0 | 0/5 | Not started | — |
+| 12. BoM, Exports, Wizard UI + i18n | v2.0 | 1/5 | In Progress|  |
 
 ---
 *v1.0 archived: 2026-04-01*

@@ -5,13 +5,13 @@ milestone_name: — OpenShift Virtualization + AI Sizing
 current_phase: Phase 12 — BoM, Exports, Wizard UI + i18n (not started)
 current_plan: —
 status: Phase 12 planned — ready for execution
-last_updated: "2026-04-01T10:00:00Z"
+last_updated: "2026-04-01T09:57:28.103Z"
 last_activity: 2026-04-01 — Phase 11 RHOAI Add-On Engine verified complete (237 tests passing)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 15
+  completed_plans: 11
 ---
 
 # Project State
@@ -97,6 +97,8 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [Phase 11]: rhoaiEnabled added to totals recalc condition in calcCluster — ensures sizing.totals reflects RHOAI-mutated worker/infra values
 - [Phase Phase 11]: makeConfig() base fixture in calculators.test.ts extended with rhoaiEnabled:false — AddOnConfig requires it as non-optional boolean
 - [Phase Phase 11]: RHOAI constants tests use named RHOAI_WORKER_MIN_VCPU / RHOAI_WORKER_MIN_RAM_GB in assertions — enforce constant values, not inline literals
+- [Phase 12]: rhoaiOverhead required (not optional) on ClusterSizing — null sentinel forces all topology literals to explicitly acknowledge the field
+- [Phase 12]: calcRHOAI always sets rhoaiOverhead to RHOAI_INFRA_OVERHEAD constants when called — same constants regardless of infra vs worker path
 
 ## Key Context
 
@@ -137,3 +139,4 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 | Phase 11 P01 | 5 | 2 tasks | 4 files |
 | Phase 11 P02 | 8 min | 2 tasks | 4 files |
 | Phase 11 P03 | 4 | 2 tasks | 2 files |
+| Phase 12 P01 | 10 | 2 tasks | 8 files |
