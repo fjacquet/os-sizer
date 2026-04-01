@@ -5,13 +5,13 @@ milestone_name: — OpenShift Virtualization + AI Sizing
 current_phase: Phase 10 — GPU Node Engine (not started)
 current_plan: —
 status: Phase 10 planned — ready for execution
-last_updated: "2026-04-01T08:23:44.797Z"
+last_updated: "2026-04-01T08:28:59.934Z"
 last_activity: 2026-04-01 — Phase 9 Virt Engine Foundation verified complete (204 tests passing)
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -86,6 +86,9 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [Phase 10]: migProfile typed as string (not union) — valid values differ per GPU model; MIG_PROFILES table validates at runtime
 - [Phase 10]: gpuMode/gpuModel use as const in defaults.ts to satisfy TypeScript union narrowing without losing type safety
 - [Phase 10]: gpuNodeCount and gpuPerNode use Zod .min(1) — zero-node GPU pools are nonsensical; gpuEnabled:false disables the pool
+- [Phase 10]: calcGpuNodes count safety guard Math.max(gpuNodeCount,1) — zero-node GPU pools are nonsensical; gpuEnabled=false disables the pool
+- [Phase 10]: WARN-01 fires on passthrough regardless of virtEnabled — vfio-pci is a node-level hardware constraint affecting all VMs
+- [Phase 10]: WARN-03 checks migProfile!=='' + virtEnabled (NOT gpuMode=vgpu) — MIG+KubeVirt incompatibility is orthogonal to vGPU mode
 
 ## Key Context
 
@@ -120,3 +123,4 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 | Phase 09 P03 | 8 min | 2 tasks | 4 files |
 | Phase 09 P04 | 8 min | 3 tasks | 3 files |
 | Phase 10 P01 | 5 min | 2 tasks | 4 files |
+| Phase 10 P02 | 5 min | 2 tasks | 3 files |
