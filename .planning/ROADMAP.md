@@ -25,7 +25,7 @@
 
 - [x] **Phase 9: Virt Engine Foundation** - Extend types, implement calcVirt(), SNO-virt profile, and RWX storage warning (completed 2026-04-01)
 - [x] **Phase 10: GPU Node Engine** - Dedicated GPU node pool sizing with MIG profiles and passthrough/MIG-vGPU warnings (completed 2026-04-01)
-- [ ] **Phase 11: RHOAI Add-On Engine** - RHOAI operator overhead calculation and worker node floor enforcement
+- [x] **Phase 11: RHOAI Add-On Engine** - RHOAI operator overhead calculation and worker node floor enforcement (completed 2026-04-01)
 - [ ] **Phase 12: BoM, Exports, Wizard UI + i18n** - GPU and RHOAI rows in BoM/exports; wizard inputs for all new fields; all four locales
 
 ## Phase Details
@@ -76,7 +76,7 @@ Plans:
 Plans:
 - [x] 11-01-PLAN.md — Type Extension + RHOAI Constants (AddOnConfig rhoaiEnabled, four RHOAI_* constants, defaults, useUrlState schema)
 - [x] 11-02-PLAN.md — calcRHOAI() + Integration (addons.ts implementation, calcCluster() post-dispatch wiring, totals recalc)
-- [ ] 11-03-PLAN.md — Unit Tests (worker floor below/at/above minimum, SNO null-guard, infra overhead addend, constants verification)
+- [x] 11-03-PLAN.md — Unit Tests (worker floor below/at/above minimum, SNO null-guard, infra overhead addend, constants verification)
 
 ### Phase 12: BoM, Exports, Wizard UI + i18n
 **Goal**: All new v2.0 capabilities are accessible through the wizard, visible in the BoM, and included in all exports across all four locales
@@ -105,7 +105,7 @@ Plans:
 | 8. Engine Tech Debt | v1.0 | 1/1 | Complete | 2026-03-31 |
 | 9. Virt Engine Foundation | v2.0 | 4/4 | Complete   | 2026-04-01 |
 | 10. GPU Node Engine | v2.0 | 3/3 | Complete   | 2026-04-01 |
-| 11. RHOAI Add-On Engine | v2.0 | 2/3 | In Progress|  |
+| 11. RHOAI Add-On Engine | v2.0 | 3/3 | Complete   | 2026-04-01 |
 | 12. BoM, Exports, Wizard UI + i18n | v2.0 | 0/? | Not started | — |
 
 ---
