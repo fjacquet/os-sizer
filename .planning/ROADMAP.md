@@ -59,7 +59,7 @@ Plans:
   5. All GPU engine code compiles cleanly and is covered by Vitest tests for each GPU mode and each warning trigger condition
 **Plans**: 3 plans
 Plans:
-- [ ] 10-01-PLAN.md — Type Extension + GPU Constants (AddOnConfig GPU fields, MIG_PROFILES lookup, GPU_NODE_MIN_*, defaults, useUrlState schema)
+- [x] 10-01-PLAN.md — Type Extension + GPU Constants (AddOnConfig GPU fields, MIG_PROFILES lookup, GPU_NODE_MIN_*, defaults, useUrlState schema)
 - [ ] 10-02-PLAN.md — calcGpuNodes() + Integration (addons.ts implementation, calcCluster() post-dispatch wiring, WARN-01 + WARN-03 in validation.ts)
 - [ ] 10-03-PLAN.md — Unit Tests (calcGpuNodes(), MIG profile lookup, WARN-01 trigger, WARN-03 trigger, GPU mode coverage)
 
@@ -100,7 +100,7 @@ Plans:
 | 7. Wizard Component Tests | v1.0 | 1/1 | Complete | 2026-03-31 |
 | 8. Engine Tech Debt | v1.0 | 1/1 | Complete | 2026-03-31 |
 | 9. Virt Engine Foundation | v2.0 | 4/4 | Complete   | 2026-04-01 |
-| 10. GPU Node Engine | v2.0 | 0/3 | Not started | — |
+| 10. GPU Node Engine | v2.0 | 1/3 | In Progress|  |
 | 11. RHOAI Add-On Engine | v2.0 | 0/? | Not started | — |
 | 12. BoM, Exports, Wizard UI + i18n | v2.0 | 0/? | Not started | — |
 

@@ -33,9 +33,9 @@
 
 ### Validation Warnings (WARN)
 
-- [ ] **WARN-01**: System emits a `ValidationWarning` when GPU passthrough mode is active, informing that live migration is permanently blocked
+- [x] **WARN-01**: System emits a `ValidationWarning` when GPU passthrough mode is active, informing that live migration is permanently blocked
 - [x] **WARN-02**: System emits a `ValidationWarning` when virt topology is selected without ODF enabled, informing that RWX storage is required for live migration
-- [ ] **WARN-03**: System emits a `ValidationWarning` when MIG profile is combined with KubeVirt VMs, noting this combination is unsupported by the standard GPU Operator
+- [x] **WARN-03**: System emits a `ValidationWarning` when MIG profile is combined with KubeVirt VMs, noting this combination is unsupported by the standard GPU Operator
 
 ## Future Requirements (v2.1+)
 
@@ -73,6 +73,6 @@
 | RHOAI-03 | Phase 11 | Pending |
 | RHOAI-04 | Phase 12 | Pending |
 | SNO-01 | Phase 9 | Complete |
-| WARN-01 | Phase 10 | Pending |
+| WARN-01 | Phase 10 | Complete |
 | WARN-02 | Phase 9 | Complete |
-| WARN-03 | Phase 10 | Pending |
+| WARN-03 | Phase 10 | Complete |
