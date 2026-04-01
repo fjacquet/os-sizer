@@ -96,57 +96,69 @@ describe('calcRHOAI', () => {
   const baseInfra  = { count: 3, vcpu: 4, ramGB: 24, storageGB: 100 }
 
   it('lifts worker vcpu below floor to RHOAI_WORKER_MIN_VCPU (8)', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     calcRHOAI(sizing, false)
     expect(sizing.workerNodes!.vcpu).toBe(8)
     expect(sizing.workerNodes!.ramGB).toBe(32)
   })
 
   it('does not lower worker vcpu already at minimum (8 vCPU / 32 GB)', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     calcRHOAI(sizing, false)
     expect(sizing.workerNodes!.vcpu).toBe(8)
     expect(sizing.workerNodes!.ramGB).toBe(32)
   })
 
   it('does not lower worker vcpu above minimum (32 vCPU / 64 GB)', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { count: 3, vcpu: 32, ramGB: 64, storageGB: 100 }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { count: 3, vcpu: 32, ramGB: 64, storageGB: 100 }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     calcRHOAI(sizing, false)
     expect(sizing.workerNodes!.vcpu).toBe(32)
     expect(sizing.workerNodes!.ramGB).toBe(64)
   })
 
   it('is a no-op when workerNodes is null (SNO/compact-3node)', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: null, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: null, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     expect(() => calcRHOAI(sizing, false)).not.toThrow()
     expect(sizing.workerNodes).toBeNull()
   })
 
   it('adds infra overhead when infraNodesEnabled=true and infraNodes present (4 vcpu + 16 ramGB)', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: { ...baseInfra }, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: { ...baseInfra }, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     calcRHOAI(sizing, true)
     expect(sizing.infraNodes!.vcpu).toBe(8)    // 4 + RHOAI_INFRA_OVERHEAD_VCPU(4)
     expect(sizing.infraNodes!.ramGB).toBe(40)  // 24 + RHOAI_INFRA_OVERHEAD_RAM_GB(16)
   })
 
   it('skips infra overhead when infraNodesEnabled=false', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: { ...baseInfra }, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: { ...baseInfra }, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     calcRHOAI(sizing, false)
     expect(sizing.infraNodes!.vcpu).toBe(4)    // unchanged
     expect(sizing.infraNodes!.ramGB).toBe(24)  // unchanged
   })
 
   it('is a no-op for infra when infraNodesEnabled=true but infraNodes is null', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     expect(() => calcRHOAI(sizing, true)).not.toThrow()
     expect(sizing.infraNodes).toBeNull()
   })
 
   it('preserves count and storageGB unchanged on worker nodes', () => {
-    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
     calcRHOAI(sizing, false)
     expect(sizing.workerNodes!.count).toBe(3)
     expect(sizing.workerNodes!.storageGB).toBe(100)
+  })
+
+  it('sets rhoaiOverhead to { vcpu: 4, ramGB: 16 } when infraNodesEnabled=true and infraNodes present', () => {
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: { ...baseInfra }, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    calcRHOAI(sizing, true)
+    expect(sizing.rhoaiOverhead).toEqual({ vcpu: 4, ramGB: 16 })
+  })
+
+  it('sets rhoaiOverhead to { vcpu: 4, ramGB: 16 } when infraNodesEnabled=false (overhead on workers)', () => {
+    const sizing = { masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 100 }, workerNodes: { ...baseWorker }, infraNodes: null, odfNodes: null, rhacmWorkers: null, virtWorkerNodes: null, gpuNodes: null, virtStorageGB: 0, rhoaiOverhead: null, totals: { vcpu: 0, ramGB: 0, storageGB: 0 } }
+    calcRHOAI(sizing, false)
+    expect(sizing.rhoaiOverhead).toEqual({ vcpu: 4, ramGB: 16 })
   })
 })
 

@@ -56,6 +56,7 @@ function emptySizing(masterNodes: NodeSpec): ClusterSizing {
     virtWorkerNodes: null,
     gpuNodes: null,
     virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: sumTotals([masterNodes]),
   }
 }
@@ -117,6 +118,7 @@ export function calcStandardHA(config: ClusterConfig): { sizing: ClusterSizing; 
     virtWorkerNodes: null,
     gpuNodes: null,
     virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: sumTotals([masterNodes, workerNodes, infraNodes]),
   }
 
@@ -143,6 +145,7 @@ export function calcCompact3Node(_config: ClusterConfig): { sizing: ClusterSizin
     virtWorkerNodes: null,
     gpuNodes: null,
     virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: sumTotals([masterNodes]),
   }
 
@@ -219,6 +222,7 @@ export function calcTNA(_config: ClusterConfig): { sizing: ClusterSizing; warnin
     virtWorkerNodes: null,
     gpuNodes: null,
     virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: sumTotals([cpNodes, arbiterNode]),
   }
 
@@ -253,6 +257,7 @@ export function calcTNF(_config: ClusterConfig): { sizing: ClusterSizing; warnin
     virtWorkerNodes: null,
     gpuNodes: null,
     virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: sumTotals([masterNodes]),
   }
 
@@ -339,6 +344,7 @@ export function calcHCP(config: ClusterConfig): { sizing: ClusterSizing; warning
     virtWorkerNodes: null,
     gpuNodes: null,
     virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: sumTotals([masterNodes, workerNodes, infraNodes]),
   }
 
@@ -400,6 +406,7 @@ export function calcManagedCloud(_config: ClusterConfig): { sizing: ClusterSizin
     virtWorkerNodes: null,
     gpuNodes: null,
     virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: { vcpu: 0, ramGB: 0, storageGB: 0 },
   }
 

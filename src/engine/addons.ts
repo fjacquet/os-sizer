@@ -202,4 +202,12 @@ export function calcRHOAI(sizing: ClusterSizing, infraNodesEnabled: boolean): vo
       ramGB: sizing.infraNodes.ramGB + RHOAI_INFRA_OVERHEAD_RAM_GB,
     }
   }
+
+  // RHOAI-04: record the overhead addend for BoM display (Phase 12 BomTable contract)
+  // Always set when calcRHOAI is called (i.e. rhoaiEnabled=true) — constants represent
+  // the addend amounts regardless of whether they landed on infra or worker nodes.
+  sizing.rhoaiOverhead = {
+    vcpu: RHOAI_INFRA_OVERHEAD_VCPU,
+    ramGB: RHOAI_INFRA_OVERHEAD_RAM_GB,
+  }
 }
