@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { calcODF, calcInfraNodes, calcRHACM } from './addons'
+import { calcODF, calcInfraNodes, calcRHACM, calcVirt } from './addons'
 
 describe('calcODF', () => {
   it('0 extra OSD: 3 nodes x 16 vCPU / 64 GB', () => {
@@ -36,5 +36,28 @@ describe('calcRHACM', () => {
 
   it('500 clusters -> 3 x 16 vCPU / 64 GB', () => {
     expect(calcRHACM(500)).toEqual({ count: 3, vcpu: 16, ramGB: 64, storageGB: 100 })
+  })
+})
+
+describe('calcVirt', () => {
+  it('worker count exceeds raw density minimum (includes live migration reserve)', () => {
+    // raw density = ceil(10/10) = 1, but min=3 and +1 reserve → expect >=4
+    const result = calcVirt(10, 10, 4, 8, 16, 32)
+    expect(result.count).toBeGreaterThan(1)
+  })
+
+  it('per-node vCPU includes KubeVirt overhead: nodeVcpu + 2', () => {
+    const result = calcVirt(10, 10, 4, 8, 16, 32)
+    expect(result.vcpu).toBe(18)   // 16 nodeVcpu + 2 VIRT_OVERHEAD_CPU_PER_NODE
+  })
+
+  it('minimum 3 workers + 1 live migration reserve enforced even for 1 VM', () => {
+    const result = calcVirt(1, 10, 4, 8, 16, 32)
+    expect(result.count).toBeGreaterThanOrEqual(4)
+  })
+
+  it('density constraint applied: 100 VMs at 10/worker requires >=10 workers', () => {
+    const result = calcVirt(100, 10, 4, 8, 16, 32)
+    expect(result.count).toBeGreaterThanOrEqual(10)
   })
 })
