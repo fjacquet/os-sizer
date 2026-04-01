@@ -40,5 +40,28 @@ export const useUiStore = defineStore('ui', () => {
     topologyConfirmed.value = true
   }
 
-  return { locale, setLocale, currentWizardStep, setWizardStep, topologyConfirmed, confirmTopology }
+  // Dark mode: respect OS preference, persist manual override to localStorage
+  const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined'
+  const stored = isBrowser ? localStorage.getItem('os-sizer-dark-mode') : null
+  const prefersDark = isBrowser ? window.matchMedia('(prefers-color-scheme: dark)').matches : false
+  const isDarkMode = ref<boolean>(stored !== null ? stored === 'true' : prefersDark)
+
+  function setDarkMode(value: boolean): void {
+    isDarkMode.value = value
+    if (isBrowser) {
+      localStorage.setItem('os-sizer-dark-mode', String(value))
+      document.documentElement.classList.toggle('dark', value)
+    }
+  }
+
+  return {
+    locale,
+    setLocale,
+    currentWizardStep,
+    setWizardStep,
+    topologyConfirmed,
+    confirmTopology,
+    isDarkMode,
+    setDarkMode,
+  }
 })
