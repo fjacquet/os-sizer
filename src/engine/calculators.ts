@@ -3,7 +3,7 @@
 // Source: .planning/research/hardware-sizing.md
 
 import type { ClusterConfig, ClusterSizing, NodeSpec, ValidationWarning } from './types'
-import { calcODF, calcRHACM, calcVirt } from './addons'
+import { calcODF, calcRHACM, calcVirt, calcGpuNodes } from './addons'
 import {
   CP_MIN,
   WORKER_MIN,
@@ -19,6 +19,7 @@ import {
   HCP_CPU_PER_1000_QPS,
   HCP_RAM_PER_1000_QPS,
   MICROSHIFT_SYS_MIN,
+  GPU_NODE_MIN_STORAGE_GB,
 } from './constants'
 import { cpSizing, workerCount as calcWorkerCount, infraNodeSizing, allocatableRamGB } from './formulas'
 
@@ -460,8 +461,18 @@ export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; war
       (sizing.virtWorkerNodes.count) * config.addOns.vmsPerWorker * config.addOns.virtAvgVmRamGB
   }
 
+  // Phase 10: GPU node pool
+  if (config.addOns.gpuEnabled) {
+    sizing.gpuNodes = calcGpuNodes(
+      config.addOns.gpuNodeCount,
+      config.workload.nodeVcpu,
+      config.workload.nodeRamGB,
+      GPU_NODE_MIN_STORAGE_GB,
+    )
+  }
+
   // Recalculate totals to include add-on nodes
-  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled || config.addOns.virtEnabled) {
+  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled || config.addOns.virtEnabled || config.addOns.gpuEnabled) {
     sizing.totals = sumTotals([
       sizing.masterNodes,
       sizing.workerNodes,
@@ -469,6 +480,7 @@ export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; war
       sizing.odfNodes,
       sizing.rhacmWorkers,
       sizing.virtWorkerNodes,
+      sizing.gpuNodes,
     ])
   }
 

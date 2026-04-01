@@ -55,5 +55,27 @@ export function validateInputs(config: ClusterConfig): ValidationWarning[] {
     })
   }
 
+  // WARN-01: GPU passthrough permanently blocks live migration on affected nodes.
+  // vfio-pci binds the PCI device exclusively to a VM — VMs with PCIDevice passthrough cannot be live-migrated.
+  // Source: KubeVirt host devices guide + Harvester live migration docs
+  if (config.addOns.gpuEnabled && config.addOns.gpuMode === 'passthrough') {
+    warnings.push({
+      code: 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION',
+      severity: 'warning',
+      messageKey: 'warnings.gpu.passthroughBlocksLiveMigration',
+    })
+  }
+
+  // WARN-03: MIG-backed vGPU combined with KubeVirt VMs is unsupported by the standard GPU Operator.
+  // Source: NVIDIA GPU Operator + OpenShift Virtualization docs (24.9.2): "MIG-backed vGPUs are not supported"
+  // Red Hat Customer Portal article 7115541 describes a workaround using a custom DaemonSet.
+  if (config.addOns.gpuEnabled && config.addOns.migProfile !== '' && config.addOns.virtEnabled) {
+    warnings.push({
+      code: 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED',
+      severity: 'warning',
+      messageKey: 'warnings.gpu.migProfileWithKubevirtUnsupported',
+    })
+  }
+
   return warnings
 }
