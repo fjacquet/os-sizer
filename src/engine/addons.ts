@@ -15,6 +15,9 @@ import {
   VIRT_VM_OVERHEAD_GUEST_RAM_RATIO,
   TARGET_UTILIZATION,
   WORKER_MIN,
+  GPU_NODE_MIN_VCPU,
+  GPU_NODE_MIN_RAM_GB,
+  GPU_NODE_MIN_STORAGE_GB,
 } from './constants'
 import { infraNodeSizing, allocatableRamGB } from './formulas'
 
@@ -131,5 +134,31 @@ export function calcVirt(
     vcpu: nodeVcpu + VIRT_OVERHEAD_CPU_PER_NODE,   // per-node KubeVirt CPU overhead baked in
     ramGB: Math.max(nodeRamGB, WORKER_MIN.ramGB),
     storageGB: WORKER_MIN.storageGB,
+  }
+}
+
+/**
+ * Calculate GPU node pool spec.
+ *
+ * GPU node count is USER-SPECIFIED (not formula-derived — unlike calcVirt).
+ * The function enforces hardware minimums so nodes are never undersized.
+ *
+ * @param gpuNodeCount  - user-specified number of GPU nodes in the pool
+ * @param nodeVcpu      - worker node vCPU count (from WorkloadProfile)
+ * @param nodeRamGB     - worker node RAM in GiB (from WorkloadProfile)
+ * @param nodeStorageGB - storage per node in GiB
+ * @returns NodeSpec for the GPU node pool
+ */
+export function calcGpuNodes(
+  gpuNodeCount: number,
+  nodeVcpu: number,
+  nodeRamGB: number,
+  nodeStorageGB: number,
+): NodeSpec {
+  return {
+    count: Math.max(gpuNodeCount, 1),
+    vcpu: Math.max(nodeVcpu, GPU_NODE_MIN_VCPU),
+    ramGB: Math.max(nodeRamGB, GPU_NODE_MIN_RAM_GB),
+    storageGB: Math.max(nodeStorageGB, GPU_NODE_MIN_STORAGE_GB),
   }
 }
