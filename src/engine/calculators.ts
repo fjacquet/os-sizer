@@ -10,6 +10,7 @@ import {
   SNO_STD_MIN,
   SNO_EDGE_MIN,
   SNO_TELECOM_MIN,
+  SNO_VIRT_MIN,
   TNA_CP_MIN,
   TNA_ARBITER_MIN,
   TNF_CP_MIN,
@@ -163,11 +164,27 @@ export function calcSNO(config: ClusterConfig): { sizing: ClusterSizing; warning
   }
 
   const base = profileMap[config.snoProfile] ?? SNO_STD_MIN
-  const masterNodes: NodeSpec = { ...base }
+
+  // SNO-01: override minimums when virt is enabled on SNO
+  // SNO_VIRT_MIN (14 vCPU / 32 GB / 170 GB) applies regardless of snoProfile
+  const spec = config.addOns.snoVirtMode ? SNO_VIRT_MIN : base
+  const masterNodes: NodeSpec = { ...spec }
 
   const sizing: ClusterSizing = emptySizing(masterNodes)
 
-  return { sizing, warnings: [] }
+  const warnings: ValidationWarning[] = []
+  if (config.addOns.snoVirtMode) {
+    // SNO_VIRT_NO_HA: implicit behavioral constraint of SNO-01.
+    // Signals that live migration and HA are unavailable on single-node deployments.
+    // Traceability: SNO-01 (hardware minimum requirement) → SNO_VIRT_NO_HA (user-facing signal).
+    warnings.push({
+      code: 'SNO_VIRT_NO_HA',
+      severity: 'warning',
+      messageKey: 'warnings.sno.virtNoHa',
+    })
+  }
+
+  return { sizing, warnings }
 }
 
 // ---------------------------------------------------------------------------

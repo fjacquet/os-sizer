@@ -37,7 +37,17 @@ function makeConfig(overrides: Partial<ClusterConfig> = {}): ClusterConfig {
       infraNodesEnabled: false,
       rhacmEnabled: false,
       rhacmManagedClusters: 0,
+      virtEnabled: false,
+      vmCount: 0,
+      vmsPerWorker: 10,
+      virtAvgVmVcpu: 4,
+      virtAvgVmRamGB: 8,
+      snoVirtMode: false,
     },
+    environment: 'datacenter',
+    haRequired: true,
+    airGapped: false,
+    maxNodes: null,
     ...overrides,
   }
 }
@@ -159,6 +169,38 @@ describe('calcSNO', () => {
     const config = makeConfig({ topology: 'sno' })
     const { sizing } = calcSNO(config)
     expect(sizing.workerNodes).toBeNull()
+  })
+
+  // SNO-01: snoVirtMode overrides hardware minimums
+  it('snoVirtMode=true: 14 vCPU / 32 GB / 170 GB (SNO_VIRT_MIN)', () => {
+    const config = makeConfig({ topology: 'sno', addOns: { odfEnabled: false, odfExtraOsdCount: 0, infraNodesEnabled: false, rhacmEnabled: false, rhacmManagedClusters: 0, virtEnabled: false, vmCount: 0, vmsPerWorker: 10, virtAvgVmVcpu: 4, virtAvgVmRamGB: 8, snoVirtMode: true } })
+    const { sizing } = calcSNO(config)
+    expect(sizing.masterNodes).toMatchObject({ count: 1, vcpu: 14, ramGB: 32, storageGB: 170 })
+  })
+
+  it('snoVirtMode=true: emits SNO_VIRT_NO_HA warning', () => {
+    const config = makeConfig({ topology: 'sno', addOns: { odfEnabled: false, odfExtraOsdCount: 0, infraNodesEnabled: false, rhacmEnabled: false, rhacmManagedClusters: 0, virtEnabled: false, vmCount: 0, vmsPerWorker: 10, virtAvgVmVcpu: 4, virtAvgVmRamGB: 8, snoVirtMode: true } })
+    const { warnings } = calcSNO(config)
+    expect(warnings.some((w) => w.code === 'SNO_VIRT_NO_HA')).toBe(true)
+  })
+
+  it('snoVirtMode=false, standard profile: 8 vCPU / 16 GB / 120 GB (unchanged)', () => {
+    const config = makeConfig({ topology: 'sno', snoProfile: 'standard' })
+    const { sizing, warnings } = calcSNO(config)
+    expect(sizing.masterNodes).toMatchObject({ count: 1, vcpu: 8, ramGB: 16, storageGB: 120 })
+    expect(warnings).toHaveLength(0)
+  })
+
+  it('snoVirtMode=false, edge profile: 8 vCPU / 32 GB (unchanged)', () => {
+    const config = makeConfig({ topology: 'sno', snoProfile: 'edge' })
+    const { sizing } = calcSNO(config)
+    expect(sizing.masterNodes).toMatchObject({ vcpu: 8, ramGB: 32 })
+  })
+
+  it('snoVirtMode=false, telecom profile: 24 vCPU (unchanged)', () => {
+    const config = makeConfig({ topology: 'sno', snoProfile: 'telecom-vdu' })
+    const { sizing } = calcSNO(config)
+    expect(sizing.masterNodes.vcpu).toBe(24)
   })
 })
 
