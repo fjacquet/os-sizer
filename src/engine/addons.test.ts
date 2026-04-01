@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { calcODF, calcInfraNodes, calcRHACM, calcVirt } from './addons'
+import { calcODF, calcInfraNodes, calcRHACM, calcVirt, calcGpuNodes } from './addons'
+import { MIG_PROFILES } from './constants'
 
 describe('calcODF', () => {
   it('0 extra OSD: 3 nodes x 16 vCPU / 64 GB', () => {
@@ -59,5 +60,51 @@ describe('calcVirt', () => {
   it('density constraint applied: 100 VMs at 10/worker requires >=10 workers', () => {
     const result = calcVirt(100, 10, 4, 8, 16, 32)
     expect(result.count).toBeGreaterThanOrEqual(10)
+  })
+})
+
+describe('calcGpuNodes', () => {
+  it('node count below 1 is clamped to 1', () => {
+    const result = calcGpuNodes(0, 16, 64, 200)
+    expect(result.count).toBe(1)
+  })
+
+  it('nodeVcpu below GPU_NODE_MIN_VCPU is lifted to 16', () => {
+    const result = calcGpuNodes(3, 8, 16, 200)
+    expect(result.vcpu).toBe(16)
+    expect(result.ramGB).toBe(64)
+  })
+
+  it('nodeVcpu and nodeRamGB above minimums are returned as-is', () => {
+    const result = calcGpuNodes(3, 32, 128, 200)
+    expect(result.vcpu).toBe(32)
+    expect(result.ramGB).toBe(128)
+  })
+
+  it('returns exact NodeSpec at minimum boundary', () => {
+    const result = calcGpuNodes(3, 16, 64, 200)
+    expect(result).toEqual({ count: 3, vcpu: 16, ramGB: 64, storageGB: 200 })
+  })
+})
+
+describe('MIG_PROFILES — A100-40GB lookup', () => {
+  it('1g.5gb resolves to 7 instances', () => {
+    expect(MIG_PROFILES['A100-40GB']['1g.5gb']).toBe(7)
+  })
+
+  it('2g.10gb resolves to 3 instances', () => {
+    expect(MIG_PROFILES['A100-40GB']['2g.10gb']).toBe(3)
+  })
+
+  it('3g.20gb resolves to 2 instances', () => {
+    expect(MIG_PROFILES['A100-40GB']['3g.20gb']).toBe(2)
+  })
+
+  it('7g.40gb resolves to 1 instance (whole GPU in MIG mode)', () => {
+    expect(MIG_PROFILES['A100-40GB']['7g.40gb']).toBe(1)
+  })
+
+  it('H100-80GB has 4 profile entries matching A100-80GB structure', () => {
+    expect(Object.keys(MIG_PROFILES['H100-80GB']).length).toBe(4)
   })
 })
