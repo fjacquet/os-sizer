@@ -54,3 +54,21 @@ export const INFRA_SIZING_TABLE = [
 export const TARGET_UTILIZATION = 0.70
 export const MAX_PODS_PER_NODE = 200
 export const CP_SAFETY_FACTOR = 0.60  // max 60% CP utilization
+
+// KubeVirt worker node per-node CPU overhead
+// Source: Red Hat OpenShift Virtualization docs — "2 additional cores per virt-enabled node"
+export const VIRT_OVERHEAD_CPU_PER_NODE = 2          // vCPU reserved per virt-enabled worker
+
+// KubeVirt per-VM memory overhead formula constants (virt-launcher pod overhead)
+// Source: developers.redhat.com/blog/2025/01/31/memory-management-openshift-virtualization
+// Formula: overheadMiB = VIRT_VM_OVERHEAD_BASE_MIB + VIRT_VM_OVERHEAD_PER_VCPU_MIB * vCPUs + VIRT_VM_OVERHEAD_GUEST_RAM_RATIO * guestRAM_MiB
+export const VIRT_VM_OVERHEAD_BASE_MIB = 218
+export const VIRT_VM_OVERHEAD_PER_VCPU_MIB = 8
+export const VIRT_VM_OVERHEAD_GUEST_RAM_RATIO = 0.002  // 0.2% of guest RAM in MiB
+
+// SNO-with-Virt minimum hardware profile (SNO-01)
+// Source: Red Hat SNO docs + access.redhat.com/solutions/7014308
+// Base SNO_STD_MIN is 8 vCPU / 16 GB / 120 GB — virt requires 14 vCPU / 32 GB / 170 GB
+// storageGB 170 = 120 GB root disk + 50 GB second disk for VM PVCs (hostpath-provisioner)
+export const SNO_VIRT_MIN: Readonly<NodeSpec> = { count: 1, vcpu: 14, ramGB: 32, storageGB: 170 }
+export const SNO_VIRT_STORAGE_EXTRA_GB = 50           // second disk for VM PVCs
