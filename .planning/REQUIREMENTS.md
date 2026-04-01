@@ -9,7 +9,7 @@
 
 - [x] **VIRT-01**: User can select 'OpenShift Virtualization' as a distinct topology type in the architecture wizard step
 - [x] **VIRT-02**: `calcVirt()` calculator applies KubeVirt per-worker overhead: +2 vCPU/node plus per-VM formula (0.002 × guestRAM + 218 MiB + 8 MiB × vCPUs)
-- [ ] **VIRT-03**: User can input the expected number of VMs per worker node to drive worker count calculation
+- [x] **VIRT-03**: User can input the expected number of VMs per worker node to drive worker count calculation
 - [x] **VIRT-04**: Virt topology is surfaced as a recommendation option in the topology recommendation engine
 
 ### GPU Nodes (GPU)
@@ -61,7 +61,7 @@
 |--------|-------|--------|
 | VIRT-01 | Phase 12 | Complete |
 | VIRT-02 | Phase 9 | Complete |
-| VIRT-03 | Phase 12 | Pending |
+| VIRT-03 | Phase 12 | Complete |
 | VIRT-04 | Phase 9 | Complete |
 | GPU-01 | Phase 12 | Complete |
 | GPU-02 | Phase 12 | Complete |
