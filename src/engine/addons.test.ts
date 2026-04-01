@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import { calcODF, calcInfraNodes, calcRHACM, calcVirt, calcGpuNodes, calcRHOAI } from './addons'
-import { MIG_PROFILES } from './constants'
+import {
+  MIG_PROFILES,
+  RHOAI_WORKER_MIN_VCPU,
+  RHOAI_WORKER_MIN_RAM_GB,
+} from './constants'
 
 describe('calcODF', () => {
   it('0 extra OSD: 3 nodes x 16 vCPU / 64 GB', () => {
@@ -143,6 +147,21 @@ describe('calcRHOAI', () => {
     calcRHOAI(sizing, false)
     expect(sizing.workerNodes!.count).toBe(3)
     expect(sizing.workerNodes!.storageGB).toBe(100)
+  })
+})
+
+describe('RHOAI constants — RHOAI 3.x cluster minimum verification', () => {
+  it('RHOAI_WORKER_MIN_VCPU is 8 — matches RHOAI 3.x documented per-worker minimum', () => {
+    expect(RHOAI_WORKER_MIN_VCPU).toBe(8)
+  })
+
+  it('RHOAI_WORKER_MIN_RAM_GB is 32 — matches RHOAI 3.x documented per-worker minimum', () => {
+    expect(RHOAI_WORKER_MIN_RAM_GB).toBe(32)
+  })
+
+  it('2 workers at minimum produce 16 vCPU and 64 GB cluster total — RHOAI 3.x minimum cluster', () => {
+    expect(2 * RHOAI_WORKER_MIN_VCPU).toBe(16)
+    expect(2 * RHOAI_WORKER_MIN_RAM_GB).toBe(64)
   })
 })
 

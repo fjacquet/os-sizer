@@ -43,6 +43,7 @@ function makeConfig(overrides: Partial<ClusterConfig> = {}): ClusterConfig {
       virtAvgVmVcpu: 4,
       virtAvgVmRamGB: 8,
       snoVirtMode: false,
+      rhoaiEnabled: false,
     },
     environment: 'datacenter',
     haRequired: true,
