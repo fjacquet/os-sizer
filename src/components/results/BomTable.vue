@@ -24,22 +24,22 @@ const rows = computed(() => {
 <template>
   <div class="overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0">
     <table class="w-full text-sm border-collapse" :aria-label="t('results.title')">
-      <thead class="bg-gray-50">
+      <thead class="bg-gray-50 dark:bg-gray-700">
         <tr>
-          <th class="px-3 py-2 text-left font-medium text-gray-600 border-b">{{ t('topology.label') }}</th>
-          <th class="px-3 py-2 text-left font-medium text-gray-600 border-b">{{ t('node.count') }}</th>
-          <th class="px-3 py-2 text-left font-medium text-gray-600 border-b">{{ t('node.vcpu') }}</th>
-          <th class="px-3 py-2 text-left font-medium text-gray-600 border-b">{{ t('node.ramGB') }}</th>
-          <th class="px-3 py-2 text-left font-medium text-gray-600 border-b">{{ t('node.storageGB') }}</th>
+          <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-gray-300 border-b dark:border-gray-600">{{ t('topology.label') }}</th>
+          <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-gray-300 border-b dark:border-gray-600">{{ t('node.count') }}</th>
+          <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-gray-300 border-b dark:border-gray-600">{{ t('node.vcpu') }}</th>
+          <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-gray-300 border-b dark:border-gray-600">{{ t('node.ramGB') }}</th>
+          <th class="px-3 py-2 text-left font-medium text-gray-600 dark:text-gray-300 border-b dark:border-gray-600">{{ t('node.storageGB') }}</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="row.labelKey">
-          <td class="px-3 py-2 border-b border-gray-100">{{ t(row.labelKey) }}</td>
-          <td class="px-3 py-2 font-mono border-b border-gray-100">{{ row.spec.count }}</td>
-          <td class="px-3 py-2 font-mono border-b border-gray-100">{{ row.spec.vcpu }}</td>
-          <td class="px-3 py-2 font-mono border-b border-gray-100">{{ row.spec.ramGB }}</td>
-          <td class="px-3 py-2 font-mono border-b border-gray-100">{{ row.spec.storageGB }}</td>
+          <td class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ t(row.labelKey) }}</td>
+          <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ row.spec.count }}</td>
+          <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ row.spec.vcpu }}</td>
+          <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ row.spec.ramGB }}</td>
+          <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ row.spec.storageGB }}</td>
         </tr>
       </tbody>
     </table>

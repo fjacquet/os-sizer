@@ -74,8 +74,8 @@ defineExpose({ validate })
 </script>
 
 <template>
-  <section class="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
-    <h2 class="text-lg font-semibold text-gray-900">{{ t('wizard.step2.title') }}</h2>
+  <section class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ t('wizard.step2.title') }}</h2>
 
     <!-- Workload inputs -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -126,8 +126,8 @@ defineExpose({ validate })
     </div>
 
     <!-- Add-ons -->
-    <div class="border-t border-gray-100 pt-4 space-y-3">
-      <h3 class="text-sm font-semibold text-gray-700">{{ t('workload.addons') }}</h3>
+    <div class="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-3">
+      <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ t('workload.addons') }}</h3>
       <div class="space-y-2">
         <label class="flex items-center gap-2 cursor-pointer">
           <input
@@ -137,7 +137,7 @@ defineExpose({ validate })
             class="w-4 h-4 accent-blue-600"
             @change="odfEnabled = ($event.target as HTMLInputElement).checked"
           />
-          <span class="text-sm text-gray-700">{{ t('workload.odfStorage') }}</span>
+          <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.odfStorage') }}</span>
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
           <input
@@ -147,7 +147,7 @@ defineExpose({ validate })
             class="w-4 h-4 accent-blue-600"
             @change="infraNodesEnabled = ($event.target as HTMLInputElement).checked"
           />
-          <span class="text-sm text-gray-700">{{ t('workload.infraNodes') }}</span>
+          <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.infraNodes') }}</span>
         </label>
         <label class="flex items-center gap-2 cursor-pointer">
           <input
@@ -157,7 +157,7 @@ defineExpose({ validate })
             class="w-4 h-4 accent-blue-600"
             @change="rhacmEnabled = ($event.target as HTMLInputElement).checked"
           />
-          <span class="text-sm text-gray-700">{{ t('workload.rhacmHub') }}</span>
+          <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.rhacmHub') }}</span>
         </label>
         <!-- Managed cluster count slider (only when hub add-on is enabled) -->
         <div v-if="rhacmEnabled" class="ml-6 mt-2">

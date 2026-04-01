@@ -23,27 +23,27 @@ function fitScoreColor(score: number): string {
     :class="[
       'w-full text-left p-4 rounded-lg border-2 transition-colors space-y-2',
       selected
-        ? 'border-blue-600 bg-blue-50'
-        : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-gray-50'
+        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30'
+        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-700'
     ]"
     @click="emit('select', recommendation.topology)"
   >
     <div class="flex items-center justify-between">
-      <span class="font-semibold text-gray-900 text-sm">
+      <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">
         {{ t(topologyLabelKey) }}
       </span>
       <span :class="['text-xs font-bold px-2 py-0.5 rounded', fitScoreColor(recommendation.fitScore)]">
         {{ recommendation.fitScore }}%
       </span>
     </div>
-    <p class="text-xs text-gray-600">
+    <p class="text-xs text-gray-600 dark:text-gray-400">
       {{ t(recommendation.justificationKey) }}
     </p>
     <div v-if="recommendation.warningKeys.length > 0" class="space-y-1">
       <p
         v-for="key in recommendation.warningKeys"
         :key="key"
-        class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1"
+        class="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded px-2 py-1"
       >
         {{ t(key) }}
       </p>

@@ -27,7 +27,7 @@ const activeCluster = computed(() => clusters.value[activeClusterIndex.value] ??
 <template>
   <div class="space-y-4">
     <!-- Page heading -->
-    <h2 class="text-xl font-bold text-gray-900">{{ t('wizard.step4.title') }}</h2>
+    <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ t('wizard.step4.title') }}</h2>
 
     <!-- Architecture overview -->
     <ArchOverviewCard :cluster="activeCluster" />
@@ -43,8 +43,8 @@ const activeCluster = computed(() => clusters.value[activeClusterIndex.value] ??
     </template>
 
     <!-- BoM table -->
-    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      <h3 class="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-100">
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <h3 class="px-4 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700">
         {{ t('results.title') }}
       </h3>
       <BomTable v-if="activeResult" :result="activeResult" />
@@ -65,7 +65,7 @@ const activeCluster = computed(() => clusters.value[activeClusterIndex.value] ??
     <!-- Back button -->
     <div class="flex justify-start pt-2">
       <button
-        class="px-4 py-2 text-sm font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+        class="px-4 py-2 text-sm font-medium rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600"
         @click="ui.setWizardStep(3)"
       >
         {{ t('wizard.nav.previous') }}

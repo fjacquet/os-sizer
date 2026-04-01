@@ -25,26 +25,26 @@ const topologyI18nKey = computed(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg border border-gray-200 p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
     <div class="flex flex-wrap items-start gap-4">
       <div class="flex-1 min-w-0">
-        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t('topology.label') }}</p>
-        <p class="mt-1 text-lg font-semibold text-gray-900">{{ t(topologyI18nKey) }}</p>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ t('topology.label') }}</p>
+        <p class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">{{ t(topologyI18nKey) }}</p>
       </div>
       <div class="flex-1 min-w-0">
-        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t('results.overview.haStatus') }}</p>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ t('results.overview.haStatus') }}</p>
         <span
           class="mt-1 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
           :class="props.cluster.haRequired
-            ? 'bg-green-100 text-green-800'
-            : 'bg-gray-100 text-gray-600'"
+            ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300'
+            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'"
         >
           {{ props.cluster.haRequired ? t('results.overview.haEnabled') : t('results.overview.haDisabled') }}
         </span>
       </div>
       <div class="flex-1 min-w-0">
-        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">{{ t('results.overview.environment') }}</p>
-        <p class="mt-1 text-sm text-gray-700">{{ t(`environment.${props.cluster.environment}`) }}</p>
+        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ t('results.overview.environment') }}</p>
+        <p class="mt-1 text-sm text-gray-700 dark:text-gray-300">{{ t(`environment.${props.cluster.environment}`) }}</p>
       </div>
     </div>
   </div>

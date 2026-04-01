@@ -53,7 +53,7 @@ async function handleExportPptx() {
   <div class="flex flex-wrap gap-2 pt-2 print:hidden">
     <!-- Share URL -->
     <button
-      class="text-sm px-2 py-1 sm:px-3 sm:py-2 font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+      class="text-sm px-2 py-1 sm:px-3 sm:py-2 font-medium rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
       :aria-label="t('results.toolbar.share')"
       @click="handleShare"
     >
@@ -61,7 +61,7 @@ async function handleExportPptx() {
     </button>
     <!-- CSV export (04-05) -->
     <button
-      class="text-sm px-2 py-1 sm:px-3 sm:py-2 font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+      class="text-sm px-2 py-1 sm:px-3 sm:py-2 font-medium rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
       :aria-label="t('results.toolbar.exportCsv')"
       @click="handleExportCsv"
     >

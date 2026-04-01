@@ -40,8 +40,8 @@ function goForward() {
       :disabled="!canGoBack"
       :class="['px-4 py-2 text-sm rounded border font-medium transition-colors',
         canGoBack
-          ? 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
-          : 'opacity-40 cursor-not-allowed bg-gray-100 text-gray-400 border-gray-200']"
+          ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400'
+          : 'opacity-40 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700']"
       @click="goBack"
     >
       {{ t('wizard.nav.previous') }}
@@ -62,13 +62,13 @@ function goForward() {
           v-else
           :class="['flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full border font-medium',
             ui.currentWizardStep > s.step
-              ? 'bg-green-100 text-green-700 border-green-400'
-              : 'bg-white text-gray-400 border-gray-200']"
+              ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 border-green-400 dark:border-green-600'
+              : 'bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700']"
         >
           <span class="font-bold">{{ s.step }}</span>
           <span class="hidden sm:inline">{{ t(s.labelKey) }}</span>
         </div>
-        <div v-if="index < steps.length - 1" class="w-6 h-px bg-gray-300"></div>
+        <div v-if="index < steps.length - 1" class="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
       </template>
     </div>
 
@@ -79,7 +79,7 @@ function goForward() {
         :class="['px-4 py-2 text-sm rounded border font-medium transition-colors',
           canGoForward
             ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
-            : 'opacity-40 cursor-not-allowed bg-gray-100 text-gray-400 border-gray-200']"
+            : 'opacity-40 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700']"
         @click="goForward"
       >
         {{ nextLabel }}
