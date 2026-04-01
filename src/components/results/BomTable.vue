@@ -17,6 +17,8 @@ const rows = computed(() => {
   if (s.infraNodes) entries.push({ labelKey: 'node.infra', spec: s.infraNodes })
   if (s.odfNodes) entries.push({ labelKey: 'node.storage', spec: s.odfNodes })
   if (s.rhacmWorkers) entries.push({ labelKey: 'results.bom.rhacmWorkers', spec: s.rhacmWorkers })
+  if (s.virtWorkerNodes) entries.push({ labelKey: 'node.virtWorkers', spec: s.virtWorkerNodes })
+  if (s.gpuNodes) entries.push({ labelKey: 'node.gpu', spec: s.gpuNodes })
   return entries
 })
 </script>
@@ -40,6 +42,18 @@ const rows = computed(() => {
           <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ row.spec.vcpu }}</td>
           <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ row.spec.ramGB }}</td>
           <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">{{ row.spec.storageGB }}</td>
+        </tr>
+        <!-- RHOAI overhead annotation row (RHOAI-04) — not a NodeSpec, shown as contextual info -->
+        <tr v-if="props.result.sizing.rhoaiOverhead" class="bg-blue-50 dark:bg-blue-900/20">
+          <td class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 italic">
+            {{ t('rhoai.bomRow') }}
+            <span class="text-xs text-gray-500 dark:text-gray-400 block not-italic">
+              {{ t('rhoai.kserve') }} · {{ t('rhoai.dsPipelines') }} · {{ t('rhoai.modelRegistry') }}
+            </span>
+          </td>
+          <td class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-xs italic" colspan="4">
+            +{{ props.result.sizing.rhoaiOverhead.vcpu }} vCPU / +{{ props.result.sizing.rhoaiOverhead.ramGB }} GB RAM (overhead on infra or worker nodes)
+          </td>
         </tr>
       </tbody>
     </table>
