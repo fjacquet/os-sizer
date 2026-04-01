@@ -23,7 +23,7 @@
 
 ### v2.0 — OpenShift Virtualization + AI Sizing
 
-- [ ] **Phase 9: Virt Engine Foundation** - Extend types, implement calcVirt(), SNO-virt profile, and RWX storage warning
+- [x] **Phase 9: Virt Engine Foundation** - Extend types, implement calcVirt(), SNO-virt profile, and RWX storage warning (completed 2026-04-01)
 - [ ] **Phase 10: GPU Node Engine** - Dedicated GPU node pool sizing with MIG profiles and passthrough/MIG-vGPU warnings
 - [ ] **Phase 11: RHOAI Add-On Engine** - RHOAI operator overhead calculation and worker node floor enforcement
 - [ ] **Phase 12: BoM, Exports, Wizard UI + i18n** - GPU and RHOAI rows in BoM/exports; wizard inputs for all new fields; all four locales
@@ -45,7 +45,7 @@ Plans:
 - [x] 09-01-PLAN.md — Type Extension + Constants (ClusterSizing, AddOnConfig, RecommendationConstraints, KubeVirt constants)
 - [x] 09-02-PLAN.md — calcVirt() + Integration (addons.ts implementation, calcCluster() wiring, WARN-02)
 - [x] 09-03-PLAN.md — SNO-with-Virt Profile + Recommendation Engine (calcSNO snoVirtMode branch, scoreStandardHa +25 boost)
-- [ ] 09-04-PLAN.md — Unit Tests (Vitest tests for calcVirt formula, WARN-02 trigger, SNO-virt minimums, recommendation boost)
+- [x] 09-04-PLAN.md — Unit Tests (Vitest tests for calcVirt formula, WARN-02 trigger, SNO-virt minimums, recommendation boost)
 
 ### Phase 10: GPU Node Engine
 **Goal**: The engine sizes a dedicated GPU node pool, enforces GPU-mode constraints, and emits warnings for incompatible combinations
@@ -95,7 +95,7 @@ Plans:
 | 6. Add-on Engine Integration | v1.0 | 1/1 | Complete | 2026-03-31 |
 | 7. Wizard Component Tests | v1.0 | 1/1 | Complete | 2026-03-31 |
 | 8. Engine Tech Debt | v1.0 | 1/1 | Complete | 2026-03-31 |
-| 9. Virt Engine Foundation | v2.0 | 3/4 | In Progress|  |
+| 9. Virt Engine Foundation | v2.0 | 4/4 | Complete   | 2026-04-01 |
 | 10. GPU Node Engine | v2.0 | 0/? | Not started | — |
 | 11. RHOAI Add-On Engine | v2.0 | 0/? | Not started | — |
 | 12. BoM, Exports, Wizard UI + i18n | v2.0 | 0/? | Not started | — |
