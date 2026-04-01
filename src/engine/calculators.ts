@@ -3,7 +3,7 @@
 // Source: .planning/research/hardware-sizing.md
 
 import type { ClusterConfig, ClusterSizing, NodeSpec, ValidationWarning } from './types'
-import { calcODF, calcRHACM, calcVirt, calcGpuNodes } from './addons'
+import { calcODF, calcRHACM, calcVirt, calcGpuNodes, calcRHOAI } from './addons'
 import {
   CP_MIN,
   WORKER_MIN,
@@ -471,8 +471,13 @@ export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; war
     )
   }
 
+  // Phase 11: RHOAI worker floor + infra overhead (RHOAI-02, RHOAI-03)
+  if (config.addOns.rhoaiEnabled) {
+    calcRHOAI(sizing, config.addOns.infraNodesEnabled)
+  }
+
   // Recalculate totals to include add-on nodes
-  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled || config.addOns.virtEnabled || config.addOns.gpuEnabled) {
+  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled || config.addOns.virtEnabled || config.addOns.gpuEnabled || config.addOns.rhoaiEnabled) {
     sizing.totals = sumTotals([
       sizing.masterNodes,
       sizing.workerNodes,
