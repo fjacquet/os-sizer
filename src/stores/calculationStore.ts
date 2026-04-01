@@ -25,6 +25,7 @@ export const useCalculationStore = defineStore('calculation', () => {
         addOns: {
           odf: cluster.addOns.odfEnabled,
           rhacm: cluster.addOns.rhacmEnabled,
+          virt: cluster.addOns.virtEnabled,
         },
       }),
       validationErrors: validateInputs(cluster),
@@ -43,6 +44,7 @@ export const useCalculationStore = defineStore('calculation', () => {
       addOns: {
         odf: cluster.addOns.odfEnabled,
         rhacm: cluster.addOns.rhacmEnabled,
+        virt: cluster.addOns.virtEnabled,
       },
     })
   })

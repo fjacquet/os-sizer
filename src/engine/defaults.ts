@@ -23,6 +23,13 @@ export function createDefaultClusterConfig(index: number): ClusterConfig {
       infraNodesEnabled: false,
       rhacmEnabled: false,
       rhacmManagedClusters: 0,
+      // Phase 9: OpenShift Virtualization
+      virtEnabled: false,
+      vmCount: 50,
+      vmsPerWorker: 10,
+      virtAvgVmVcpu: 4,
+      virtAvgVmRamGB: 8,
+      snoVirtMode: false,
     },
     environment: 'datacenter',
     haRequired: true,

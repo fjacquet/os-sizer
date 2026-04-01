@@ -51,6 +51,9 @@ function emptySizing(masterNodes: NodeSpec): ClusterSizing {
     infraNodes: null,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
     totals: sumTotals([masterNodes]),
   }
 }
@@ -109,6 +112,9 @@ export function calcStandardHA(config: ClusterConfig): { sizing: ClusterSizing; 
     infraNodes,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
     totals: sumTotals([masterNodes, workerNodes, infraNodes]),
   }
 
@@ -132,6 +138,9 @@ export function calcCompact3Node(_config: ClusterConfig): { sizing: ClusterSizin
     infraNodes: null,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
     totals: sumTotals([masterNodes]),
   }
 
@@ -189,6 +198,9 @@ export function calcTNA(_config: ClusterConfig): { sizing: ClusterSizing; warnin
     infraNodes: arbiterNode,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
     totals: sumTotals([cpNodes, arbiterNode]),
   }
 
@@ -220,6 +232,9 @@ export function calcTNF(_config: ClusterConfig): { sizing: ClusterSizing; warnin
     infraNodes: null,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
     totals: sumTotals([masterNodes]),
   }
 
@@ -303,6 +318,9 @@ export function calcHCP(config: ClusterConfig): { sizing: ClusterSizing; warning
     infraNodes,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
     totals: sumTotals([masterNodes, workerNodes, infraNodes]),
   }
 
@@ -361,6 +379,9 @@ export function calcManagedCloud(_config: ClusterConfig): { sizing: ClusterSizin
     infraNodes: null,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
     totals: { vcpu: 0, ramGB: 0, storageGB: 0 },
   }
 

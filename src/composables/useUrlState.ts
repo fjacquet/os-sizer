@@ -25,6 +25,13 @@ const AddOnConfigSchema = z
     infraNodesEnabled: z.boolean().default(false),
     rhacmEnabled: z.boolean().default(false),
     rhacmManagedClusters: z.number().int().min(0).default(0),
+    // Phase 9: OpenShift Virtualization
+    virtEnabled: z.boolean().default(false),
+    vmCount: z.number().int().min(0).default(50),
+    vmsPerWorker: z.number().int().min(1).default(10),
+    virtAvgVmVcpu: z.number().int().min(1).default(4),
+    virtAvgVmRamGB: z.number().int().min(1).default(8),
+    snoVirtMode: z.boolean().default(false),
   })
   .strip()
 
