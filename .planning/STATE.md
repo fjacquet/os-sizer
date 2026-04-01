@@ -2,35 +2,35 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — OpenShift Virtualization + AI Sizing
-current_phase: Phase 11 — RHOAI Add-On Engine (not started)
+current_phase: Phase 12 — BoM, Exports, Wizard UI + i18n (not started)
 current_plan: —
-status: Phase 11 planned — ready for execution
-last_updated: "2026-04-01T09:15:12.540Z"
-last_activity: 2026-04-01 — Phase 10 GPU Node Engine verified complete (221 tests passing)
+status: Phase 12 planned — ready for execution
+last_updated: "2026-04-01T10:00:00Z"
+last_activity: 2026-04-01 — Phase 11 RHOAI Add-On Engine verified complete (237 tests passing)
 progress:
   total_phases: 4
   completed_phases: 3
-  total_plans: 10
-  completed_plans: 10
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # Project State
 
 **Project:** os-sizer
-**Current Phase:** Phase 11 — RHOAI Add-On Engine (not started)
+**Current Phase:** Phase 12 — BoM, Exports, Wizard UI + i18n (not started)
 **Current Plan:** —
 **Last Updated:** 2026-04-01
-**Last Activity:** 2026-04-01 — Phase 10 GPU Node Engine verified complete (221 tests passing)
+**Last Activity:** 2026-04-01 — Phase 11 RHOAI Add-On Engine verified complete (237 tests passing)
 
 ## Progress
 
 ```
-v2.0 Milestone: 2/4 phases complete
-████████████████░░░░  50%
+v2.0 Milestone: 3/4 phases complete
+████████████████████████░░░░  75%
 
 Phase 9:  Virt Engine Foundation      [ Complete  2026-04-01 ]
 Phase 10: GPU Node Engine             [ Complete  2026-04-01 ]
-Phase 11: RHOAI Add-On Engine         [ Not started ]
+Phase 11: RHOAI Add-On Engine         [ Complete  2026-04-01 ]
 Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 ```
 
@@ -41,7 +41,7 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [x] v2.0 roadmap created (4 phases, 100% coverage)
 - [x] Phase 9: Virt Engine Foundation — complete 2026-04-01 (204 tests passing)
 - [x] Phase 10: GPU Node Engine — complete 2026-04-01 (221 tests passing)
-- [ ] Phase 11: RHOAI Add-On Engine
+- [x] Phase 11: RHOAI Add-On Engine — complete 2026-04-01 (237 tests passing)
 - [ ] Phase 12: BoM, Exports, Wizard UI + i18n
 
 ## Decisions Made
@@ -108,6 +108,7 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - v2.0 critical pitfall: ClusterSizing type extension (gpuNodes: NodeSpec | null, virtStorageGB) MUST land in Phase 9 first commit before any calculator work
 - v2.0 pattern: calcVirt() and calcGpuNodes() follow post-dispatch add-on pattern identical to calcODF()/calcRHACM()
 - v2.0 research flag: RHOAI overhead constants (Phase 11) are MEDIUM confidence — validate 16 vCPU / 64 GB cluster minimum against RHOAI 3.x supported configs during Phase 11 planning
+- Phase 12 note: All v2.0 wizard inputs (virt, GPU, RHOAI), BoM rows, export formats (CSV/PPTX/PDF), and i18n translations (EN/FR/IT/DE) are deferred to Phase 12
 
 ## Performance Metrics
 
