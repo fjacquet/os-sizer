@@ -23,8 +23,8 @@
 ### RHOAI (RHOAI)
 
 - [ ] **RHOAI-01**: User can enable the RHOAI add-on to size an AI/ML platform layer
-- [ ] **RHOAI-02**: When RHOAI is enabled, each worker node is enforced to meet minimum 8 vCPU / 32 GB RAM
-- [ ] **RHOAI-03**: RHOAI operator overhead is reserved on infra nodes when RHOAI is enabled
+- [x] **RHOAI-02**: When RHOAI is enabled, each worker node is enforced to meet minimum 8 vCPU / 32 GB RAM
+- [x] **RHOAI-03**: RHOAI operator overhead is reserved on infra nodes when RHOAI is enabled
 - [ ] **RHOAI-04**: BoM shows RHOAI component breakdown (KServe, Data Science Pipelines, Model Registry) as a separate overhead row
 
 ### SNO with Virtualization (SNO)
@@ -69,8 +69,8 @@
 | GPU-04 | Phase 12 | Pending |
 | GPU-05 | Phase 12 | Pending |
 | RHOAI-01 | Phase 12 | Pending |
-| RHOAI-02 | Phase 11 | Pending |
-| RHOAI-03 | Phase 11 | Pending |
+| RHOAI-02 | Phase 11 | Complete |
+| RHOAI-03 | Phase 11 | Complete |
 | RHOAI-04 | Phase 12 | Pending |
 | SNO-01 | Phase 9 | Complete |
 | WARN-01 | Phase 10 | Complete |
