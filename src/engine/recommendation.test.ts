@@ -9,7 +9,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 10,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     expect(result.length).toBeGreaterThan(0)
     expect(result[0].topology).toBe('standard-ha')
@@ -24,7 +24,7 @@ describe('recommend', () => {
       maxNodes: 1,
       airGapped: false,
       estimatedWorkers: 0,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     const top2 = result.slice(0, 2).map((r) => r.topology)
     expect(top2.some((t) => t === 'sno' || t === 'microshift')).toBe(true)
@@ -38,7 +38,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: true,
       estimatedWorkers: 10,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     expect(result.every((r) => r.topology !== 'managed-cloud')).toBe(true)
   })
@@ -50,7 +50,7 @@ describe('recommend', () => {
       maxNodes: 3,
       airGapped: false,
       estimatedWorkers: 5,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     const top2 = result.slice(0, 2).map((r) => r.topology)
     expect(top2).toContain('compact-3node')
@@ -63,7 +63,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 0,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     expect(result.length).toBeGreaterThan(0)
     expect(result[0].topology).toBe('managed-cloud')
@@ -76,7 +76,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 5,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     }
     const result = recommend(constraints)
     for (const r of result) {
@@ -91,7 +91,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 10,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     for (let i = 0; i < result.length - 1; i++) {
       expect(result[i].fitScore).toBeGreaterThanOrEqual(result[i + 1].fitScore)
