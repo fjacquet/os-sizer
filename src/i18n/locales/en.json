@@ -28,7 +28,10 @@
     "vcpu": "vCPU",
     "ramGB": "RAM (GB)",
     "storageGB": "Storage (GB)",
-    "count": "Count"
+    "count": "Count",
+    "virtWorkers": "Virt Worker Nodes",
+    "gpu": "GPU Nodes",
+    "rhoaiOverhead": "RHOAI Overhead"
   },
   "wizard": {
     "step1": {
@@ -89,13 +92,25 @@
     "gpuNodes": "GPU Nodes",
     "rhacmHub": "RHACM Hub",
     "nodeVcpu": "Worker Node vCPU",
-    "nodeRam": "Worker Node RAM"
+    "nodeRam": "Worker Node RAM",
+    "rhoaiAddon": "Red Hat OpenShift AI (RHOAI)",
+    "gpuNodePool": "GPU Node Pool",
+    "gpuNodeCount": "GPU Node Count",
+    "gpuMode": "GPU Mode",
+    "gpuModel": "GPU Model",
+    "migProfile": "MIG Profile",
+    "vmCount": "Total VM Count",
+    "vmsPerWorker": "VMs per Worker Node",
+    "virtAvgVmVcpu": "Average VM vCPU",
+    "virtAvgVmRamGB": "Average VM RAM (GB)",
+    "virtAddon": "OpenShift Virtualization"
   },
   "sno": {
     "profile": "SNO Profile",
     "standard": "Standard",
     "edge": "Edge",
-    "telecomVdu": "Telecom vDU"
+    "telecomVdu": "Telecom vDU",
+    "virtMode": "SNO with Virtualization Profile"
   },
   "hcp": {
     "clusterCount": "Hosted Cluster Count",
@@ -154,11 +169,22 @@
     },
     "managedCloud": {
       "noHardware": "Managed cloud topologies (ROSA/ARO) are sized by the provider — no hardware BoM is required"
+    },
+    "virt": {
+      "rwxRequiresOdf": "OpenShift Virtualization requires RWX storage (ODF) for live migration. Without ODF, live migration is unavailable."
+    },
+    "sno": {
+      "virtNoLiveMigration": "SNO topology does not support live migration — VM HA is unavailable."
+    },
+    "gpu": {
+      "passthroughBlocksLiveMigration": "GPU passthrough mode permanently blocks live migration on affected nodes.",
+      "migProfileWithKubevirtUnsupported": "MIG profiles combined with KubeVirt VMs are unsupported by the standard GPU Operator."
     }
   },
   "recommendation": {
     "standardHa": {
-      "production": "Best for production workloads requiring full HA in a datacenter"
+      "production": "Best for production workloads requiring full HA in a datacenter",
+      "virtWorkloads": "Recommended for VM workloads — standard HA provides live migration and node redundancy."
     },
     "compact3Node": {
       "budgetFriendly": "Suitable for resource-constrained environments with HA — masters double as workers"
@@ -181,6 +207,21 @@
     "managedCloud": {
       "noHardwareManagement": "Provider-managed OpenShift — no hardware sizing required (ROSA/ARO/OSD)"
     }
+  },
+  "gpu": {
+    "modeContainer": "Container (whole GPU per pod)",
+    "modePassthrough": "Passthrough (whole GPU per VM)",
+    "modeVgpu": "vGPU (shared across VMs)",
+    "migNone": "No MIG partitioning",
+    "densityTableTitle": "vGPU Density Reference (estimated, driver-dependent)",
+    "densityNote": "Values are estimates. Actual density depends on NVIDIA vGPU driver version and license tier."
+  },
+  "rhoai": {
+    "label": "Red Hat OpenShift AI",
+    "bomRow": "RHOAI Operator Overhead",
+    "kserve": "KServe",
+    "dsPipelines": "Data Science Pipelines",
+    "modelRegistry": "Model Registry"
   },
   "print": {
     "header": {
