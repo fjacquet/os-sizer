@@ -614,3 +614,69 @@ describe('calcCluster add-on dispatch', () => {
     expect(sizing.rhacmWorkers).toBeNull()
   })
 })
+
+// ---------------------------------------------------------------------------
+// calcCluster Phase 11: RHOAI post-dispatch
+// ---------------------------------------------------------------------------
+
+describe('calcCluster Phase 11: rhoaiEnabled post-dispatch', () => {
+  it('rhoaiEnabled=true raises worker vcpu to at least 8 when below floor', () => {
+    const config = makeConfig({
+      workload: { totalPods: 10, podCpuMillicores: 500, podMemMiB: 512, nodeVcpu: 4, nodeRamGB: 8 },
+      addOns: {
+        ...makeConfig().addOns,
+        rhoaiEnabled: true,
+        infraNodesEnabled: false,
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.workerNodes!.vcpu).toBeGreaterThanOrEqual(8)
+    expect(sizing.workerNodes!.ramGB).toBeGreaterThanOrEqual(32)
+  })
+
+  it('rhoaiEnabled=true with infraNodesEnabled=true increases infraNodes vcpu by 4', () => {
+    const baseConfig = makeConfig({
+      addOns: { ...makeConfig().addOns, rhoaiEnabled: false, infraNodesEnabled: true },
+    })
+    const rhoaiConfig = makeConfig({
+      addOns: { ...makeConfig().addOns, rhoaiEnabled: true, infraNodesEnabled: true },
+    })
+    const { sizing: baseSizing } = calcCluster(baseConfig)
+    const { sizing: rhoaiSizing } = calcCluster(rhoaiConfig)
+    expect(rhoaiSizing.infraNodes!.vcpu).toBe(baseSizing.infraNodes!.vcpu + 4)
+    expect(rhoaiSizing.infraNodes!.ramGB).toBe(baseSizing.infraNodes!.ramGB + 16)
+  })
+
+  it('rhoaiEnabled=false leaves workerNodes and infraNodes unchanged', () => {
+    const baseConfig = makeConfig({
+      addOns: { ...makeConfig().addOns, rhoaiEnabled: false, infraNodesEnabled: true },
+    })
+    const noRhoaiConfig = makeConfig({
+      addOns: { ...makeConfig().addOns, rhoaiEnabled: false, infraNodesEnabled: true },
+    })
+    const { sizing: base } = calcCluster(baseConfig)
+    const { sizing: noRhoai } = calcCluster(noRhoaiConfig)
+    expect(noRhoai.workerNodes!.vcpu).toBe(base.workerNodes!.vcpu)
+    expect(noRhoai.infraNodes!.vcpu).toBe(base.infraNodes!.vcpu)
+  })
+
+  it('rhoaiEnabled=true recalculates totals to reflect mutated worker specs', () => {
+    const config = makeConfig({
+      workload: { totalPods: 10, podCpuMillicores: 500, podMemMiB: 512, nodeVcpu: 4, nodeRamGB: 8 },
+      addOns: { ...makeConfig().addOns, rhoaiEnabled: true, infraNodesEnabled: false },
+    })
+    const { sizing } = calcCluster(config)
+    const expectedVcpu =
+      sizing.masterNodes.vcpu * sizing.masterNodes.count +
+      sizing.workerNodes!.vcpu * sizing.workerNodes!.count
+    expect(sizing.totals.vcpu).toBe(expectedVcpu)
+  })
+
+  it('rhoaiEnabled=true on SNO topology (workerNodes=null) does not throw', () => {
+    const config = makeConfig({
+      topology: 'sno',
+      addOns: { ...makeConfig().addOns, rhoaiEnabled: true, infraNodesEnabled: false },
+    })
+    expect(() => calcCluster(config)).not.toThrow()
+  })
+})
