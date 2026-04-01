@@ -9,8 +9,14 @@ import {
   ODF_MIN_NODES,
   ODF_CPU_PER_OSD,
   ODF_RAM_PER_OSD_GB,
+  VIRT_OVERHEAD_CPU_PER_NODE,
+  VIRT_VM_OVERHEAD_BASE_MIB,
+  VIRT_VM_OVERHEAD_PER_VCPU_MIB,
+  VIRT_VM_OVERHEAD_GUEST_RAM_RATIO,
+  TARGET_UTILIZATION,
+  WORKER_MIN,
 } from './constants'
-import { infraNodeSizing } from './formulas'
+import { infraNodeSizing, allocatableRamGB } from './formulas'
 
 /**
  * ODF (OpenShift Data Foundation) storage node sizing.
@@ -68,5 +74,62 @@ export function calcRHACM(managedClusters: number): NodeSpec {
     vcpu: large ? 16 : 8,
     ramGB: large ? 64 : 32,
     storageGB: 100,
+  }
+}
+
+/**
+ * OpenShift Virtualization worker pool sizing.
+ *
+ * Sizes a dedicated virt-enabled worker pool to host the specified VM count.
+ * Applies KubeVirt per-node CPU overhead (VIRT_OVERHEAD_CPU_PER_NODE=2 vCPU/node)
+ * and per-VM memory overhead formula:
+ *   overheadMiB = VIRT_VM_OVERHEAD_BASE_MIB + VIRT_VM_OVERHEAD_PER_VCPU_MIB * avgVmVcpu
+ *               + VIRT_VM_OVERHEAD_GUEST_RAM_RATIO * (avgVmRamGB * 1024)
+ *
+ * Worker count = max(density, RAM, CPU constraints, 3) + 1 live migration reserve.
+ * The +1 ensures one node can be drained without losing VM capacity.
+ *
+ * Per-node CPU overhead is encoded in the returned NodeSpec.vcpu field:
+ *   spec.vcpu = nodeVcpu + VIRT_OVERHEAD_CPU_PER_NODE
+ *
+ * @param vmCount       - total VMs to host across the worker pool
+ * @param vmsPerWorker  - target VM density per node (drives density constraint)
+ * @param avgVmVcpu     - average vCPUs per VM (for overhead formula)
+ * @param avgVmRamGB    - average RAM per VM in GiB (for overhead formula)
+ * @param nodeVcpu      - worker node vCPU count (before overhead)
+ * @param nodeRamGB     - worker node total RAM in GiB
+ * @returns NodeSpec for the virt worker pool
+ */
+export function calcVirt(
+  vmCount: number,
+  vmsPerWorker: number,
+  avgVmVcpu: number,
+  avgVmRamGB: number,
+  nodeVcpu: number,
+  nodeRamGB: number,
+): NodeSpec {
+  // Constraint 1: density (target VM packing)
+  const workersByDensity = Math.ceil(vmCount / Math.max(vmsPerWorker, 1))
+
+  // Constraint 2: RAM demand with per-VM overhead
+  const vmOverheadMiB =
+    VIRT_VM_OVERHEAD_BASE_MIB +
+    VIRT_VM_OVERHEAD_PER_VCPU_MIB * avgVmVcpu +
+    VIRT_VM_OVERHEAD_GUEST_RAM_RATIO * (avgVmRamGB * 1024)
+  const totalRamDemandGB = vmCount * (avgVmRamGB + vmOverheadMiB / 1024)
+  const workersByRam = Math.ceil(totalRamDemandGB / (allocatableRamGB(nodeRamGB) * TARGET_UTILIZATION))
+
+  // Constraint 3: CPU demand
+  const totalVcpuDemand = vmCount * avgVmVcpu
+  const workersByCpu = Math.ceil(totalVcpuDemand / (nodeVcpu * TARGET_UTILIZATION))
+
+  // Final: take maximum of all constraints, enforce minimum 3, add 1 for live migration headroom
+  const workerCount = Math.max(workersByDensity, workersByRam, workersByCpu, 3) + 1
+
+  return {
+    count: workerCount,
+    vcpu: nodeVcpu + VIRT_OVERHEAD_CPU_PER_NODE,   // per-node KubeVirt CPU overhead baked in
+    ramGB: Math.max(nodeRamGB, WORKER_MIN.ramGB),
+    storageGB: WORKER_MIN.storageGB,
   }
 }
