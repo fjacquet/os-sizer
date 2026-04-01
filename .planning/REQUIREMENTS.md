@@ -8,9 +8,9 @@
 ### Virtualization (VIRT)
 
 - [ ] **VIRT-01**: User can select 'OpenShift Virtualization' as a distinct topology type in the architecture wizard step
-- [ ] **VIRT-02**: `calcVirt()` calculator applies KubeVirt per-worker overhead: +2 vCPU/node plus per-VM formula (0.002 × guestRAM + 218 MiB + 8 MiB × vCPUs)
+- [x] **VIRT-02**: `calcVirt()` calculator applies KubeVirt per-worker overhead: +2 vCPU/node plus per-VM formula (0.002 × guestRAM + 218 MiB + 8 MiB × vCPUs)
 - [ ] **VIRT-03**: User can input the expected number of VMs per worker node to drive worker count calculation
-- [ ] **VIRT-04**: Virt topology is surfaced as a recommendation option in the topology recommendation engine
+- [x] **VIRT-04**: Virt topology is surfaced as a recommendation option in the topology recommendation engine
 
 ### GPU Nodes (GPU)
 
@@ -29,12 +29,12 @@
 
 ### SNO with Virtualization (SNO)
 
-- [ ] **SNO-01**: SNO wizard profile includes a 'SNO-with-Virt' option with boosted hardware minimums: 14 vCPU, 32 GB RAM, 170 GB total storage (120 GB root + 50 GB second disk for VM PVCs)
+- [x] **SNO-01**: SNO wizard profile includes a 'SNO-with-Virt' option with boosted hardware minimums: 14 vCPU, 32 GB RAM, 170 GB total storage (120 GB root + 50 GB second disk for VM PVCs)
 
 ### Validation Warnings (WARN)
 
 - [ ] **WARN-01**: System emits a `ValidationWarning` when GPU passthrough mode is active, informing that live migration is permanently blocked
-- [ ] **WARN-02**: System emits a `ValidationWarning` when virt topology is selected without ODF enabled, informing that RWX storage is required for live migration
+- [x] **WARN-02**: System emits a `ValidationWarning` when virt topology is selected without ODF enabled, informing that RWX storage is required for live migration
 - [ ] **WARN-03**: System emits a `ValidationWarning` when MIG profile is combined with KubeVirt VMs, noting this combination is unsupported by the standard GPU Operator
 
 ## Future Requirements (v2.1+)
@@ -60,9 +60,9 @@
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
 | VIRT-01 | Phase 12 | Pending |
-| VIRT-02 | Phase 9 | Pending |
+| VIRT-02 | Phase 9 | Complete |
 | VIRT-03 | Phase 12 | Pending |
-| VIRT-04 | Phase 9 | Pending |
+| VIRT-04 | Phase 9 | Complete |
 | GPU-01 | Phase 12 | Pending |
 | GPU-02 | Phase 12 | Pending |
 | GPU-03 | Phase 12 | Pending |
@@ -72,7 +72,7 @@
 | RHOAI-02 | Phase 11 | Pending |
 | RHOAI-03 | Phase 11 | Pending |
 | RHOAI-04 | Phase 12 | Pending |
-| SNO-01 | Phase 9 | Pending |
+| SNO-01 | Phase 9 | Complete |
 | WARN-01 | Phase 10 | Pending |
-| WARN-02 | Phase 9 | Pending |
+| WARN-02 | Phase 9 | Complete |
 | WARN-03 | Phase 10 | Pending |

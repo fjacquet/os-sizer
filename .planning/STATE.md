@@ -1,16 +1,17 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.0
-milestone_name: OpenShift Virtualization + AI Sizing
-current_phase: 9
-current_plan: 09-01
+milestone_name: — OpenShift Virtualization + AI Sizing
+current_phase: Phase 9 — Virt Engine Foundation (not started)
+current_plan: —
 status: Phase 9 planned — ready for execution
-last_updated: "2026-04-01"
+last_updated: "2026-04-01T07:30:03.456Z"
+last_activity: 2026-04-01 — v2.0 roadmap created (4 phases, 17 requirements mapped)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 0
+  completed_plans: 1
 ---
 
 # Project State
@@ -73,6 +74,9 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [v2.0 Roadmap]: WARN-01 and WARN-03 co-located with GPU engine (Phase 10) to prevent silent-failure mode where calculator ships without its warnings
 - [v2.0 Roadmap]: WARN-02 co-located with virt engine (Phase 9) — RWX dependency belongs in the calculator, not UI
 - [v2.0 Roadmap]: Phase 12 marked UI hint=yes — contains all wizard inputs and BoM display work
+- [Phase 09]: AddOnConfig.vmCount is explicit user input — NOT derived from vmsPerWorker * workerNodes.count (circular dependency)
+- [Phase 09]: RecommendationConstraints.addOns.virt added for recommendation engine scoring in P09-03 scoreStandardHa boost
+- [Phase 09]: useUrlState.ts AddOnConfigSchema extended with Phase 9 virt fields — URL state hydration now round-trips all virt fields
 
 ## Key Context
 
@@ -102,3 +106,4 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 | Phase 06 P01 | 5 min | 3 tasks | 7 files |
 | Phase 07 P07-01 | 4 min | 2 tasks | 5 files |
 | Phase 08 P01 | 4 | 2 tasks | 2 files |
+| Phase 09 P01 | 8 min | 3 tasks | 6 files |
