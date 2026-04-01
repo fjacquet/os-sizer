@@ -72,3 +72,33 @@ export const VIRT_VM_OVERHEAD_GUEST_RAM_RATIO = 0.002  // 0.2% of guest RAM in M
 // storageGB 170 = 120 GB root disk + 50 GB second disk for VM PVCs (hostpath-provisioner)
 export const SNO_VIRT_MIN: Readonly<NodeSpec> = { count: 1, vcpu: 14, ramGB: 32, storageGB: 170 }
 export const SNO_VIRT_STORAGE_EXTRA_GB = 50           // second disk for VM PVCs
+
+// MIG profiles for GPU nodes — static lookup table (GPU-04)
+// Source: NVIDIA MIG User Guide — docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html
+// Scope: A100-40GB is the v2.0 primary target per REQUIREMENTS.md GPU-04; A100-80GB and H100-80GB follow identical structure
+export const MIG_PROFILES: Readonly<Record<string, Readonly<Record<string, number>>>> = {
+  'A100-40GB': {
+    '1g.5gb':  7,  // 7 instances × 5 GB = 35 GB (1 slice reserved for system)
+    '2g.10gb': 3,  // 3 instances × 10 GB
+    '3g.20gb': 2,  // 2 instances × 20 GB
+    '7g.40gb': 1,  // 1 instance (whole GPU in MIG mode)
+  },
+  'A100-80GB': {
+    '1g.10gb': 7,
+    '2g.20gb': 3,
+    '3g.40gb': 2,
+    '7g.80gb': 1,
+  },
+  'H100-80GB': {
+    '1g.10gb': 7,
+    '2g.20gb': 3,
+    '3g.40gb': 2,
+    '7g.80gb': 1,
+  },
+} as const
+
+// GPU node hardware minimums (Phase 10)
+// No authoritative Red Hat sizing table exists for GPU nodes; values reflect general bare-metal GPU server minimums
+export const GPU_NODE_MIN_VCPU = 16        // typical bare-metal GPU node baseline
+export const GPU_NODE_MIN_RAM_GB = 64      // GPU nodes require sufficient CPU-side RAM for driver + workloads
+export const GPU_NODE_MIN_STORAGE_GB = 200 // OS + GPU drivers + container images

@@ -42,6 +42,13 @@ export interface AddOnConfig {
   virtAvgVmVcpu: number              // average vCPU count per VM (default 4)
   virtAvgVmRamGB: number             // average RAM per VM in GB (default 8)
   snoVirtMode: boolean               // SNO-with-Virt profile (SNO-01)
+  // Phase 10: GPU Node Engine
+  gpuEnabled: boolean                // dedicated GPU node pool enabled (default false)
+  gpuNodeCount: number               // number of GPU nodes in pool — user-specified (default 1)
+  gpuMode: 'container' | 'passthrough' | 'vgpu'  // GPU workload mode (default 'container')
+  gpuModel: 'A100-40GB' | 'A100-80GB' | 'H100-80GB'  // GPU model (default 'A100-40GB')
+  migProfile: string                 // MIG profile name e.g. '1g.5gb' — empty string = no MIG (default '')
+  gpuPerNode: number                 // GPUs per node (default 1)
 }
 
 export interface ClusterConfig {
