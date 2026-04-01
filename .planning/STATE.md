@@ -5,13 +5,13 @@ milestone_name: — OpenShift Virtualization + AI Sizing
 current_phase: Phase 9 — Virt Engine Foundation (not started)
 current_plan: —
 status: Phase 9 planned — ready for execution
-last_updated: "2026-04-01T07:36:27.718Z"
+last_updated: "2026-04-01T07:44:37.754Z"
 last_activity: 2026-04-01 — v2.0 roadmap created (4 phases, 17 requirements mapped)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # Project State
@@ -79,6 +79,9 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [Phase 09]: useUrlState.ts AddOnConfigSchema extended with Phase 9 virt fields — URL state hydration now round-trips all virt fields
 - [Phase 09]: calcVirt() vmCount sourced directly from config.addOns.vmCount — not derived from vmsPerWorker*workerNodes.count (circular dependency)
 - [Phase 09]: SNO_VIRT_NO_LIVE_MIGRATION condition uses virtEnabled (not snoVirtMode) — live migration is a topology constraint, not a hardware profile constraint
+- [Phase 09-03]: SNO_VIRT_NO_HA warning severity is 'warning' (not 'error') — SNO+Virt is supported, not forbidden; signals live migration and HA unavailable
+- [Phase 09-03]: snoVirtMode branch uses SNO_VIRT_MIN regardless of snoProfile — full spec override (SNO-01)
+- [Phase 09-03]: justificationKey 'recommendation.standardHa.virtWorkloads' is i18n token only — translation added in Phase 12
 
 ## Key Context
 
@@ -110,3 +113,4 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 | Phase 08 P01 | 4 | 2 tasks | 2 files |
 | Phase 09 P01 | 8 min | 3 tasks | 6 files |
 | Phase 09 P02 | 8 | 3 tasks | 3 files |
+| Phase 09 P03 | 8 min | 2 tasks | 4 files |
