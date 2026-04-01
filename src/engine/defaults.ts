@@ -30,6 +30,13 @@ export function createDefaultClusterConfig(index: number): ClusterConfig {
       virtAvgVmVcpu: 4,
       virtAvgVmRamGB: 8,
       snoVirtMode: false,
+      // Phase 10: GPU Node Engine
+      gpuEnabled: false,
+      gpuNodeCount: 1,
+      gpuMode: 'container' as const,
+      gpuModel: 'A100-40GB' as const,
+      migProfile: '',
+      gpuPerNode: 1,
     },
     environment: 'datacenter',
     haRequired: true,

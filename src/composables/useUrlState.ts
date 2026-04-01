@@ -32,6 +32,13 @@ const AddOnConfigSchema = z
     virtAvgVmVcpu: z.number().int().min(1).default(4),
     virtAvgVmRamGB: z.number().int().min(1).default(8),
     snoVirtMode: z.boolean().default(false),
+    // Phase 10: GPU Node Engine
+    gpuEnabled: z.boolean().default(false),
+    gpuNodeCount: z.number().int().min(1).default(1),
+    gpuMode: z.enum(['container', 'passthrough', 'vgpu']).default('container'),
+    gpuModel: z.enum(['A100-40GB', 'A100-80GB', 'H100-80GB']).default('A100-40GB'),
+    migProfile: z.string().default(''),
+    gpuPerNode: z.number().int().min(1).default(1),
   })
   .strip()
 
