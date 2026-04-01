@@ -5,13 +5,13 @@ milestone_name: — OpenShift Virtualization + AI Sizing
 current_phase: Phase 9 — Virt Engine Foundation (not started)
 current_plan: —
 status: Phase 9 planned — ready for execution
-last_updated: "2026-04-01T07:30:03.456Z"
+last_updated: "2026-04-01T07:36:27.718Z"
 last_activity: 2026-04-01 — v2.0 roadmap created (4 phases, 17 requirements mapped)
 progress:
   total_phases: 4
   completed_phases: 0
   total_plans: 4
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -77,6 +77,8 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [Phase 09]: AddOnConfig.vmCount is explicit user input — NOT derived from vmsPerWorker * workerNodes.count (circular dependency)
 - [Phase 09]: RecommendationConstraints.addOns.virt added for recommendation engine scoring in P09-03 scoreStandardHa boost
 - [Phase 09]: useUrlState.ts AddOnConfigSchema extended with Phase 9 virt fields — URL state hydration now round-trips all virt fields
+- [Phase 09]: calcVirt() vmCount sourced directly from config.addOns.vmCount — not derived from vmsPerWorker*workerNodes.count (circular dependency)
+- [Phase 09]: SNO_VIRT_NO_LIVE_MIGRATION condition uses virtEnabled (not snoVirtMode) — live migration is a topology constraint, not a hardware profile constraint
 
 ## Key Context
 
@@ -107,3 +109,4 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 | Phase 07 P07-01 | 4 min | 2 tasks | 5 files |
 | Phase 08 P01 | 4 | 2 tasks | 2 files |
 | Phase 09 P01 | 8 min | 3 tasks | 6 files |
+| Phase 09 P02 | 8 | 3 tasks | 3 files |
