@@ -3,7 +3,7 @@
 // Source: .planning/research/hardware-sizing.md
 
 import type { ClusterConfig, ClusterSizing, NodeSpec, ValidationWarning } from './types'
-import { calcODF, calcRHACM } from './addons'
+import { calcODF, calcRHACM, calcVirt } from './addons'
 import {
   CP_MIN,
   WORKER_MIN,
@@ -429,14 +429,29 @@ export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; war
     sizing.rhacmWorkers = calcRHACM(config.addOns.rhacmManagedClusters)
   }
 
+  // Phase 9: virt worker pool (VIRT-02)
+  if (config.addOns.virtEnabled) {
+    sizing.virtWorkerNodes = calcVirt(
+      config.addOns.vmCount,
+      config.addOns.vmsPerWorker,
+      config.addOns.virtAvgVmVcpu,
+      config.addOns.virtAvgVmRamGB,
+      config.workload.nodeVcpu,
+      config.workload.nodeRamGB,
+    )
+    sizing.virtStorageGB =
+      (sizing.virtWorkerNodes.count) * config.addOns.vmsPerWorker * config.addOns.virtAvgVmRamGB
+  }
+
   // Recalculate totals to include add-on nodes
-  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled) {
+  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled || config.addOns.virtEnabled) {
     sizing.totals = sumTotals([
       sizing.masterNodes,
       sizing.workerNodes,
       sizing.infraNodes,
       sizing.odfNodes,
       sizing.rhacmWorkers,
+      sizing.virtWorkerNodes,
     ])
   }
 
