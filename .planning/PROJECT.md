@@ -8,7 +8,18 @@ A web-based OpenShift sizing and architecture recommendation tool for pre-sales 
 
 From constraints to proposal-ready hardware BoM in minutes — covering every supported OpenShift topology.
 
-## Current State
+## Current Milestone: v2.0 OpenShift Virtualization + AI Sizing
+
+**Goal:** Extend the sizer to handle VM-based workloads (OpenShift Virtualization / CNV) and AI/RHOAI clusters with GPU nodes, covering the full hybrid topology spectrum.
+
+**Target features:**
+- OpenShift Virtualization topology (`calcVirt()`) — worker + KubeVirt overhead + ODF RWX storage nodes
+- AI / RHOAI add-on — GPU node sizing (count, type, mode: container / passthrough / vGPU), RHOAI operator overhead
+- GPU node profiles — NVIDIA passthrough vs vGPU density vs MIG partition sizing
+- SNO-with-Virt profile — boosted minimums (8 vCPU, 120 GB root + 50 GB virt storage)
+- Updated BoM table — GPU node rows, virt storage row, live-migration warnings
+
+## Previous State
 
 **v1.0 shipped 2026-04-01** — Full OpenShift Sizer complete.
 
@@ -36,7 +47,15 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 
 ### Active (v2.0)
 
-- [ ] OpenShift Virtualization topology (CNV) support
+- [ ] OpenShift Virtualization topology (CNV) — `calcVirt()` calculator
+- [ ] GPU node sizing — count, type, mode (container / passthrough / vGPU / MIG)
+- [ ] RHOAI add-on — operator overhead + GPU nodes
+- [ ] SNO-with-Virt profile — boosted hardware minimums
+- [ ] Live-migration storage warning — RWX required, GPU passthrough blocks migration
+- [ ] Updated BoM — GPU row, virt storage row
+
+### Deferred (v2.1+)
+
 - [ ] Multi-cluster sizing (multiple sites/environments in one session)
 - [ ] Air-gapped mirror registry sizing (bastion host, storage for 100–650 GB images)
 - [ ] ROSA/ARO/OSD managed cloud comparison view
@@ -76,5 +95,22 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 - **Languages**: FR, EN, IT, DE — all UI strings via vue-i18n
 - **Exports**: PPTX via pptxgenjs, PDF via jsPDF, CSV
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-01 after v1.0 milestone*
+*Last updated: 2026-04-01 — v2.0 milestone started*
