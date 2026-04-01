@@ -2,7 +2,7 @@
 // Implements ODF storage, infrastructure nodes, and RHACM hub sizing.
 // Source: .planning/research/hardware-sizing.md sections 4, 5.1, 7
 
-import type { NodeSpec } from './types'
+import type { NodeSpec, ClusterSizing } from './types'
 import {
   ODF_MIN_CPU_PER_NODE,
   ODF_MIN_RAM_PER_NODE_GB,
@@ -18,6 +18,10 @@ import {
   GPU_NODE_MIN_VCPU,
   GPU_NODE_MIN_RAM_GB,
   GPU_NODE_MIN_STORAGE_GB,
+  RHOAI_WORKER_MIN_VCPU,
+  RHOAI_WORKER_MIN_RAM_GB,
+  RHOAI_INFRA_OVERHEAD_VCPU,
+  RHOAI_INFRA_OVERHEAD_RAM_GB,
 } from './constants'
 import { infraNodeSizing, allocatableRamGB } from './formulas'
 
@@ -160,5 +164,42 @@ export function calcGpuNodes(
     vcpu: Math.max(nodeVcpu, GPU_NODE_MIN_VCPU),
     ramGB: Math.max(nodeRamGB, GPU_NODE_MIN_RAM_GB),
     storageGB: Math.max(nodeStorageGB, GPU_NODE_MIN_STORAGE_GB),
+  }
+}
+
+/**
+ * Apply RHOAI operator constraints to an already-computed ClusterSizing.
+ *
+ * RHOAI-02: Enforces per-worker minimum (RHOAI_WORKER_MIN_VCPU / RHOAI_WORKER_MIN_RAM_GB).
+ *   Uses Math.max to lift nodes below the floor — never lowers them.
+ *   No-op when workerNodes is null (SNO, compact-3node, MicroShift have no separate worker pool).
+ *
+ * RHOAI-03: Adds operator overhead to infra nodes when present (infraNodesEnabled=true).
+ *   Overhead covers: RHOAI dashboard, KServe controller, DS Pipelines controller,
+ *   Model Registry controller pods pinned to infra nodes via nodeSelector.
+ *   No-op when infraNodesEnabled=false or infraNodes is null.
+ *
+ * @param sizing            - ClusterSizing produced by topology calculator (mutated in-place)
+ * @param infraNodesEnabled - whether dedicated infra nodes are in the cluster
+ */
+export function calcRHOAI(sizing: ClusterSizing, infraNodesEnabled: boolean): void {
+  // RHOAI-02: enforce per-worker floor (SNO/compact-3node return workerNodes=null — skip)
+  if (sizing.workerNodes) {
+    sizing.workerNodes = {
+      ...sizing.workerNodes,
+      vcpu:  Math.max(sizing.workerNodes.vcpu,  RHOAI_WORKER_MIN_VCPU),
+      ramGB: Math.max(sizing.workerNodes.ramGB, RHOAI_WORKER_MIN_RAM_GB),
+    }
+  }
+
+  // RHOAI-03: add operator overhead addend to infra nodes when infraNodesEnabled=true
+  // When infraNodesEnabled=false, RHOAI operator pods land on worker nodes;
+  // the worker floor (RHOAI-02) above already ensures adequate capacity.
+  if (infraNodesEnabled && sizing.infraNodes) {
+    sizing.infraNodes = {
+      ...sizing.infraNodes,
+      vcpu:  sizing.infraNodes.vcpu  + RHOAI_INFRA_OVERHEAD_VCPU,
+      ramGB: sizing.infraNodes.ramGB + RHOAI_INFRA_OVERHEAD_RAM_GB,
+    }
   }
 }
