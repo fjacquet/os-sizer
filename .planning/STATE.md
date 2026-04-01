@@ -5,13 +5,13 @@ milestone_name: — OpenShift Virtualization + AI Sizing
 current_phase: Phase 11 — RHOAI Add-On Engine (not started)
 current_plan: —
 status: Phase 11 planned — ready for execution
-last_updated: "2026-04-01T09:00:47.738Z"
+last_updated: "2026-04-01T09:09:30.229Z"
 last_activity: 2026-04-01 — Phase 10 GPU Node Engine verified complete (221 tests passing)
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -93,6 +93,8 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [Phase 10]: MIG_PROFILES tests import directly from constants.ts — verifying lookup table structure, not engine integration
 - [Phase 11]: rhoaiEnabled typed as boolean (not union) — only on/off semantics needed for Phase 11
 - [Phase 11]: RHOAI_INFRA_OVERHEAD constants annotated MEDIUM confidence — no official Red Hat aggregate table; community estimate from ai-on-openshift.io
+- [Phase 11]: calcRHOAI void mutation pattern — matches post-dispatch pattern, returns void, mutates in-place via object spread
+- [Phase 11]: rhoaiEnabled added to totals recalc condition in calcCluster — ensures sizing.totals reflects RHOAI-mutated worker/infra values
 
 ## Key Context
 
@@ -130,3 +132,4 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 | Phase 10 P02 | 5 min | 2 tasks | 3 files |
 | Phase 10 P03 | 5 min | 3 tasks | 2 files |
 | Phase 11 P01 | 5 | 2 tasks | 4 files |
+| Phase 11 P02 | 8 min | 2 tasks | 4 files |
