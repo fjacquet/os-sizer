@@ -8,87 +8,73 @@ A web-based OpenShift sizing and architecture recommendation tool for pre-sales 
 
 From constraints to proposal-ready hardware BoM in minutes — covering every supported OpenShift topology.
 
+## Current State
+
+**v1.0 shipped 2026-04-01** — Full OpenShift Sizer complete.
+
+- 8 phases, 26 plans, ~5,100 LOC TypeScript/Vue
+- 186 tests passing (engine, stores, composables, wizard components)
+- Deployed: GitHub Pages via GitHub Actions CI/CD
+- Tech stack: Vue 3 + TypeScript + Vite 8 + Tailwind v4 + Pinia + vue-i18n + pptxgenjs/jsPDF
+
 ## Requirements
 
-### Validated
+### Validated (v1.0)
 
-<!-- Shipped and confirmed valuable. -->
+- ✓ Vue 3 + TypeScript + Vite 8 + Tailwind v4 + Pinia + vue-i18n scaffolding — v1.0
+- ✓ 8 topology calculators (StandardHA, Compact3Node, SNO, TNA, TNF, HCP, MicroShift, ManagedCloud) — v1.0
+- ✓ Recommendation engine with constraint-driven topology ranking — v1.0
+- ✓ Multi-step wizard: Environment → Workload → Architecture → Results — v1.0
+- ✓ ODF and RHACM add-on sizing wired into calcCluster dispatcher — v1.0
+- ✓ Results page: BoM table, charts, totals, warnings — v1.0
+- ✓ PPTX/PDF/CSV exports — v1.0
+- ✓ URL sharing (lz-string + Zod encoding) — v1.0
+- ✓ EN/FR/IT/DE i18n (all strings, all locales) — v1.0
+- ✓ GitHub Pages deployment + CI/CD — v1.0
+- ✓ 186 tests: engine formulas, recommendation engine, stores, wizard components — v1.0
+- ✓ allocatableRamGB formula, Math.max minimums, HCP infraNodes support — v1.0
 
-(None yet — ship to validate)
+### Active (v2.0)
 
-### Active
-
-<!-- Current scope. Building toward these. -->
-
-**Architecture Coverage:**
-
-- [ ] Standard HA cluster (3 masters + N workers + optional infra nodes)
-- [ ] Compact 3-node cluster (masters double as workers)
-- [ ] Single Node OpenShift (SNO) — edge profiles including telecom/vDU
-- [ ] Two-Node with Arbiter (TNA)
-- [ ] Two-Node with Fencing (TNF) — bare-metal only
-- [ ] Hosted Control Planes (HCP) — decoupled control plane
-- [ ] MicroShift / Red Hat Device Edge — far edge, IoT
-- [ ] Managed cloud (ROSA, ARO) — informational sizing
-
-**Sizing Engine:**
-
-- [ ] Workload profile inputs (apps, pods, CPU/RAM per workload)
-- [ ] HA/resilience inputs (node failure tolerance, site failure tolerance)
-- [ ] Environment constraints (edge, air-gapped, datacenter, cloud)
-- [ ] Optional add-ons: ODF storage, infra nodes, GPU nodes, RHACM
-- [ ] Infrastructure node sizing (logging, monitoring, registry, ingress) — separate from workers
-- [ ] Control plane node sizing per topology
-- [ ] Worker node sizing based on workload profile
-
-**UI / UX:**
-
-- [ ] Guided wizard: constraints → architecture recommendation → hardware sizing
-- [ ] On-screen Bill of Materials summary
-- [ ] Shareable compressed URL (all inputs encoded)
-
-**Exports:**
-
-- [ ] PowerPoint (PPTX) export via pptxgenjs
-- [ ] PDF export
-- [ ] CSV export
-
-**Internationalization:**
-
-- [ ] English (EN)
-- [ ] French (FR)
-- [ ] Italian (IT)
-- [ ] German (DE)
+- [ ] OpenShift Virtualization topology (CNV) support
+- [ ] Multi-cluster sizing (multiple sites/environments in one session)
+- [ ] Air-gapped mirror registry sizing (bastion host, storage for 100–650 GB images)
+- [ ] ROSA/ARO/OSD managed cloud comparison view
+- [ ] Side-by-side topology comparison
+- [ ] Save/load sessions (localStorage)
 
 ### Out of Scope
 
 - Subscription/licensing cost calculations — pricing changes too frequently, maintain separately
 - Network topology design — out of scope for hardware sizer
 - Day-2 operations planning — focus is on initial sizing
+- SNO + worker nodes — SNO is by definition single-node (not supported by Red Hat)
 
 ## Context
 
-- Inspired by and structurally modeled on the `vcf-sizer` project (VMware Cloud Foundation sizer)
-- vcf-sizer uses Vue 3 + TypeScript + Vite + Tailwind v4 + Pinia + vue-i18n + pptxgenjs
-- Architecture source document: `docs/Architectures de déploiement OpenShift supportées.md` — comprehensive French-language research covering all OpenShift deployment topologies with hardware specs
+- Deployed at GitHub Pages: `/os-sizer/` base path
+- Source of truth for hardware specs: `docs/Architectures de déploiement OpenShift supportées.md`
 - Target audience: pre-sales architects creating customer proposals and BoM documents
-- Red Hat publishes official minimum hardware specs per topology; sizer must align with these
-
-## Constraints
-
-- **Tech stack**: Vue 3 + TypeScript + Vite + Tailwind v4 + Pinia + vue-i18n — match vcf-sizer for maintainability
-- **Accuracy**: Sizing must align with Red Hat official hardware specifications (not estimates)
-- **Languages**: FR, EN, IT, DE from day one — all UI strings via vue-i18n
-- **Exports**: PPTX via pptxgenjs (same library as vcf-sizer), PDF, CSV
+- Modeled on `vcf-sizer` (VMware Cloud Foundation sizer) — same maintainer, same tech stack
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Mirror vcf-sizer tech stack | Same maintainer, consistency, proven patterns | — Pending |
-| All architectures in v1 | Full coverage matches the architecture doc scope | — Pending |
-| Infra nodes sized separately | Key for licensing optimization (infra nodes don't consume app subscriptions) | — Pending |
-| 4 languages from day one | Primary markets: FR, EN, IT, DE | — Pending |
+| Mirror vcf-sizer tech stack | Same maintainer, consistency, proven patterns | ✓ Worked well — fast bootstrap |
+| All 8 architectures in v1 | Full coverage matches architecture doc scope | ✓ Validated — users need topology choice |
+| Infra nodes sized separately | Key for licensing optimization | ✓ Confirmed — separate BomTable row |
+| 4 languages from day one | Primary markets: FR, EN, IT, DE | ✓ Completed with Swiss locale review |
+| TDD for engine | Sizing errors are high-stakes; tests catch regressions | ✓ Caught 3 real gaps in gap-closure phases |
+| Post-dispatch add-on pattern | Cleaner than per-topology add-on handling | ✓ Used for ODF/RHACM wiring in Phase 6 |
+| Gap-closure phases 6-8 | Audit-identified gaps addressed separately | ✓ Clean separation, all gaps resolved |
+
+## Constraints
+
+- **Tech stack**: Vue 3 + TypeScript + Vite + Tailwind v4 + Pinia + vue-i18n — match vcf-sizer for maintainability
+- **Accuracy**: Sizing must align with Red Hat official hardware specifications (not estimates)
+- **Languages**: FR, EN, IT, DE — all UI strings via vue-i18n
+- **Exports**: PPTX via pptxgenjs, PDF via jsPDF, CSV
 
 ---
-*Last updated: 2026-03-31 after project initialization*
+*Last updated: 2026-04-01 after v1.0 milestone*
