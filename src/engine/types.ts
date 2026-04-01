@@ -49,6 +49,8 @@ export interface AddOnConfig {
   gpuModel: 'A100-40GB' | 'A100-80GB' | 'H100-80GB'  // GPU model (default 'A100-40GB')
   migProfile: string                 // MIG profile name e.g. '1g.5gb' — empty string = no MIG (default '')
   gpuPerNode: number                 // GPUs per node (default 1)
+  // Phase 11: Red Hat OpenShift AI
+  rhoaiEnabled: boolean              // RHOAI operator add-on enabled (default false)
 }
 
 export interface ClusterConfig {

@@ -37,6 +37,8 @@ export function createDefaultClusterConfig(index: number): ClusterConfig {
       gpuModel: 'A100-40GB' as const,
       migProfile: '',
       gpuPerNode: 1,
+      // Phase 11: Red Hat OpenShift AI
+      rhoaiEnabled: false,
     },
     environment: 'datacenter',
     haRequired: true,

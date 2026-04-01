@@ -39,6 +39,8 @@ const AddOnConfigSchema = z
     gpuModel: z.enum(['A100-40GB', 'A100-80GB', 'H100-80GB']).default('A100-40GB'),
     migProfile: z.string().default(''),
     gpuPerNode: z.number().int().min(1).default(1),
+    // Phase 11: Red Hat OpenShift AI
+    rhoaiEnabled: z.boolean().default(false),
   })
   .strip()
 
