@@ -49,10 +49,26 @@ function clusterField<K extends keyof ClusterConfig>(key: K) {
   })
 }
 
+function addOnField(key: keyof typeof activeCluster.value.addOns) {
+  return computed({
+    get: () => activeCluster.value.addOns[key],
+    set: (val: boolean | number) => {
+      const c = input.clusters[input.activeClusterIndex]
+      if (c) input.updateCluster(c.id, { addOns: { ...c.addOns, [key]: val } })
+    },
+  })
+}
+
 const topology = clusterField('topology')
 const snoProfile = clusterField('snoProfile')
 const hcpHostedClusters = clusterField('hcpHostedClusters')
 const hcpQpsPerCluster = clusterField('hcpQpsPerCluster')
+const virtEnabled = addOnField('virtEnabled')
+const vmCount = addOnField('vmCount')
+const vmsPerWorker = addOnField('vmsPerWorker')
+const virtAvgVmVcpu = addOnField('virtAvgVmVcpu')
+const virtAvgVmRamGB = addOnField('virtAvgVmRamGB')
+const snoVirtMode = addOnField('snoVirtMode')
 
 function selectTopology(topo: TopologyType) {
   topology.value = topo
@@ -131,6 +147,19 @@ function selectTopology(topo: TopologyType) {
             {{ p === 'standard' ? t('sno.standard') : p === 'edge' ? t('sno.edge') : t('sno.telecomVdu') }}
           </button>
         </div>
+        <!-- SNO-with-Virt mode toggle (SNO-01 engine already complete) -->
+        <div class="mt-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              :checked="snoVirtMode as boolean"
+              :aria-label="t('sno.virtMode')"
+              class="w-4 h-4 accent-blue-600"
+              @change="snoVirtMode = ($event.target as HTMLInputElement).checked"
+            />
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('sno.virtMode') }}</span>
+          </label>
+        </div>
       </div>
 
       <!-- HCP inputs -->
@@ -152,6 +181,51 @@ function selectTopology(topo: TopologyType) {
           :step="100"
           aria-required="true"
         />
+      </div>
+
+      <!-- Virt VM sizing inputs (VIRT-01, VIRT-03) — shown when virt add-on enabled on standard-ha or compact-3node -->
+      <div v-if="virtEnabled && (topology === 'standard-ha' || topology === 'compact-3node')" class="space-y-3">
+        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('workload.virtAddon') }}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <NumberSliderInput
+            :model-value="vmCount as number"
+            @update:model-value="(val: number) => { vmCount = val }"
+            :label="t('workload.vmCount')"
+            :min="1"
+            :max="5000"
+            :step="10"
+            aria-required="true"
+          />
+          <NumberSliderInput
+            :model-value="vmsPerWorker as number"
+            @update:model-value="(val: number) => { vmsPerWorker = val }"
+            :label="t('workload.vmsPerWorker')"
+            :min="1"
+            :max="50"
+            :step="1"
+            aria-required="true"
+          />
+          <NumberSliderInput
+            :model-value="virtAvgVmVcpu as number"
+            @update:model-value="(val: number) => { virtAvgVmVcpu = val }"
+            :label="t('workload.virtAvgVmVcpu')"
+            unit="vCPU"
+            :min="1"
+            :max="32"
+            :step="1"
+            aria-required="true"
+          />
+          <NumberSliderInput
+            :model-value="virtAvgVmRamGB as number"
+            @update:model-value="(val: number) => { virtAvgVmRamGB = val }"
+            :label="t('workload.virtAvgVmRamGB')"
+            unit="GB"
+            :min="1"
+            :max="256"
+            :step="1"
+            aria-required="true"
+          />
+        </div>
       </div>
 
       <!-- TNA tech preview notice -->
