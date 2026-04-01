@@ -102,3 +102,18 @@ export const MIG_PROFILES: Readonly<Record<string, Readonly<Record<string, numbe
 export const GPU_NODE_MIN_VCPU = 16        // typical bare-metal GPU node baseline
 export const GPU_NODE_MIN_RAM_GB = 64      // GPU nodes require sufficient CPU-side RAM for driver + workloads
 export const GPU_NODE_MIN_STORAGE_GB = 200 // OS + GPU drivers + container images
+
+// RHOAI worker node per-node minimum (RHOAI-02)
+// Source: RHOAI Self-Managed 3.0/3.3 install docs — "A minimum of 2 worker nodes with at least
+// 8 CPUs and 32 GiB RAM each is required to install the Operator."
+// Confirmed across RHOAI 2.25, 3.0, 3.3, and Cloud Service 1.x — HIGH confidence.
+// These are per-node floors, not aggregate cluster minimums.
+export const RHOAI_WORKER_MIN_VCPU = 8
+export const RHOAI_WORKER_MIN_RAM_GB = 32
+
+// RHOAI operator component overhead on infra nodes (RHOAI-03)
+// Source: community estimate (ai-on-openshift.io) — no official aggregate table published by Red Hat.
+// Covers: dashboard, KServe controller, DS Pipelines controller, Model Registry controller pods.
+// MEDIUM confidence — re-validate against current RHOAI release notes when upgrading beyond RHOAI 3.x.
+export const RHOAI_INFRA_OVERHEAD_VCPU = 4
+export const RHOAI_INFRA_OVERHEAD_RAM_GB = 16
