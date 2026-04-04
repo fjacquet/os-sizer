@@ -5,13 +5,13 @@ milestone_name: — OpenShift Virtualization + AI Sizing
 current_phase: Phase 12 — BoM, Exports, Wizard UI + i18n (not started)
 current_plan: —
 status: Phase 12 planned — ready for execution
-last_updated: "2026-04-04T14:33:45.963Z"
+last_updated: "2026-04-04T14:41:38.456Z"
 last_activity: 2026-04-01 — Phase 11 RHOAI Add-On Engine verified complete (237 tests passing)
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -104,6 +104,7 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 - [Phase 12]: availableMigProfiles computed uses MIG_PROFILES[gpuModel] key lookup — cascade select drives options from model selection
 - [Phase 12]: RHOAI annotation row uses em-dash for Count/Storage columns — rhoaiOverhead has no NodeSpec count/storageGB fields
 - [Phase 12]: All 3 export composables committed atomically — partial updates produce inconsistent BoMs across formats
+- [Phase 12]: useCsvExport.test.ts and BomTable.test.ts were pre-updated in 12-04 partial work; committed as 12-05 artifacts
 
 ## Key Context
 
@@ -148,3 +149,4 @@ Phase 12: BoM, Exports, Wizard UI     [ Not started ]
 | Phase 12 P03 | ~5 min | 1 tasks | 1 files |
 | Phase 12 P02 | 8 | 1 tasks | 1 files |
 | Phase 12 P04 | 8 min | 1 tasks | 3 files |
+| Phase 12 P05 | 8 min | 2 tasks | 4 files |
