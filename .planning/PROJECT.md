@@ -13,6 +13,7 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 **Goal:** Extend the sizer to handle VM-based workloads (OpenShift Virtualization / CNV) and AI/RHOAI clusters with GPU nodes, covering the full hybrid topology spectrum.
 
 **Target features:**
+
 - OpenShift Virtualization topology (`calcVirt()`) — worker + KubeVirt overhead + ODF RWX storage nodes
 - AI / RHOAI add-on — GPU node sizing (count, type, mode: container / passthrough / vGPU), RHOAI operator overhead
 - GPU node profiles — NVIDIA passthrough vs vGPU density vs MIG partition sizing
@@ -100,6 +101,7 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 This document evolves at phase transitions and milestone boundaries.
 
 **After each phase transition** (via `/gsd:transition`):
+
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
@@ -107,6 +109,7 @@ This document evolves at phase transitions and milestone boundaries.
 5. "What This Is" still accurate? → Update if drifted
 
 **After each milestone** (via `/gsd:complete-milestone`):
+
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
