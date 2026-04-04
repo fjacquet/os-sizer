@@ -175,11 +175,11 @@ defineExpose({ validate })
         <div v-if="rhacmEnabled" class="ml-6 mt-2">
           <NumberSliderInput
             :model-value="rhacmManagedClusters as number"
-            @update:model-value="(val: number) => { rhacmManagedClusters = val }"
             :label="t('hcp.clusterCount')"
             :min="1"
             :max="500"
             :step="1"
+            @update:model-value="(val: number) => { rhacmManagedClusters = val }"
           />
         </div>
         <!-- OpenShift Virtualization add-on (VIRT-01) -->
@@ -208,11 +208,11 @@ defineExpose({ validate })
         <div v-if="gpuEnabled" class="ml-6 mt-2 space-y-3">
           <NumberSliderInput
             :model-value="gpuNodeCount as number"
-            @update:model-value="(val: number) => { gpuNodeCount = val }"
             :label="t('workload.gpuNodeCount')"
             :min="1"
             :max="32"
             :step="1"
+            @update:model-value="(val: number) => { gpuNodeCount = val }"
           />
           <!-- GPU Mode select (GPU-02) -->
           <div class="space-y-1">

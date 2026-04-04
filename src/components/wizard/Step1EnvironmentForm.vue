@@ -66,7 +66,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
 
     <!-- Environment type -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700 dark:text-gray-300" id="env-type-label">{{ t('environment.label') }}</label>
+      <label id="env-type-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('environment.label') }}</label>
       <div
         class="flex flex-wrap gap-2"
         role="radiogroup"
@@ -91,7 +91,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
 
     <!-- Connectivity -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700 dark:text-gray-300" id="connectivity-label">{{ t('environment.connectivity') }}</label>
+      <label id="connectivity-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('environment.connectivity') }}</label>
       <div
         class="flex gap-2"
         role="radiogroup"
@@ -125,7 +125,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
 
     <!-- HA Level -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700 dark:text-gray-300" id="ha-level-label">{{ t('environment.haLevel') }}</label>
+      <label id="ha-level-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('environment.haLevel') }}</label>
       <div
         class="flex gap-2"
         role="radiogroup"

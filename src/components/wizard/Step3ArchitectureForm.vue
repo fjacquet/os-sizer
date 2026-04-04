@@ -126,7 +126,7 @@ function selectTopology(topo: TopologyType) {
 
       <!-- SNO profile selector -->
       <div v-if="topology === 'sno'" class="space-y-2">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300" id="sno-profile-label">{{ t('sno.profile') }}</label>
+        <label id="sno-profile-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('sno.profile') }}</label>
         <div
           class="flex flex-wrap gap-2"
           role="radiogroup"
@@ -189,41 +189,41 @@ function selectTopology(topo: TopologyType) {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <NumberSliderInput
             :model-value="vmCount as number"
-            @update:model-value="(val: number) => { vmCount = val }"
             :label="t('workload.vmCount')"
             :min="1"
             :max="5000"
             :step="10"
             aria-required="true"
+            @update:model-value="(val: number) => { vmCount = val }"
           />
           <NumberSliderInput
             :model-value="vmsPerWorker as number"
-            @update:model-value="(val: number) => { vmsPerWorker = val }"
             :label="t('workload.vmsPerWorker')"
             :min="1"
             :max="50"
             :step="1"
             aria-required="true"
+            @update:model-value="(val: number) => { vmsPerWorker = val }"
           />
           <NumberSliderInput
             :model-value="virtAvgVmVcpu as number"
-            @update:model-value="(val: number) => { virtAvgVmVcpu = val }"
             :label="t('workload.virtAvgVmVcpu')"
             unit="vCPU"
             :min="1"
             :max="32"
             :step="1"
             aria-required="true"
+            @update:model-value="(val: number) => { virtAvgVmVcpu = val }"
           />
           <NumberSliderInput
             :model-value="virtAvgVmRamGB as number"
-            @update:model-value="(val: number) => { virtAvgVmRamGB = val }"
             :label="t('workload.virtAvgVmRamGB')"
             unit="GB"
             :min="1"
             :max="256"
             :step="1"
             aria-required="true"
+            @update:model-value="(val: number) => { virtAvgVmRamGB = val }"
           />
         </div>
       </div>
