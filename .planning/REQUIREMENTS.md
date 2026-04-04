@@ -75,18 +75,18 @@
 
 | REQ-ID | Phase | Plan | Status |
 |--------|-------|------|--------|
-| WARN-04 | — | — | pending |
-| WARN-05 | — | — | pending |
-| PPTX-01 | — | — | pending |
-| PPTX-02 | — | — | pending |
-| PPTX-03 | — | — | pending |
-| PDF-01 | — | — | pending |
-| PDF-02 | — | — | pending |
-| PDF-03 | — | — | pending |
-| PDF-04 | — | — | pending |
-| CLUSTER-01 | — | — | pending |
-| CLUSTER-02 | — | — | pending |
-| CLUSTER-03 | — | — | pending |
-| CLUSTER-04 | — | — | pending |
-| SESSION-01 | — | — | pending |
-| SESSION-02 | — | — | pending |
+| WARN-04 | Phase 14 | 14-01 | pending |
+| WARN-05 | Phase 14 | 14-01 | pending |
+| PPTX-01 | Phase 16 | 16-01 | pending |
+| PPTX-02 | Phase 16 | 16-01 | pending |
+| PPTX-03 | Phase 16 | 16-02 | pending |
+| PDF-01 | Phase 17 | 17-01 | pending |
+| PDF-02 | Phase 17 | 17-02 | pending |
+| PDF-03 | Phase 17 | 17-02 | pending |
+| PDF-04 | Phase 17 | 17-02 | pending |
+| CLUSTER-01 | Phase 18 | 18-01 | pending |
+| CLUSTER-02 | Phase 18 | 18-02 | pending |
+| CLUSTER-03 | Phase 18 | 18-02 | pending |
+| CLUSTER-04 | Phase 19 | 19-01 | pending |
+| SESSION-01 | Phase 15 | 15-01 | pending |
+| SESSION-02 | Phase 15 | 15-01 | pending |
