@@ -1,588 +1,394 @@
-# Architecture Research
+# Architecture Research: v2.1 Export Milestone
 
-**Domain:** OpenShift Virtualization + AI/GPU sizing extension to an existing OpenShift sizer
-**Researched:** 2026-04-01
-**Confidence:** HIGH (based on direct source code analysis + MEDIUM for sizing constants from official docs)
-
-## Standard Architecture
-
-### System Overview
-
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                         Vue 3 UI Layer                           │
-├──────────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────┐   │
-│  │  Wizard      │  │  Results     │  │  Shared Components    │   │
-│  │  Step1-3     │  │  BomTable    │  │  NumberSliderInput    │   │
-│  │  Step3:NEW   │  │  BomTable:   │  │  WarningBanner        │   │
-│  │  VirtInputs  │  │  GPU rows    │  │  WizardStepper        │   │
-│  │  GpuInputs   │  │  Virt rows   │  │                       │   │
-│  └──────┬───────┘  └──────┬───────┘  └───────────────────────┘   │
-│         │                 │                                       │
-├─────────┴─────────────────┴───────────────────────────────────────┤
-│                       Pinia Store Layer                          │
-├──────────────────────────────────────────────────────────────────┤
-│  ┌──────────────────────┐  ┌───────────────────────────────────┐  │
-│  │  inputStore          │  │  calculationStore                 │  │
-│  │  clusters[]          │  │  clusterResults[] (computed)      │  │
-│  │  ClusterConfig:NEW   │  │  recommendations[] (computed)     │  │
-│  │  + VirtConfig        │  │  → calcCluster() per cluster      │  │
-│  │  + GpuConfig         │  │  → recommend() per cluster        │  │
-│  └──────────────────────┘  └───────────────────────────────────┘  │
-│                                                                   │
-├───────────────────────────────────────────────────────────────────┤
-│                       Engine Layer (zero Vue)                    │
-├───────────────────────────────────────────────────────────────────┤
-│  ┌──────────┐  ┌─────────────────┐  ┌──────────┐  ┌───────────┐  │
-│  │ types.ts │  │  calculators.ts │  │ addons.ts│  │ constants │  │
-│  │ NEW:     │  │  calcCluster()  │  │ calcODF()│  │ NEW:      │  │
-│  │ VirtConf │  │  NEW: calcVirt()│  │ NEW:     │  │ VIRT_*    │  │
-│  │ GpuConf  │  │  mod: calcSNO() │  │ calcGpu  │  │ GPU_*     │  │
-│  │ TopType  │  │  NEW: case virt │  │ Nodes()  │  │ SNO_VIRT_ │  │
-│  │ +virt    │  │  calcGpuNodes() │  │ calcRHOAI│  │ RHOAI_*   │  │
-│  │ ClustCfg │  │                 │  │ Workers()│  │           │  │
-│  │ +virtCfg │  │                 │  │          │  │           │  │
-│  │ +gpuCfg  │  │                 │  │          │  │           │  │
-│  └──────────┘  └─────────────────┘  └──────────┘  └───────────┘  │
-│  ┌──────────┐  ┌─────────────────┐  ┌──────────────────────────┐  │
-│  │ defaults │  │  recommendation │  │  validation.ts           │  │
-│  │ +virt/   │  │  +scoreVirt()   │  │  +GPU passthrough blocks  │  │
-│  │  gpu defs│  │  +virt in list  │  │   live migration          │  │
-│  └──────────┘  └─────────────────┘  │  +RWX required for virt  │  │
-│                                     │  +RHOAI req >= 2 workers  │  │
-│                                     └──────────────────────────┘  │
-└───────────────────────────────────────────────────────────────────┘
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | New vs Modified |
-|-----------|----------------|-----------------|
-| `types.ts` | All data shapes; TopologyType union; ClusterConfig; ClusterSizing | **MODIFIED** — add VirtConfig, GpuConfig, extend AddOnConfig, extend ClusterConfig, extend ClusterSizing |
-| `constants.ts` | Hardware minimums as readonly constants | **MODIFIED** — add VIRT_WORKER_MIN, SNO_VIRT_MIN, GPU_NODE_*, RHOAI_* constants |
-| `calculators.ts` | Dispatch + topology calculators | **MODIFIED** — add calcVirt(), calcGpuNodes() helper, modify calcSNO() for virt profile, extend calcCluster() switch |
-| `addons.ts` | Post-dispatch add-on sizing (ODF, RHACM) | **MODIFIED** — add calcRHOAIWorkers(), calcGpuNodePool() |
-| `defaults.ts` | Default ClusterConfig factory | **MODIFIED** — add virtConfig, gpuConfig defaults |
-| `recommendation.ts` | Score + rank topologies | **MODIFIED** — add 'virt' to topologies[], add scoreVirt() |
-| `validation.ts` | Cross-field warnings | **MODIFIED** — add GPU passthrough + live migration warning, RWX required warning, RHOAI node count check |
-| `index.ts` (barrel) | Public engine API exports | **MODIFIED** — export calcVirt, calcGpuNodes, calcRHOAIWorkers, calcGpuNodePool |
-| `Step3ArchitectureForm.vue` | Topology picker + topology-specific inputs | **MODIFIED** — add 'virt' to topologyLabelMap and allTopologies, add VirtInputsSection, GpuConfigSection |
-| `BomTable.vue` | Node rows per ClusterSizing | **MODIFIED** — add gpuNodes row, virtStorage row |
-| `inputStore.ts` | Reactive clusters[] array | **MODIFIED** — VirtConfig and GpuConfig are part of ClusterConfig, no store change needed |
-| `calculationStore.ts` | Computed clusterResults | **MODIFIED** — pass virt/gpu flags to recommend() constraints |
+**Project:** os-sizer
+**Researched:** 2026-04-04
+**Scope:** Multi-cluster state, topology comparison, chart data flow, JSON session serialization
+**Confidence:** HIGH — based on direct source-code reading of the production codebase
 
 ---
 
-## Recommended Project Structure
+## Baseline: What Already Exists
+
+The current architecture follows a strict three-layer separation:
 
 ```
-src/
-├── engine/
-│   ├── types.ts          # MODIFIED: VirtConfig, GpuConfig, GpuMode, extended ClusterConfig/ClusterSizing
-│   ├── constants.ts      # MODIFIED: VIRT_WORKER_MIN, SNO_VIRT_MIN, GPU_NODE_*, RHOAI_* constants
-│   ├── calculators.ts    # MODIFIED: calcVirt(), modified calcSNO(), extended calcCluster() switch
-│   ├── addons.ts         # MODIFIED: calcGpuNodePool(), calcRHOAIWorkers()
-│   ├── defaults.ts       # MODIFIED: virtConfig + gpuConfig in createDefaultClusterConfig()
-│   ├── recommendation.ts # MODIFIED: 'virt' in topologies[], scoreVirt()
-│   ├── validation.ts     # MODIFIED: GPU passthrough warning, RWX storage warning, RHOAI minimum
-│   ├── formulas.ts       # NO CHANGE — existing worker/CP formulas reused by calcVirt()
-│   └── index.ts          # MODIFIED: new exports
-├── stores/
-│   ├── inputStore.ts     # NO CHANGE — ClusterConfig shape change flows automatically
-│   └── calculationStore.ts # MODIFIED: pass virtEnabled/gpuEnabled to recommend()
-├── components/
-│   ├── wizard/
-│   │   ├── Step3ArchitectureForm.vue   # MODIFIED: add virt to topology list + sub-inputs
-│   │   └── VirtConfigSection.vue       # NEW: virt worker config, VM count, ODF RWX checkbox
-│   │   └── GpuConfigSection.vue        # NEW: GPU count, type, mode (container/passthrough/vGPU/MIG)
-│   └── results/
-│       └── BomTable.vue                # MODIFIED: gpuNodes row, virtStorage annotation row
+src/engine/        Pure TypeScript. ZERO Vue imports. Formulas + types + validation.
+src/stores/        Pinia. inputStore (ref) + calculationStore (computed only) + uiStore.
+src/components/    Vue SFCs. Read from stores. Never call engine directly.
+src/composables/   Plain TypeScript modules. No Vue lifecycle hooks.
 ```
 
-### Structure Rationale
+**Critical invariants that must be preserved in v2.1:**
+- CALC-01: `src/engine/` files must never import Vue, Pinia, or any Vue ecosystem library
+- CALC-02: `calculationStore.ts` must contain zero `ref()` — only `computed()`
+- Export composables are plain TypeScript, no Vue lifecycle hooks (enables unit testing without DOM)
 
-- **Engine stays zero-Vue:** All new types, constants, calculators follow the CALC-01 constraint — no Vue imports in `engine/`. This preserves testability with plain Vitest.
-- **New sub-components for virt/GPU inputs:** Step3 is already 188 lines. Adding virt + GPU inline would make it unmaintainable. Extract `VirtConfigSection.vue` and `GpuConfigSection.vue` as scoped sub-components rendered conditionally inside Step3.
-- **addons.ts gets GPU/RHOAI:** The post-dispatch add-on pattern (established for ODF/RHACM) is the right home for GPU node pool sizing and RHOAI worker sizing. They are add-ons applied after topology dispatch, not separate topologies.
-- **ClusterSizing gets new node pool fields:** `gpuNodes` and (optionally) `virtStorageNodes` follow the same optional `NodeSpec | null` pattern as `odfNodes` and `rhacmWorkers`. BomTable already handles this pattern with null checks.
+### Current store graph
+
+```
+inputStore (ref)
+  clusters: ClusterConfig[]         <- array already supports N clusters
+  activeClusterIndex: number
+  addCluster() / removeCluster() / updateCluster()
+
+calculationStore (computed only)
+  clusterResults: SizingResult[]    <- computed from all clusters, already per-cluster
+  recommendations: TopologyRecommendation[]  <- only for active cluster
+  activeCluster: ClusterConfig      <- shortcut computed
+
+uiStore (ref)
+  currentWizardStep: 1|2|3|4
+  locale, isDarkMode, topologyConfirmed
+```
+
+Key finding: **multi-cluster state infrastructure is already in place**. `inputStore` already holds an array of `ClusterConfig` with add/remove/update actions. `calculationStore` already computes `clusterResults` as `SizingResult[]` — one per cluster. The wizard and ResultsPage already use `activeClusterIndex` to select the active cluster. v2.1 adds UI on top of existing data model, not a new data model.
 
 ---
 
-## Architectural Patterns
+## Area 1: Multi-Cluster State
 
-### Pattern 1: Topology Calculator — Pure Function returning `{ sizing, warnings }`
+**New vs Modified:** Modified — inputStore already supports N clusters. Only UI is new.
 
-**What:** Each topology is a pure function `(config: ClusterConfig) => { sizing: ClusterSizing; warnings: ValidationWarning[] }`. No side effects, no Vue reactivity.
+**Integration point:** `inputStore.clusters[]` is the source of truth. No new store needed.
 
-**When to use:** For `calcVirt()` — exactly the same signature as `calcStandardHA()`. The 'virt' topology is Standard HA with KubeVirt overhead added to worker nodes and ODF RWX required.
+**What needs to be added to inputStore:**
 
-**Trade-offs:** Simple to test, simple to reason about. Coupling to `ClusterConfig` means new fields (virtConfig, gpuConfig) must be added to the shared config type rather than having separate per-topology config objects.
-
-**Example:**
 ```typescript
-// calcVirt() follows the same signature as calcStandardHA()
-export function calcVirt(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
-  // Step 1: standard HA sizing
-  const base = calcStandardHA(config)
-  // Step 2: boost worker nodes for KubeVirt overhead
-  //   KubeVirt overhead = 2 vCPU baseline + (1.002 * vmRamGB) + 146 MiB + 8 MiB * vCPUs
-  //   Minimum virt worker: 16 vCPU, 64 GB RAM (bare metal class)
-  // Step 3: force odfEnabled=true (RWX required for live migration)
-  // Step 4: return warnings if GPU passthrough + live migration enabled
-  return { sizing, warnings }
+// OPTIONAL: cluster role tagging for Hub+Spoke
+// Add to ClusterConfig in engine/types.ts:
+role?: 'hub' | 'spoke' | undefined  // undefined = standalone (default)
+```
+
+This is the only type-level change needed. The engine calculators do not distinguish hub from spoke — roles are metadata for display and aggregate BoM only.
+
+**Data flow:**
+```
+User clicks "Add Cluster"
+  -> inputStore.addCluster()
+  -> clusters[] gains a new ClusterConfig (createDefaultClusterConfig(index))
+  -> calculationStore.clusterResults recomputes reactively (computed, zero ref)
+  -> ResultsPage reflects N clusters via clusterResults[]
+```
+
+**Aggregate BoM** (sum across all clusters for a multi-site report) is a pure derived value. Implement as a computed in `calculationStore`:
+
+```typescript
+// NEW computed in calculationStore
+const aggregateTotals = computed(() =>
+  clusterResults.value.reduce(
+    (acc, r) => ({
+      vcpu: acc.vcpu + r.sizing.totals.vcpu,
+      ramGB: acc.ramGB + r.sizing.totals.ramGB,
+      storageGB: acc.storageGB + r.sizing.totals.storageGB,
+    }),
+    { vcpu: 0, ramGB: 0, storageGB: 0 }
+  )
+)
+```
+
+**Build order note:** No engine changes required for multi-cluster (engine is already per-ClusterConfig). InputStore already handles arrays. UI is the only deliverable. Build UI cluster tabs/switcher before exports.
+
+---
+
+## Area 2: Side-by-Side Topology Comparison
+
+**New vs Modified:** New concept, implemented via existing multi-cluster data model.
+
+**Design decision:** Topology comparison is NOT a separate mode or store. It is a view over two `ClusterConfig` entries that have the same workload but different `topology` values. The user creates two clusters, copies workload to both, and the UI renders them side by side.
+
+**Integration point:** `calculationStore.clusterResults[]` already provides all the data. The comparison view reads `clusterResults[i]` and `clusterResults[j]` and renders them in a two-column layout.
+
+**Data flow:**
+```
+User selects "Compare topologies"
+  -> uiStore: new comparisonClusterIds: [id_a, id_b] (two selected cluster IDs)
+  -> ComparisonView reads clusterResults for those two IDs
+  -> Renders side-by-side NodeSpec table (columns = topology, rows = node type)
+```
+
+**New uiStore fields needed:**
+
+```typescript
+// ADD to uiStore:
+const comparisonMode = ref(false)
+const comparisonClusterIds = ref<[string, string] | null>(null)
+```
+
+Alternatively, comparison state can live in the ComparisonView component itself (local `ref`) since it is purely presentational and does not need to survive navigation or be exported. Local state is simpler and avoids uiStore bloat. Recommended: local component state first; promote to uiStore only if URL sharing of comparison state is needed.
+
+**Workload copy helper:** Add a `copyWorkload(sourceId, targetId)` action to inputStore to make it easy to duplicate workload settings between clusters for a fair topology comparison.
+
+**Build order note:** Build after multi-cluster UI (requires cluster list), before export redesign (comparison view should be exportable).
+
+---
+
+## Area 3: Chart Data Flow for PPTX/PDF Exports
+
+**New vs Modified:** Modified — existing chart components (VcpuChart, RamChart, StorageChart) use vue-chartjs (Chart.js). Export composables currently produce tables only, no charts.
+
+**The core problem:** Chart.js renders to a `<canvas>` element in the DOM. pptxgenjs and jsPDF need base64-encoded PNG data or native chart data structures. The chart data computation logic in Vue components needs to be extractable as pure data, separate from the Chart.js render.
+
+**Integration point:** The computation in VcpuChart/RamChart/StorageChart is currently inline in the component script. It must be extracted into a shared pure function so both the Vue chart component AND the export composable can use it.
+
+**Recommended approach — extract chart data builders:**
+
+```typescript
+// NEW: src/composables/useChartData.ts
+// Pure TypeScript, no Vue imports (follows existing composable pattern)
+
+export interface ChartDataRow { label: string; value: number }
+
+export function buildVcpuChartData(sizing: ClusterSizing): ChartDataRow[]
+export function buildRamChartData(sizing: ClusterSizing): ChartDataRow[]
+export function buildStorageChartData(sizing: ClusterSizing): ChartDataRow[]
+```
+
+Chart Vue components call these functions and pass results to Chart.js. Export composables call the same functions to build chart data, then either:
+
+1. **Option A (simpler, recommended for PPTX):** Render chart data as a pptxgenjs bar chart using the native `slide.addChart()` API — pptxgenjs has built-in chart support that does not require canvas. Data flows directly from `buildVcpuChartData()` to `addChart()`.
+
+2. **Option B (for PDF):** Render the chart to an off-screen `<canvas>` via Chart.js, call `canvas.toDataURL('image/png')`, and embed the PNG into jsPDF via `doc.addImage()`. This requires brief DOM access during export. Not a Vue lifecycle concern — it can be done inside the async export function.
+
+**Recommended for v2.1:** Option A for PPTX (zero DOM dependency, pptxgenjs native charts), Option B for PDF (canvas-to-PNG, one-time DOM touch during export).
+
+**pptxgenjs chart data format:**
+```typescript
+slide.addChart(pptx.ChartType.bar, [
+  { name: 'vCPU', labels: ['Masters', 'Workers', ...], values: [96, 160, ...] }
+], { x: 1, y: 1.5, w: 8, h: 3.5 })
+```
+
+**Data flow for PPTX export:**
+```
+generatePptxReport()
+  -> reads inputStore.clusters[i] + calculationStore.clusterResults[i]
+  -> calls buildVcpuChartData(sizing) -> ChartDataRow[]
+  -> maps ChartDataRow[] to pptxgenjs chart data format
+  -> slide.addChart() renders bar chart natively
+```
+
+**Build order note:** Extract `useChartData.ts` first (shared dep). Then update Vue chart components to use it. Then update export composables. This sequence avoids duplicate logic and enables testing the data builders in isolation.
+
+---
+
+## Area 4: Session JSON Serialization
+
+**New vs Modified:** New composable (`useSessionExport.ts`), no store changes required.
+
+**Integration point:** `inputStore` already holds the complete session state (`clusters[]` + `activeClusterIndex`). URL state (`useUrlState.ts`) already has the Zod schema (`InputStateSchema`) that validates this shape. Session JSON reuses these same schemas.
+
+**Export (serialize):**
+
+```typescript
+// src/composables/useSessionExport.ts
+
+export function exportSession(): void {
+  const input = useInputStore()
+  const state: InputState = {
+    clusters: input.clusters.map(({ id: _id, ...rest }) => rest),
+    // id excluded — same as URL state pattern
+  }
+  const json = JSON.stringify(state, null, 2)
+  downloadBlob(json, `os-sizer-session-${date}.json`, 'application/json')
 }
 ```
 
-### Pattern 2: Post-Dispatch Add-On Augmentation
+The `downloadBlob` helper is currently duplicated in `useCsvExport.ts`. Extract it to `src/composables/utils/download.ts` and share across CSV, session JSON, and any future binary exports.
 
-**What:** After topology dispatch in `calcCluster()`, the sizing is augmented with add-on node pools. Existing pattern handles ODF and RHACM. GPU nodes and RHOAI workers extend this same post-dispatch block.
+**Import (hydrate from JSON):**
 
-**When to use:** For GPU node pools and RHOAI workers. These are add-ons that overlay on top of any topology, not a topology variant themselves.
-
-**Trade-offs:** Clean separation. A 'standard-ha' cluster with GPU + RHOAI enabled follows the same code path as one without — the topology calculator focuses on topology, the add-on block handles optional overlays. The totals recalculation at the end must include all new node pools.
-
-**Example:**
 ```typescript
-// In calcCluster() post-dispatch block (extension of existing pattern):
-if (config.addOns.rhOaiEnabled) {
-  sizing.rhoaiWorkers = calcRHOAIWorkers(config.addOns.rhOaiGpuCount)
-}
-if (config.gpuConfig?.enabled) {
-  sizing.gpuNodes = calcGpuNodePool(config.gpuConfig)
-}
-// Recalculate totals to include all new pools
-sizing.totals = sumTotals([
-  sizing.masterNodes, sizing.workerNodes, sizing.infraNodes,
-  sizing.odfNodes, sizing.rhacmWorkers, sizing.rhoaiWorkers, sizing.gpuNodes,
-])
-```
-
-### Pattern 3: SNO Profile Extension (Additive, Not Fork)
-
-**What:** `calcSNO()` uses a `profileMap` keyed by `config.snoProfile`. Adding a `'virt'` SNO profile means adding one entry to the profileMap and one constant to `constants.ts`. The switch case in `calcCluster()` does not change — `calcSNO()` handles all SNO variants.
-
-**When to use:** For the SNO-with-Virt profile (boosted minimums: 8 vCPU, 120 GB root + 50 GB virt storage, 32 GB RAM minimum). This is not a separate topology — it is SNO with a virt-capable hardware minimum.
-
-**Trade-offs:** Low-change-surface. Only `constants.ts` (new constant), `types.ts` (extend `SnoProfile` union), `defaults.ts` (update default if needed), and the `profileMap` in `calcSNO()`. No change to the dispatcher.
-
-**Example:**
-```typescript
-// In types.ts:
-export type SnoProfile = 'standard' | 'edge' | 'telecom-vdu' | 'virt'
-
-// In constants.ts:
-export const SNO_VIRT_MIN: Readonly<NodeSpec> = { count: 1, vcpu: 8, ramGB: 32, storageGB: 170 }
-// 170 GB = 120 GB root + 50 GB virt storage — aligns with Red Hat guidance
-
-// In calcSNO() profileMap:
-const profileMap = {
-  'standard': SNO_STD_MIN,
-  'edge': SNO_EDGE_MIN,
-  'telecom-vdu': SNO_TELECOM_MIN,
-  'virt': SNO_VIRT_MIN,   // NEW
+export async function importSession(file: File): Promise<{ ok: true } | { ok: false; error: string }> {
+  const text = await file.text()
+  let parsed: unknown
+  try { parsed = JSON.parse(text) } catch { return { ok: false, error: 'invalid JSON' } }
+  const result = InputStateSchema.safeParse(parsed)
+  if (!result.success) return { ok: false, error: 'schema validation failed' }
+  const store = useInputStore()
+  store.clusters = result.data.clusters.map(c => ({ ...c, id: crypto.randomUUID() }))
+  store.activeClusterIndex = 0
+  return { ok: true }
 }
 ```
 
-### Pattern 4: GpuMode Type + Per-Mode NodeSpec
+This is structurally identical to `hydrateFromUrl()` in `useUrlState.ts` — same Zod schema, same ID re-generation, same store mutation pattern. The only difference is the input source (File API vs URL query param).
 
-**What:** GPU nodes are not a topology — they are a typed configuration producing a `NodeSpec`. Four modes exist with distinct constraints:
+**Interaction with URL state:** Session JSON and URL state coexist without conflict. URL state encodes `InputState` (compressed). Session JSON serializes the same `InputState` (uncompressed, human-readable). After import, `generateShareUrl()` will produce a valid URL from the newly-hydrated store. No ordering concern.
 
-| Mode | Live Migration | Bare Metal Required | vGPU Manager | Notes |
-|------|---------------|--------------------|-----------|-|
-| `container` | Yes (no GPU) | No | No | Standard container GPU — NVIDIA GPU Operator only |
-| `passthrough` | **NO** | Yes | No | VFIO-PCI; each VM owns the physical GPU |
-| `vgpu` | Yes (NVIDIA mediated) | Yes | Yes (NVIDIA vGPU Manager) | MxGPU or NVIDIA vGPU license required |
-| `mig` | Partition-dependent | Yes (A100/H100 only) | No | MIG for A30/A100/A100X/H100/H200/H800 |
+**uiStore is intentionally excluded** from session JSON. Locale and dark mode are per-browser preferences, not per-session design decisions. The wizard step should reset to step 1 on import (same as URL hydration behavior).
 
-**When to use:** GpuMode drives both the NodeSpec sizing (passthrough needs more RAM per GPU) and validation warnings (passthrough blocks live migration).
+**Build order note:** Implement `useSessionExport.ts` after extracting `downloadBlob` to shared utils. Add import/export buttons to ExportToolbar. No store changes needed — this is purely a composable.
 
-**Example:**
-```typescript
-// In types.ts:
-export type GpuMode = 'container' | 'passthrough' | 'vgpu' | 'mig'
+---
 
-export interface GpuConfig {
-  enabled: boolean
-  gpuCount: number           // number of GPU nodes
-  gpusPerNode: number        // GPUs per node (typically 1-8)
-  gpuType: string            // 'A100-80GB', 'H100-80GB', 'L40S', etc. (informational)
-  mode: GpuMode
-  migProfile?: string        // '1g.10gb', '2g.20gb', etc. — only when mode='mig'
-}
+## Area 5: ExportToolbar and ResultsPage Updates
+
+**New vs Modified:** Modified — ExportToolbar gains new buttons; ResultsPage gains cluster tab navigation.
+
+**ExportToolbar additions:**
+- "Export JSON" button -> calls `exportSession()`
+- "Import JSON" button -> triggers `<input type="file" accept=".json">` click, calls `importSession(file)`
+- (Existing: Share URL, CSV, PDF, PPTX)
+
+**ResultsPage cluster navigation:**
+- Add cluster tab bar above results (shows cluster names, activeClusterIndex highlighted)
+- Add "Add Cluster" button
+- Tab click -> `inputStore.activeClusterIndex = idx` -> all computed results update reactively
+
+**No new store fields needed for ResultsPage cluster switching** — `activeClusterIndex` in inputStore already drives `activeResult` and `activeCluster` computeds in ResultsPage.
+
+**Build order note:** ResultsPage cluster tabs depend on multi-cluster UI work. ExportToolbar JSON buttons depend on `useSessionExport.ts`. Both are independent of chart redesign.
+
+---
+
+## Area 6: Aggregate BoM Export
+
+**New vs Modified:** New functionality in existing export composables.
+
+**Integration point:** `calculationStore.aggregateTotals` (new computed) + `calculationStore.clusterResults[]`.
+
+**Export behavior:**
+- Single-cluster session: exports only that cluster (current behavior, unchanged)
+- Multi-cluster session: export includes one section per cluster + a "Totals" aggregation row/slide
+
+**PPTX multi-cluster:** Add one BoM slide per cluster, plus a final "Aggregate Summary" slide showing totals across all clusters.
+
+**PDF multi-cluster:** Add one autoTable section per cluster with cluster name as section header, plus a totals row at the end.
+
+**CSV multi-cluster:** Emit one CSV with cluster names as grouping rows, rather than zip files — avoids zip dependency complexity.
+
+**Build order note:** Aggregate BoM export is the last export feature to build — it requires multi-cluster UI (so user can create N clusters to test), useChartData extraction, and redesigned export templates. Build after all individual-cluster export redesigns are complete.
+
+---
+
+## Data Flow Summary
+
+```
+User Input (wizard)
+        |
+        v
+inputStore.clusters[]       <- ref(), source of truth, N ClusterConfigs
+        |
+        v (computed, reactive)
+calculationStore
+  .clusterResults[]          <- SizingResult[] per cluster
+  .recommendations[]         <- for active cluster
+  .aggregateTotals            <- NEW: sum across all clusters
+        |
+        +---> ResultsPage
+        |       activeResult = clusterResults[activeClusterIndex]
+        |       cluster tabs -> set activeClusterIndex
+        |
+        +---> Charts (Vue components)
+        |       VcpuChart/RamChart/StorageChart
+        |       call buildXxxChartData(sizing) <- NEW shared util
+        |
+        +---> Export Composables (plain TS, no lifecycle)
+                usePptxExport   <- reads inputStore + calculationStore directly
+                usePdfExport    <- same
+                useCsvExport    <- same
+                useSessionExport <- NEW: serialize/hydrate full inputStore state
+                useChartData    <- NEW: pure chart data builders (no Vue)
 ```
 
 ---
 
-## Data Flow
+## Component Boundary Map
 
-### Request Flow: User changes topology to 'virt'
-
-```
-Step3ArchitectureForm.vue
-  → selectTopology('virt')
-  → inputStore.updateCluster(id, { topology: 'virt' })
-  → calculationStore.clusterResults (computed, auto-recalcs)
-  → calcCluster({ topology: 'virt', ... })
-  → case 'virt': calcVirt(config)  [NEW]
-  → post-dispatch: calcGpuNodePool() if gpuConfig.enabled  [NEW]
-  → post-dispatch: calcRHOAIWorkers() if addOns.rhOaiEnabled  [NEW]
-  → sumTotals([...all node pools including gpuNodes, rhoaiWorkers])
-  → SizingResult.sizing → BomTable renders GPU row, virt storage annotation
-```
-
-### Request Flow: GPU passthrough + live migration warning
-
-```
-validateInputs(config)
-  → if gpuConfig.mode === 'passthrough' && topology === 'virt'
-  → push ValidationWarning { code: 'VIRT_GPU_PASSTHROUGH_BLOCKS_MIGRATION', severity: 'warning' }
-  → SizingResult.validationErrors
-  → WarningBanner in ResultsPage renders the warning
-```
-
-### State Management
-
-```
-inputStore.clusters[] (ref<ClusterConfig[]>)
-  ↓ reactive, auto-triggers computed
-calculationStore.clusterResults (computed<SizingResult[]>)
-  ← calcCluster(cluster)   ← engine/calculators.ts
-  ← recommend(constraints) ← engine/recommendation.ts
-  ← validateInputs(cluster) ← engine/validation.ts
-  ↓ passed as props
-ResultsPage.vue
-  → BomTable (result.sizing — reads gpuNodes, rhoaiWorkers as optional rows)
-  → WarningBanner (result.validationErrors)
-```
-
-### Key Data Flows
-
-1. **New type fields flow automatically:** `ClusterConfig` gains `virtConfig: VirtConfig` and `gpuConfig: GpuConfig`. `inputStore.updateCluster()` uses `Object.assign()`, so partial patches work for any field. No store surgery required.
-
-2. **ClusterSizing gains optional pools:** `gpuNodes: NodeSpec | null` and `rhoaiWorkers: NodeSpec | null` follow the existing null-field pattern. `BomTable.vue` already conditionally renders rows with `v-if`, so adding two more is a minimal change.
-
-3. **Totals recalculation:** The `sumTotals()` helper in `calculators.ts` accepts `Array<NodeSpec | null>` and skips nulls. Adding `gpuNodes` and `rhoaiWorkers` to the array at the bottom of `calcCluster()` is the only totals change needed.
-
----
-
-## Integration Points
-
-### New vs Modified: Explicit Mapping
-
-#### Types (`src/engine/types.ts`) — MODIFIED
-
-**Add:**
-```typescript
-export type TopologyType = ... | 'virt'          // 9th topology
-export type SnoProfile = ... | 'virt'            // 4th profile
-export type GpuMode = 'container' | 'passthrough' | 'vgpu' | 'mig'
-
-export interface VirtConfig {
-  vmCount: number            // estimated concurrent VMs (drives worker sizing)
-  avgVmVcpu: number          // avg vCPUs per VM (default 2)
-  avgVmRamGB: number         // avg RAM per VM (default 4)
-  rwxStorageEnabled: boolean // true = flag that RWX storage class is available
-}
-
-export interface GpuConfig {
-  enabled: boolean
-  gpuCount: number
-  gpusPerNode: number
-  gpuType: string
-  mode: GpuMode
-  migProfile?: string
-}
-```
-
-**Extend `AddOnConfig`:**
-```typescript
-export interface AddOnConfig {
-  // ... existing fields ...
-  rhOaiEnabled: boolean       // NEW
-  rhOaiGpuCount: number       // NEW — GPU nodes dedicated to RHOAI (default 0)
-}
-```
-
-**Extend `ClusterConfig`:**
-```typescript
-export interface ClusterConfig {
-  // ... existing fields ...
-  virtConfig: VirtConfig      // NEW — only used when topology === 'virt' or snoProfile === 'virt'
-  gpuConfig: GpuConfig        // NEW — add-on, independent of topology
-}
-```
-
-**Extend `ClusterSizing`:**
-```typescript
-export interface ClusterSizing {
-  // ... existing fields ...
-  gpuNodes: NodeSpec | null    // NEW — GPU node pool (container/passthrough/vGPU/MIG)
-  rhoaiWorkers: NodeSpec | null // NEW — RHOAI dedicated worker nodes
-}
-```
-
-#### Constants (`src/engine/constants.ts`) — MODIFIED
-
-**Add:**
-```typescript
-// OpenShift Virtualization worker minimums (bare metal class)
-// Source: Red Hat OpenShift Virtualization Installation docs
-// Workers hosting VMs require minimum 2 extra vCPU overhead + per-VM overhead
-export const VIRT_WORKER_MIN: Readonly<NodeSpec> = { count: 3, vcpu: 16, ramGB: 64, storageGB: 200 }
-// 16 vCPU / 64 GB RAM = minimum for VM-density workloads per Red Hat sizing guide
-
-// SNO-with-Virt minimum (boosted for KubeVirt + VM storage)
-// Source: PROJECT.md requirement — 8 vCPU, 120 GB root + 50 GB virt storage
-export const SNO_VIRT_MIN: Readonly<NodeSpec> = { count: 1, vcpu: 8, ramGB: 32, storageGB: 170 }
-
-// KubeVirt memory overhead formula parameters
-// Source: Red Hat OCP docs — overhead = (1.002 * guestRAM) + 146 MiB + 8 MiB * vCPUs
-export const KUBEVIRT_OVERHEAD_BASE_MIB = 146
-export const KUBEVIRT_OVERHEAD_PER_VCPU_MIB = 8
-export const KUBEVIRT_OVERHEAD_FACTOR = 1.002
-
-// GPU node minimums by mode (passthrough/vGPU bare metal)
-// Source: NVIDIA GPU Operator + OpenShift Virtualization docs
-export const GPU_NODE_MIN_VCPU = 16
-export const GPU_NODE_MIN_RAM_GB = 128   // 128 GB minimum for GPU passthrough/vGPU nodes
-export const GPU_NODE_STORAGE_GB = 200
-export const GPU_RAM_OVERHEAD_PER_DEVICE_GB = 1 // 1 GB per GPU per Red Hat docs (SR-IOV/GPU)
-
-// RHOAI operator minimum worker requirements
-// Source: Red Hat OpenShift AI Self-Managed 3.3 docs — 2 workers, 8 CPU / 32 GB each
-export const RHOAI_WORKER_MIN_COUNT = 2
-export const RHOAI_WORKER_VCPU = 16     // recommend 16 (docs say 8 minimum; 16 for real workloads)
-export const RHOAI_WORKER_RAM_GB = 64   // recommend 64 (docs say 32 minimum; 64 for real workloads)
-export const RHOAI_WORKER_STORAGE_GB = 200
-```
-
-#### Calculators (`src/engine/calculators.ts`) — MODIFIED
-
-**Add `calcVirt()`:**
-
-Strategy: Base on Standard HA, but:
-1. Boost worker node RAM to account for KubeVirt overhead per VM: `overhead = (1.002 * avgVmRamGB) + 0.146 + 0.008 * avgVmVcpu` (GB) per VM
-2. Worker count driven by both container pods AND VM overhead (use max)
-3. Minimum worker spec: `VIRT_WORKER_MIN` (16 vCPU / 64 GB / 200 GB)
-4. Force `odfNodes` to be populated (RWX required for live migration — warn if `virtConfig.rwxStorageEnabled === false`)
-5. Return `VIRT_LIVE_MIGRATION_RWX_REQUIRED` warning if no RWX storage class flagged
-
-**Modify `calcSNO()`:**
-
-Add `'virt': SNO_VIRT_MIN` to the `profileMap`. No other change.
-
-**Extend `calcCluster()` switch:**
-
-Add `case 'virt': result = calcVirt(config); break` before the default. Add `rhoaiWorkers` and `gpuNodes` to the post-dispatch augmentation block.
-
-#### Add-ons (`src/engine/addons.ts`) — MODIFIED
-
-**Add `calcGpuNodePool(gpuConfig: GpuConfig): NodeSpec`:**
-
-- `count` = `gpuConfig.gpuCount`
-- `vcpu` = `max(GPU_NODE_MIN_VCPU, gpuConfig.gpusPerNode * 8)` — 8 vCPU per GPU is typical host ratio
-- `ramGB` = `max(GPU_NODE_MIN_RAM_GB, gpuConfig.gpusPerNode * GPU_RAM_OVERHEAD_PER_DEVICE_GB * 16 + base)` — GPU passthrough and vGPU modes need more RAM
-- `storageGB` = `GPU_NODE_STORAGE_GB`
-
-**Add `calcRHOAIWorkers(gpuCount: number): NodeSpec`:**
-
-- `count` = `max(RHOAI_WORKER_MIN_COUNT, gpuCount)` — at least 2, at least one per GPU node if GPU-enabled
-- `vcpu` = `RHOAI_WORKER_VCPU`
-- `ramGB` = `RHOAI_WORKER_RAM_GB`
-- `storageGB` = `RHOAI_WORKER_STORAGE_GB`
-
-#### Validation (`src/engine/validation.ts`) — MODIFIED
-
-**Add three new checks:**
-
-1. **GPU passthrough blocks live migration:**
-   ```
-   if gpuConfig.mode === 'passthrough' && topology === 'virt'
-   → WARN: VIRT_GPU_PASSTHROUGH_BLOCKS_MIGRATION (severity: 'warning')
-   ```
-
-2. **Virt topology requires RWX storage:**
-   ```
-   if topology === 'virt' && !virtConfig.rwxStorageEnabled
-   → WARN: VIRT_RWX_STORAGE_REQUIRED (severity: 'warning')
-   ```
-
-3. **RHOAI on SNO/MicroShift insufficient:**
-   ```
-   if rhOaiEnabled && ['sno', 'microshift'].includes(topology)
-   → WARN: RHOAI_TOPOLOGY_INSUFFICIENT (severity: 'warning')
-     unless snoProfile === 'virt' (SNO-virt has sufficient resources)
-   ```
-
-#### Recommendation Engine (`src/engine/recommendation.ts`) — MODIFIED
-
-**Add `'virt'` to topologies array and add `scoreVirt()`:**
-
-Scoring rationale:
-- Base score: 65 (similar to standard-ha, designed for datacenter VM workloads)
-- `+20` if environment is 'datacenter' (virt is a datacenter pattern)
-- `+15` if `addOns.virt === true` (explicit virt workload signal)
-- `-40` if `haRequired === false` (live migration requires HA — warn, not exclude)
-- Hard exclusion (score=0): if environment is 'far-edge' or 'microshift' context
-
-**Extend `RecommendationConstraints`:**
-
-Add `addOns.virt: boolean` to the constraints interface so the calculationStore can pass the signal.
-
-#### Step3ArchitectureForm.vue — MODIFIED
-
-**Changes:**
-1. Add `'virt'` to `topologyLabelMap` and `allTopologies` array
-2. Add `<VirtConfigSection>` rendered `v-if="topology === 'virt' || snoProfile === 'virt'"`
-3. Add `<GpuConfigSection>` rendered always (GPU is topology-agnostic add-on) when `addOns.rhOaiEnabled` or `gpuConfig.enabled`
-
-**New sub-components:**
-
-`VirtConfigSection.vue` — scoped to wizard:
-- VM count slider (1–500)
-- Avg VM vCPU (1–16)
-- Avg VM RAM GB (1–128)
-- RWX storage class available toggle
-- Live-migration info note
-
-`GpuConfigSection.vue` — scoped to wizard:
-- GPU node count slider (1–32)
-- GPUs per node slider (1–8)
-- GPU type text input (informational: "A100-80GB")
-- GPU mode selector: container / passthrough / vGPU / MIG
-- MIG profile input (shown if mode=mig)
-- Warning banner if mode=passthrough (live migration blocked)
-
-#### BomTable.vue — MODIFIED
-
-**Add two conditional rows:**
-```typescript
-if (s.gpuNodes) entries.push({ labelKey: 'node.gpu', spec: s.gpuNodes })
-if (s.rhoaiWorkers) entries.push({ labelKey: 'node.rhoaiWorkers', spec: s.rhoaiWorkers })
-```
-
-The existing `v-for` over `rows` renders them automatically — the template does not change, only the `rows` computed property does.
+| Component / Module | New vs Modified | Depends On | Used By |
+|---|---|---|---|
+| `src/engine/types.ts` | Modified — add optional `role` field to ClusterConfig | nothing | everything |
+| `src/stores/inputStore.ts` | Modified — add `copyWorkload()` action | engine/types | all stores, composables |
+| `src/stores/calculationStore.ts` | Modified — add `aggregateTotals` computed | inputStore | exports, ResultsPage |
+| `src/stores/uiStore.ts` | Modified — add `comparisonMode`, `comparisonClusterIds` | nothing | ComparisonView |
+| `src/composables/useChartData.ts` | NEW — pure chart data builders | engine/types | chart Vue components, export composables |
+| `src/composables/useSessionExport.ts` | NEW — JSON export/import | inputStore, useUrlState schemas | ExportToolbar |
+| `src/composables/utils/download.ts` | NEW — shared downloadBlob | nothing | useCsvExport, useSessionExport |
+| `src/composables/usePptxExport.ts` | Modified — redesign + charts + multi-cluster | inputStore, calculationStore, useChartData | ExportToolbar |
+| `src/composables/usePdfExport.ts` | Modified — redesign + charts + multi-cluster | inputStore, calculationStore, useChartData | ExportToolbar |
+| `src/composables/useCsvExport.ts` | Modified — multi-cluster aggregate | inputStore, calculationStore | ExportToolbar |
+| `src/components/results/ChartsSection.vue` | Modified — use useChartData | useChartData, calculationStore | ResultsPage |
+| `src/components/results/charts/VcpuChart.vue` | Modified — delegate data to useChartData | useChartData | ChartsSection |
+| `src/components/results/charts/RamChart.vue` | Modified — same | useChartData | ChartsSection |
+| `src/components/results/charts/StorageChart.vue` | Modified — same | useChartData | ChartsSection |
+| `src/components/results/ResultsPage.vue` | Modified — cluster tab bar | inputStore, calculationStore | App.vue |
+| `src/components/results/ExportToolbar.vue` | Modified — JSON import/export buttons | useSessionExport | ResultsPage |
+| `src/components/results/ComparisonView.vue` | NEW — side-by-side topology table | calculationStore, uiStore | ResultsPage |
 
 ---
 
 ## Build Order
 
-The dependency graph dictates this order. Each layer depends only on layers above it in this list.
+Dependencies flow top to bottom. Each phase can start once its dependencies complete.
 
-### Phase 1: Types and Constants (no dependencies within project)
+**Phase A — Foundation (no deps, start here)**
+1. Extract `src/composables/utils/download.ts` (shared downloadBlob)
+2. Add `useChartData.ts` pure data builders (ClusterSizing -> ChartDataRow[])
+3. Add optional `role` field to `ClusterConfig` in engine/types.ts + InputStateSchema in useUrlState.ts
 
-1. `src/engine/types.ts` — add `GpuMode`, `VirtConfig`, `GpuConfig`; extend `TopologyType`, `SnoProfile`, `AddOnConfig`, `ClusterConfig`, `ClusterSizing`
-2. `src/engine/constants.ts` — add `VIRT_WORKER_MIN`, `SNO_VIRT_MIN`, `KUBEVIRT_OVERHEAD_*`, `GPU_NODE_*`, `RHOAI_WORKER_*` constants
+**Phase B — Store extensions (depends on A.3)**
+4. Add `aggregateTotals` computed to calculationStore
+5. Add `copyWorkload()` action to inputStore
+6. Add `comparisonMode` / `comparisonClusterIds` to uiStore
 
-**Why first:** Everything else imports from types and constants. Zero risk of circular imports.
+**Phase C — Core composables (depends on A.1, A.2, B.4)**
+7. Update Vue chart components to delegate to useChartData (low-risk refactor)
+8. Implement `useSessionExport.ts` (depends on A.1, existing InputStateSchema)
+9. Redesign `usePptxExport.ts` — 1-slide layout, pptxgenjs native charts (depends on A.2, B.4)
+10. Redesign `usePdfExport.ts` — canvas-to-PNG charts (depends on A.2, B.4)
+11. Update `useCsvExport.ts` — multi-cluster aggregate sections (depends on B.4)
 
-### Phase 2: Engine Calculators and Add-ons (depends on Phase 1)
+**Phase D — UI (depends on B, C)**
+12. ResultsPage cluster tab bar + "Add Cluster" button (depends on B.5)
+13. ExportToolbar — JSON import/export buttons (depends on C.8)
+14. ComparisonView component (depends on B.6, D.12)
 
-3. `src/engine/addons.ts` — add `calcGpuNodePool()`, `calcRHOAIWorkers()`
-4. `src/engine/calculators.ts` — add `calcVirt()`, modify `calcSNO()` (virt profile), extend `calcCluster()` switch + post-dispatch block
-5. `src/engine/defaults.ts` — extend `createDefaultClusterConfig()` with `virtConfig`, `gpuConfig` defaults, extend `addOns` with `rhOaiEnabled`, `rhOaiGpuCount`
-
-**Why second:** Calculator functions must compile against updated types. Defaults must match updated ClusterConfig shape.
-
-### Phase 3: Validation and Recommendation (depends on Phase 1 + 2)
-
-6. `src/engine/validation.ts` — add GPU passthrough/live migration warning, RWX required warning, RHOAI on SNO warning
-7. `src/engine/recommendation.ts` — add `'virt'` to topology list, add `scoreVirt()`, extend `RecommendationConstraints` with `addOns.virt`
-
-**Why third:** Validation and recommendation reference types and constants but not the calculators themselves.
-
-### Phase 4: Store Updates (depends on Phase 1–3)
-
-8. `src/stores/calculationStore.ts` — pass `virt: cluster.addOns.virtEnabled` in the `addOns` object passed to `recommend()` (mirrors existing `odf`, `rhacm` pattern)
-9. `src/engine/index.ts` — add barrel exports for `calcVirt`, `calcGpuNodePool`, `calcRHOAIWorkers`, `GpuMode`, `VirtConfig`, `GpuConfig`
-
-**Why fourth:** Stores depend on the entire engine being stable.
-
-### Phase 5: UI Components (depends on Phase 1–4)
-
-10. `src/components/wizard/VirtConfigSection.vue` — NEW: VM sizing inputs
-11. `src/components/wizard/GpuConfigSection.vue` — NEW: GPU node configuration inputs
-12. `src/components/wizard/Step3ArchitectureForm.vue` — MODIFIED: add 'virt' to topology list, add VirtConfigSection and GpuConfigSection
-13. `src/components/results/BomTable.vue` — MODIFIED: add `gpuNodes` and `rhoaiWorkers` rows
-14. i18n key additions — all new `messageKey` values need strings in all 4 locales (EN/FR/IT/DE)
-
-**Why last:** UI depends on store shape which depends on engine types being finalized.
-
-### Phase 6: Tests (parallel to Phase 5 or after)
-
-15. `src/engine/calculators.test.ts` — add calcVirt() tests, modified calcSNO() virt profile tests
-16. `src/engine/addons.test.ts` — add calcGpuNodePool() and calcRHOAIWorkers() tests
-17. `src/engine/validation.test.ts` — add GPU passthrough warning tests, RWX warning tests
-18. `src/engine/recommendation.test.ts` — add scoreVirt() tests
-
-**Test first for engine (TDD):** Per project decision (TDD for engine from v1.0), write engine tests before or alongside implementation.
+**Phase E — Integration (depends on D)**
+15. Wire aggregate BoM into all three export composables (depends on D.12 so user can create N clusters to test)
+16. WARN-02 fix (independent, can slot in anywhere — no architectural dep)
 
 ---
 
-## Anti-Patterns
+## Circular Dependency Risks
 
-### Anti-Pattern 1: Separate VirtClusterConfig Type
+**No circular risks in the proposed design:**
+- `useChartData.ts` imports only `engine/types.ts` (no store, no Vue)
+- `useSessionExport.ts` imports only `inputStore` and `useUrlState` schemas (same pattern as useCsvExport)
+- `download.ts` has zero imports beyond browser APIs
+- Export composables import stores directly (same as current pattern) — stores do not import composables
 
-**What people do:** Create a `VirtClusterConfig extends ClusterConfig` or a separate store for virt clusters because the fields feel different.
-
-**Why it's wrong:** The existing `inputStore.clusters[]` is `ClusterConfig[]`. The `calcCluster()` dispatcher takes `ClusterConfig`. Introducing a subtype breaks the uniform dispatch pattern, requires type guards everywhere, and duplicates the store logic. The existing pattern — all clusters have all fields, topology-specific fields are ignored by non-relevant calculators — is correct.
-
-**Do this instead:** Add `virtConfig` and `gpuConfig` directly to `ClusterConfig` with sensible defaults in `createDefaultClusterConfig()`. Non-virt topologies ignore `virtConfig`. Non-GPU clusters have `gpuConfig.enabled = false`. Follow the existing pattern of `hcpHostedClusters` being present in all configs but only used by the HCP calculator.
-
-### Anti-Pattern 2: GPU as a Topology Instead of an Add-on
-
-**What people do:** Add `'gpu-standard-ha'`, `'gpu-hcp'` as separate topology values because GPU nodes feel like a different kind of cluster.
-
-**Why it's wrong:** GPU nodes are orthogonal to topology. A standard-ha cluster, a compact-3node cluster, or an HCP cluster can all have GPU workers. Adding a topology per GPU type explodes the combination space (8 topologies × 4 GPU modes = 32 topology values) and duplicates all topology sizing logic.
-
-**Do this instead:** GPU nodes are a post-dispatch add-on in `calcCluster()` — the same pattern as ODF and RHACM. `gpuConfig.enabled` triggers `calcGpuNodePool()` which returns a `NodeSpec` stored in `ClusterSizing.gpuNodes`.
-
-### Anti-Pattern 3: Hardcoding Live Migration Warning in the UI
-
-**What people do:** Add the passthrough/live migration warning directly in `Step3ArchitectureForm.vue` or `GpuConfigSection.vue` because it feels like a UI concern.
-
-**Why it's wrong:** The warning belongs in `validation.ts` so it surfaces in `SizingResult.validationErrors` and flows through the export pipeline (PPTX/PDF exports include validation warnings). Hard-coded UI warnings are invisible to exports and tests.
-
-**Do this instead:** Add to `validateInputs()`. Render via the existing `WarningBanner` component in `ResultsPage.vue` which already consumes `result.validationErrors`. Keep one validation code path.
-
-### Anti-Pattern 4: Modifying `sumTotals()` for GPU Nodes
-
-**What people do:** Add special GPU-aware totals logic because GPU nodes have unusual specs.
-
-**Why it's wrong:** `sumTotals()` already accepts `Array<NodeSpec | null>` and sums them correctly regardless of what the numbers represent. It does not need to know about GPU semantics.
-
-**Do this instead:** Add `sizing.gpuNodes` and `sizing.rhoaiWorkers` to the array passed to `sumTotals()` in the recalculation block at the end of `calcCluster()`. No other change needed.
+**Watch for:** If `useChartData.ts` is ever tempted to import `calculationStore` to fetch data reactively, resist — keep it as a pure function that receives `ClusterSizing` as a parameter. The callers (Vue components and export composables) handle the store access themselves.
 
 ---
 
-## Scaling Considerations
+## Anti-Patterns to Avoid
 
-This is a client-side web application. Scaling concerns are about calculation complexity, not server load.
+### Anti-Pattern 1: Separate multiClusterStore
+**Why wrong:** `inputStore` already holds `clusters[]`. Adding a second store that holds cluster arrays creates a split source of truth and synchronization bugs. The existing store already has addCluster/removeCluster/updateCluster. This would be adding a new store for no reason.
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| Current (8 topologies, 2 add-ons) | Single `calcCluster()` dispatcher — fine |
-| v2.0 (9 topologies, 4 add-ons + GPU) | Same dispatcher pattern — no issues expected |
-| v2.1+ (multi-cluster comparison, air-gap) | Consider memoizing `calcCluster()` if users add 10+ clusters; still a computed() — likely fine |
+### Anti-Pattern 2: Chart data fetched from DOM for PPTX
+**Why wrong:** PPTX export runs outside any Vue component lifecycle. Trying to grab `<canvas>` elements from the DOM inside `generatePptxReport()` is brittle and fails in test environments. pptxgenjs has a native chart API that accepts data directly — use it.
 
-The `clusterResults` computed in `calculationStore` recalculates all clusters on any input change. With <10 clusters and pure TypeScript arithmetic, this is negligible (<1 ms per cluster). No optimization needed.
+### Anti-Pattern 3: Import uiStore locale into session JSON
+**Why wrong:** Locale is a browser preference, not a design decision. Importing a session from a French colleague should not change an English user's locale. Keep session JSON scoped to inputStore only.
+
+### Anti-Pattern 4: ref() in calculationStore for aggregateTotals
+**Why wrong:** CALC-02 forbids `ref()` in calculationStore. `aggregateTotals` is a derived value — it must be `computed()` from clusterResults, not stored.
+
+### Anti-Pattern 5: Duplicating downloadBlob across composables
+**Why wrong:** useCsvExport already has a private `downloadBlob`. Session JSON export needs the same function. Extract once to `utils/download.ts` rather than copying.
+
+### Anti-Pattern 6: Comparison view as a separate wizard step
+**Why wrong:** Comparison is a view of results data, not a configuration step. Adding a step 5 would break the wizard flow contract (1|2|3|4 type in uiStore) and confuse users about what "step 5" configures. Keep it as an alternative view within the Results page (step 4).
 
 ---
 
 ## Sources
 
-- Direct source code analysis: `src/engine/types.ts`, `calculators.ts`, `addons.ts`, `constants.ts`, `recommendation.ts`, `validation.ts`, `defaults.ts` — HIGH confidence
-- [NVIDIA GPU Operator with OpenShift Virtualization](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/openshift-virtualization.html) — GPU modes, live migration constraints, node labeling — MEDIUM confidence
-- [Red Hat OpenShift AI Self-Managed 3.3 Installation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install) — RHOAI worker minimums (2 workers × 8 CPU / 32 GB) — MEDIUM confidence
-- [MIG Support in OpenShift Container Platform](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/mig-ocp.html) — MIG-compatible GPU types (A30/A100/H100/H200) — MEDIUM confidence
-- [Memory management in OpenShift Virtualization (Red Hat Developer, Jan 2025)](https://developers.redhat.com/blog/2025/01/31/memory-management-openshift-virtualization) — KubeVirt memory overhead formula — MEDIUM confidence
-- KubeVirt overhead formula: `overhead = (1.002 * guestRAM) + 146 MiB + 8 MiB * vCPUs` — from multiple Red Hat OCP docs versions — MEDIUM confidence
-- GPU passthrough blocks live migration: KVM/libvirt upstream constraint, confirmed by NVIDIA OCP docs note on node exclusivity — MEDIUM confidence
-- SNO minimum specs (8 vCPU, 16 GB RAM, 120 GB storage) — confirmed by multiple sources — HIGH confidence
-- SNO-with-Virt boosted minimums (8 vCPU, 32 GB RAM, 170 GB storage) — derived from PROJECT.md requirements + SNO standard minimum + 50 GB virt storage overhead — MEDIUM confidence (verify against Red Hat published SNO+Virt specs before finalizing constants)
-
----
-
-*Architecture research for: OpenShift Virtualization + GPU/RHOAI integration into os-sizer v2.0*
-*Researched: 2026-04-01*
+- Direct code reading: `src/stores/inputStore.ts`, `src/stores/calculationStore.ts`, `src/stores/uiStore.ts`
+- Direct code reading: `src/composables/useUrlState.ts`, `usePptxExport.ts`, `usePdfExport.ts`, `useCsvExport.ts`
+- Direct code reading: `src/engine/types.ts`, `src/engine/defaults.ts`
+- Direct code reading: `src/components/results/ResultsPage.vue`, `ExportToolbar.vue`, `ChartsSection.vue`, `charts/VcpuChart.vue`
+- Direct code reading: `src/App.vue`
+- Project context: `.planning/PROJECT.md`
+- Existing research: `.planning/research/app-architecture.md`

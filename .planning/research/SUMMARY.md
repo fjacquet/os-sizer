@@ -1,194 +1,330 @@
 # Project Research Summary
 
-**Project:** os-sizer v2.0 — OpenShift Virtualization + RHOAI/GPU Sizing
+**Project:** os-sizer v2.1 — Export Quality + Multi-Cluster + Session Portability
 **Domain:** OpenShift infrastructure pre-sales sizing tool (browser-based, offline-capable)
-**Researched:** 2026-04-01
-**Confidence:** MEDIUM-HIGH — engine patterns HIGH (from live codebase); GPU/KubeVirt overhead numbers MEDIUM (community + docs); MIG+vGPU intersection LOW (limited GA support)
+**Researched:** 2026-04-04
+**Confidence:** HIGH — all findings based on direct codebase inspection + verified installed library type definitions
+
+---
 
 ## Executive Summary
 
-The os-sizer v1.0 already provides a complete, working Vue 3 + TypeScript sizing engine for OpenShift container workloads. The v2.0 milestone extends it with two new domains: OpenShift Virtualization (KubeVirt-based VM hosting) and AI/GPU workloads via RHOAI and the NVIDIA GPU Operator. Both extensions follow an identical architectural pattern already established in the codebase: post-dispatch add-on calculators that augment topology sizing without replacing it. No new npm packages are required — the existing stack (Vue 3, TypeScript, Pinia, Zod, chart.js, Tailwind v4) handles all new requirements.
+The os-sizer v2.0 delivered a complete multi-topology sizing engine with Virtualization and RHOAI support. The v2.1 milestone focuses entirely on three user-facing pain points: export quality (charts missing from PPTX and PDF), session portability (no way to save/restore a configuration without the URL), and multi-cluster usability (the data model already supports N clusters but the UI surface does not expose it). None of these features require new npm packages — the full dependency set is already installed.
 
-The recommended approach is type-first, engine-first, UI-last. The single most important prerequisite is extending `ClusterSizing` in `types.ts` with `gpuNodes: NodeSpec | null` and `virtStorageGB` fields before any calculator code is written, because this type flows through the dispatcher, BoM table, and all three export formats (CSV, PPTX, PDF). Failure to do this first is the highest-risk mistake identified in research: the compiler will miss the impact if export files use untyped object access. After the type extension, the engine work divides cleanly into four parallel tracks: `calcVirt()`, `calcGpuNodes()`, SNO-virt profile, and `calcRHOAI()`.
+The recommended approach is infrastructure-first, export-second, UI-last. Three new shared modules must be extracted first: a `useChartData.ts` pure data builder (shared by Vue chart components and export composables), a `downloadBlob` utility (shared by CSV, JSON, and future export formats), and an optional `role` field added to `ClusterConfig`. These prerequisites unlock all parallel work streams. The multi-cluster store infrastructure is already fully implemented in `inputStore` and `calculationStore` — v2.1 adds only the UI surface and aggregate computed values on top of existing reactive data.
 
-The primary technical risks are (1) undersizing due to missing KubeVirt per-node and per-VM overhead addends in `calcVirt()`, (2) treating GPU nodes as shared with general workers rather than a dedicated isolated pool, and (3) silently producing an invalid BoM for the GPU-passthrough + live-migration combination. All three risks are preventable by encoding the correct constants and validation warnings before UI work begins. The offline-capable, pre-sales positioning of the tool rules out dynamic GPU catalog fetching, real-time cluster metrics, or licensing calculations — these must remain static lookup tables and deferred concerns.
+The primary technical risks are chart rendering pitfalls in both export formats: a blank canvas bug in jsPDF when `animation: { duration: 0 }` is omitted, and silent chart corruption in pptxgenjs when options objects are reused across `addChart()` calls. A secondary risk is the WARN-02 fix, which requires a schema extension (`rwxStorageAvailable` in `AddOnConfig`) rather than a simple condition change. Both risks are fully documented with specific prevention patterns. The single most important coding discipline to preserve across all v2.1 work is the CALC-02 invariant: `calculationStore` must contain zero `ref()` — all new aggregate values must be `computed()`.
+
+---
 
 ## Key Findings
 
-### Recommended Stack
+### Stack Additions
 
-The v1.0 stack is installed and frozen — zero new npm packages are needed for v2.0. All new features are pure TypeScript engine additions (new constants, types, pure calculator functions) plus Vue 3 component extensions using existing Tailwind v4 patterns. The existing Zod `.default()` URL-state pattern automatically preserves backward compatibility with v1.0 shared URLs when new `AddOnConfig` fields are added.
+**Zero new npm packages required.** All v2.1 features are achievable with the existing dependency set:
 
-**Core technologies (unchanged):**
-- Vue 3 + TypeScript: UI framework and type safety — no change
-- Pinia: reactive state for `inputStore` (ClusterConfig) and `calculationStore` — ClusterConfig shape change flows automatically
-- Zod v4: schema validation and URL state compression — extend `AddOnConfigSchema` with `.default()` to maintain URL compat
-- chart.js + vue-chartjs: charts and BoM visualization — GPU nodes appear as a new table row, no new chart type needed
-- Vitest: test framework — same calculator test pattern as existing `calculators.test.ts`
+| Feature | Libraries Used | Status |
+|---------|---------------|--------|
+| PPTX charts | pptxgenjs 4.0.1 — `slide.addChart()` native API | Already installed |
+| PDF charts | chart.js 4.5.1 offscreen canvas + jsPDF 4.2.1 `addImage()` | Already installed |
+| JSON export | `URL.createObjectURL()` + Blob — Browser Web API | No package needed |
+| JSON import | `File.text()` + Zod 4.3.6 schema validation | Already installed |
+| Multi-cluster state | Extend existing Pinia 3.0.4 stores | Already installed |
 
-**New engine constants (typed, in `constants.ts`):**
-- KubeVirt per-VM overhead: base 218 MiB + 8 MiB × vCPUs + 0.2% of guest RAM
-- KubeVirt per-node overhead: 2 vCPU per virt-enabled worker
-- SNO-virt minimum: 8 vCPU, 32 GB RAM, 170 GB storage (120 GB root + 50 GB virt disk)
-- RHOAI minimum: 2 workers × 8 vCPU / 32 GB RAM; operator overhead ~4 vCPU / 16 GB
-- MIG profiles: A100-40/80 GB, H100-80 GB, H200-141 GB (static lookup table from NVIDIA docs)
+**Packages explicitly rejected:**
+- `html2canvas` — requires mounted DOM, breaks headless export composable pattern
+- `pdfmake` — duplicates PDF capability at ~200 KB extra bundle weight
+- `FileSaver.js` — `URL.createObjectURL()` achieves the same with zero dependencies
+- `canvas` npm package — Node.js only, not applicable in Vite browser build
 
-### Expected Features
+### Features: Table Stakes vs Differentiators
 
-See `.planning/research/FEATURES.md` for full feature table.
+**Table stakes (must ship in v2.1):**
+- PPTX: at least one chart per deck — a pre-sales PPTX with only tables is considered unfinished
+- PPTX: Red Hat branding (red header band, logo, date/author footer) on every slide
+- PDF: at least one chart — a PDF sizing report without visuals is considered a draft
+- PDF: cover section (topology, environment, date, generated-by)
+- Multi-cluster: tab/list navigation between clusters when `clusters.length > 1`
+- Multi-cluster: Add/remove cluster controls wired to existing store actions
+- Multi-cluster: per-cluster naming with inline editable tab labels
+- Multi-cluster: aggregate totals row in exports (sum across all clusters)
+- Session JSON export: "Save session" downloads `.json` file
+- Session JSON import: "Load session" reads file, validates via Zod, hydrates store
+- Session import: user-friendly error feedback on validation failure (not raw Zod errors)
+- WARN-02 fix: live migration warning should reference any RWX storage, not ODF exclusively
 
-**Must have (table stakes for v2.0):**
-- `calcVirt()` — VM density-based worker sizing with KubeVirt memory and CPU overhead applied
-- Live migration +1 node reserve — added inside `calcVirt()` when `liveMigrationEnabled=true`
-- `calcGpuNodes()` — dedicated GPU worker pool sizing, separate `NodeSpec | null` in `ClusterSizing`
-- MIG partition profile lookup table — instances-per-GPU exposed in BoM annotation
-- SNO-with-Virt boosted minimums — patch `calcSNO()` via `virtEnabled` conditional, not a new topology
-- RHOAI operator overhead enforcement — minimum worker floor when `rhoaiEnabled=true`
-- `GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION` validation warning — highest-priority cross-feature interaction
-- `LIVE_MIGRATION_REQUIRES_RWX` / `VIRT_RWX_REQUIRES_ODF` warnings — storage dependency surfaced prominently
-- Updated BoM table with GPU node row and virt storage annotation
-- Wizard inputs for all new fields (Step 2/3); all new i18n keys in EN/FR/IT/DE
+**Differentiators (add meaningful value, prioritize after table stakes):**
+- PPTX: consolidated 1-slide layout (title + summary KPIs + bar chart + BoM table on one slide)
+- PPTX: grouped vertical bar chart of node counts by type (native pptxgenjs `BAR`)
+- PDF: bar chart image above BoM table — instant visual before the numbers
+- PDF: summary KPI callout box (total vCPU / RAM / Storage) between chart and table
+- PDF: validation warnings rendered inline with severity icon/color
+- Multi-cluster: Hub+Spoke role tagging (`hub` | `spoke` | `standalone` metadata field)
+- Multi-cluster: side-by-side comparison table (rows = metrics, columns = clusters, max 5)
+- Session JSON: `version` field in exported envelope for forward compatibility
+- Session JSON: import preview ("3 clusters: Hub, Spoke-A, Spoke-B") before replacing session
 
-**Should have (v2.1 differentiators):**
-- GPU mode comparison sub-table — side-by-side passthrough/vGPU/MIG trade-off matrix
-- Mixed GPU node rows (multiple GPU types in one cluster)
-- Time-slicing GPU option (after NVIDIA time-slicing confirmed in Red Hat sizing tables)
+**Deferred to v2.2:**
+- Merge-vs-replace import option
+- Aggregate BoM in all-clusters PPTX/PDF (per-cluster first, aggregate as follow-up)
+- Delta indicators in comparison view (+/- differences from first cluster column)
+- Cluster templates or inheritance (Hub settings propagated to spokes)
 
-**Defer to v2.2+:**
-- vGPU density sizing — NVIDIA profile catalog too volatile to maintain statically
-- Dynamic GPU catalog fetch — breaks offline-capable use case
-- Multi-cluster virt sizing — out of v2.0 scope per PROJECT.md
+**Anti-features (explicitly do not build):**
+- Do NOT use html2canvas to screenshot Vue chart components for any export
+- Do NOT use 3D chart types (`bar3D`) in PPTX — distorts comparative reading
+- Do NOT show radar charts for BoM data — inappropriate for hardware counts
+- Do NOT implement cloud/server-side session storage — static GitHub Pages app
+- Do NOT use localStorage for session persistence — hidden state, bad UX
+- Do NOT rebuild the wizard per cluster — reuse existing wizard via `activeClusterIndex`
+- Do NOT show more than 5 cluster columns in comparison view (NNGroup cognitive overload limit)
+- Do NOT add a table of contents or page numbers to PDF in v2.1
 
-### Architecture Approach
+### Architecture: Key Integration Points
 
-The architecture is a strict 4-layer Vue app: zero-Vue engine layer (pure TypeScript), Pinia store layer, Vue component layer, and export layer. All v2.0 work follows established patterns: `calcVirt()` and `calcGpuNodes()` are post-dispatch add-ons (like `calcODF`/`calcRHACM`), not new topologies. The SNO-virt variant is an additive profile entry in `calcSNO()`'s `profileMap`, not a fork. Two new sub-components (`VirtConfigSection.vue`, `GpuConfigSection.vue`) are extracted from Step3 to keep the wizard maintainable. The `ClusterSizing` type extension is the critical prerequisite that must land in the first commit.
+The codebase follows a strict 4-layer separation that must be preserved:
 
-**Major components and their v2.0 responsibilities:**
-1. `engine/types.ts` — add `GpuConfig`, `GpuMode`, extend `AddOnConfig` and `ClusterSizing`; this is the foundation commit
-2. `engine/constants.ts` — add all VIRT_*, GPU_*, SNO_VIRT_*, RHOAI_* constants before any calculator work
-3. `engine/calculators.ts` + `addons.ts` — add `calcVirt()`, `calcGpuNodes()`, `calcRHOAIWorkers()`; modify `calcSNO()` for virt profile
-4. `engine/validation.ts` — add GPU passthrough, RWX, RHOAI minimum warnings
-5. `components/wizard/` + `components/results/BomTable.vue` — new inputs and new BoM rows
+```
+src/engine/        Pure TypeScript — ZERO Vue imports — formulas + types + validation
+src/stores/        Pinia — inputStore (ref) + calculationStore (computed only) + uiStore
+src/components/    Vue SFCs — read stores, never call engine directly
+src/composables/   Plain TypeScript modules — no Vue lifecycle hooks
+```
 
-### Critical Pitfalls
+**Critical invariants:**
+- CALC-01: `src/engine/` must never import Vue, Pinia, or Vue ecosystem
+- CALC-02: `calculationStore.ts` must contain zero `ref()` — only `computed()`
+- Export composables are plain TypeScript, no Vue lifecycle hooks (enables unit testing without DOM)
 
-See `.planning/research/PITFALLS.md` for full detail including recovery cost and phase mapping.
+**New modules required (in build order):**
 
-1. **KubeVirt overhead addend missing from `calcVirt()`** — On a 32-worker cluster this causes ~64 cores undersizing. Prevention: define `VIRT_NODE_OVERHEAD_VCPU=2` and `VIRT_VM_BASE_OVERHEAD_MIB=218` as named constants before writing the formula. Test: `calcVirt()` with 10 VMs must show `workerNodes.vcpu > sum-of-vm-vcpus`.
+| Module | Type | Key Responsibility |
+|--------|------|--------------------|
+| `src/composables/utils/download.ts` | NEW | Shared `downloadBlob` utility — extracted from useCsvExport, reused by useSessionExport |
+| `src/composables/useChartData.ts` | NEW | Pure TS chart data builders (`buildVcpuChartData`, etc.) — no Vue imports, accepts `ClusterSizing` |
+| `src/engine/types.ts` | Modified | Add optional `role?: 'hub' \| 'spoke'` to `ClusterConfig` |
+| `src/stores/calculationStore.ts` | Modified | Add `aggregateTotals` computed (pure arithmetic, no formatting) |
+| `src/stores/inputStore.ts` | Modified | Add `copyWorkload(sourceId, targetId)` action |
+| `src/composables/useSessionExport.ts` | NEW | JSON export/import — structurally mirrors `hydrateFromUrl()` in useUrlState.ts |
+| `src/composables/usePptxExport.ts` | Modified | 1-slide redesign + native pptxgenjs charts via `slide.addChart()` |
+| `src/composables/usePdfExport.ts` | Modified | Chart.js offscreen canvas + `doc.addImage()` charts |
+| `src/components/results/ComparisonView.vue` | NEW | Side-by-side topology comparison table, max 5 cluster columns |
+| `src/components/results/ResultsPage.vue` | Modified | Cluster tab bar + "Add Cluster" button |
+| `src/components/results/ExportToolbar.vue` | Modified | JSON import/export buttons |
 
-2. **GPU nodes merged into `workerNodes` instead of dedicated pool** — NVIDIA GPU Operator enforces mutually exclusive node labels; mixed sizing produces an invalid BoM and breaks all export rows. Prevention: `ClusterSizing.gpuNodes: NodeSpec | null` must exist as a first-class field from the first type extension commit. Recovery cost is HIGH if deferred.
+**Data flow — multi-cluster (already in place):**
+```
+inputStore.clusters[] (ref, source of truth)
+  -> calculationStore.clusterResults[] (computed, one SizingResult per cluster)
+  -> calculationStore.aggregateTotals (NEW computed — pure arithmetic sum)
+  -> ResultsPage (reads activeClusterIndex to select active result)
+  -> ComparisonView (NEW — reads all clusterResults[])
+  -> Export composables (iterate clusterResults[] when exporting all clusters)
+```
 
-3. **SNO-with-Virt minimum not boosted** — `calcSNO()` returns 8 vCPU / 16 GB / 120 GB for virt-enabled SNO, which will fail to install. Prevention: single `if (addOns.virtEnabled)` branch in `calcSNO()` applying `SNO_VIRT_MIN` (14 vCPU, 32 GB RAM, 170 GB disk). Recovery cost is LOW.
+**Chart data flow — new shared util:**
+```
+useChartData.ts (pure TS, no Vue)
+  -> VcpuChart / RamChart / StorageChart (Vue components refactored to delegate)
+  -> usePptxExport.ts (maps to pptxgenjs OptsChartData format)
+  -> usePdfExport.ts (renders to offscreen canvas for PNG embedding)
+```
 
-4. **RWX/ODF dependency buried as a comment** — Live migration silently fails at runtime without RWX storage. Prevention: emit `VIRT_RWX_REQUIRES_ODF` as a `ValidationWarning` error (not a tooltip) when `liveMigrationEnabled=true` and `odfEnabled=false`. The warning must appear in the BoM and in exports.
+**Session JSON integration:**
+- `useSessionExport.ts` reuses `InputStateSchema` from `useUrlState.ts` directly
+- Export: serializes `clusters[]` only — not `ClusterSizing` (recomputable) or uiStore (browser preference)
+- Import: `file.text()` -> `JSON.parse` -> `InputStateSchema.safeParse()` -> `clusters.value = [...]` -> `await nextTick()`
+- `uiStore` locale and dark mode are intentionally excluded from session JSON
 
-5. **MIG-backed vGPU + KubeVirt combination silently unsupported** — NVIDIA GPU Operator does not support this combination in the standard path. Prevention: emit `MIG_VGPU_VM_NOT_SUPPORTED` error when `gpuMode=vgpu` and a MIG-capable GPU type (A100/H100) is selected alongside `virtEnabled=true`.
+### Top Pitfalls to Watch
 
-6. **`ClusterSizing` type not extended before calculator work** — TypeScript catches this at compile time only if test fixtures are strictly typed. Prevention: extend `ClusterSizing` as the absolute first v2.0 commit; add `tsc --noEmit` to CI.
+**Critical (silent failures with no error thrown):**
+
+1. **Chart.js animation not disabled for PDF export.** If `animation: { duration: 0 }` is omitted, `doc.addImage()` captures the canvas before the first paint and produces a black rectangle. Fix: enforce as a constant in the export helper, not the caller's responsibility. Applies to: PDF redesign phase.
+
+2. **pptxgenjs options object reused across `addChart()` calls.** pptxgenjs mutates option objects in-place (EMU unit conversion). Reusing one options object across multiple calls — common when iterating clusters — silently produces corrupted slide geometry. Fix: factory function returning a fresh object per call. Applies to: PPTX redesign and multi-cluster export phase.
+
+3. **Zero-value node counts passed to pptxgenjs chart.** pptxgenjs treats `0` values as absent data points (GitHub issue #240). Null/absent node pools must be excluded from chart series entirely, not represented as 0. Fix: filter `count > 0` before building chart data. Applies to: PPTX redesign phase.
+
+4. **Pinia array replacement vs index assignment reactivity.** `clusters.value = newArray` (array ref replacement) triggers reactivity; `clusters.value[0] = newCluster` (index assignment) does NOT. Session import must use full array replacement. Applies to: session import phase.
+
+5. **`calculationStore.clusterResults` stale after cluster removal.** Components holding a cached local index variable will access the wrong cluster after `removeCluster()` shifts indices. Components must always read `activeClusterIndex` from the store reactively, never cache it across async operations. Applies to: multi-cluster UI phase.
+
+**Moderate (visible bugs, fixable with care):**
+
+6. **jsPDF `lastAutoTable.finalY` cast broken for multi-cluster tables.** The existing `lastAutoTable` cast only tracks the most recently rendered table. For multi-cluster aggregate PDFs, capture `autoTable()` return value directly: `const { finalY } = autoTable(doc, {...})`. Applies to: PDF redesign phase.
+
+7. **Unicode characters (FR/DE/IT accents) render as boxes in PDF.** jsPDF's default Helvetica font does not support Latin Extended characters. Fix: embed a NotoSans or Roboto Base64 subset using `addFileToVFS()` + `addFont()`. Required for any locale-translated header/footer text. Applies to: PDF redesign phase.
+
+8. **`doc.save()` and `pptx.writeFile()` lose user gesture context after `await`.** Safari iOS and some popup blockers intercept downloads when the async dynamic import is not pre-warmed. Fix: call `import('jspdf')` and `import('pptxgenjs')` eagerly in `onMounted` so the module is cached; the `await import(...)` in the click handler then resolves synchronously. Applies to: PDF and PPTX export phases.
+
+9. **File input does not fire `change` event on second import of same file.** Reset `event.target.value = ''` after every import attempt in the `finally` block. Applies to: session import UI phase.
+
+10. **WARN-02 fix requires schema extension, not just condition change.** Simply removing `!odfEnabled` from the warning condition would fire the warning for all virt-enabled clusters. The correct fix adds `rwxStorageAvailable: boolean` (default `false`) to `AddOnConfig`, updates the wizard Step 3 UI, and changes the condition to `virtEnabled && !odfEnabled && !rwxStorageAvailable`. Rename the warning code to `VIRT_RWX_STORAGE_REQUIRED`. Update all 4 locale files and all tests in the same commit. Applies to: WARN-02 fix phase.
+
+---
 
 ## Implications for Roadmap
 
-Based on combined research, the suggested phase structure below is dependency-driven: the type system must precede the engine, the engine must precede the UI, and validation warnings must accompany each calculator (not deferred to a final cleanup phase).
+The build order is driven by three dependency chains: (A) shared infrastructure must precede individual feature work, (B) export composables depend on `useChartData.ts`, and (C) multi-cluster UI must precede aggregate export testing. These chains are independent of each other and can be parallelized within a phase.
 
-### Phase 1: Type Foundation and Engine Core (virtEnabled)
-**Rationale:** The `ClusterSizing` type extension is a breaking change that touches every downstream layer. Doing it first means all subsequent PRs compile cleanly. KubeVirt overhead constants belong here because `calcVirt()` cannot be correct without them. The RWX/ODF warning is also Phase 1 because it lives in the calculator, not the UI.
-**Delivers:** Extended `ClusterSizing` type, new `AddOnConfig` fields, all VIRT_* constants, `calcVirt()` with overhead, live migration +1 reserve, `VIRT_RWX_REQUIRES_ODF` validation warning, Zod schema extensions with `.default()` backward compat.
-**Addresses:** calcVirt() VM density sizing, KubeVirt memory overhead, live migration reserve, RWX storage warning (table stakes P1 features).
-**Avoids:** Pitfall 1 (overhead missing), Pitfall 4 (RWX buried as comment), Pitfall 7 (type not extended first).
-**Research flag:** Standard patterns — follow existing `calcODF()` post-dispatch pattern exactly.
+### Suggested Phase Structure
 
-### Phase 2: GPU Node Engine
-**Rationale:** GPU nodes require a dedicated `ClusterSizing.gpuNodes` field (already in Phase 1 type extension) and the full `GpuMode` type with per-mode constraints. The MIG+vGPU+VM exclusion warning must be encoded in the same PR as the GPU calculator to prevent the dangerous silent-failure case.
-**Delivers:** `GpuConfig` type, `GpuMode` enum, all GPU_* and MIG_PROFILES constants, `calcGpuNodes()` in `addons.ts`, `GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION` warning, `MIG_VGPU_VM_NOT_SUPPORTED` warning, `GPU_DEDICATED_NODE_REQUIRED` warning.
-**Addresses:** GPU node profile sizing, MIG partition profile lookup table (table stakes P1 features).
-**Avoids:** Pitfall 2 (GPU nodes merged into workerNodes), Pitfall 5 (MIG+vGPU+VM silently unsupported).
-**Research flag:** NVIDIA MIG profiles are HIGH confidence (official docs). vGPU density is deliberately out of scope for v2.0.
+**Phase 1: Foundation Infrastructure (no dependencies, build first)**
+- Extract `src/composables/utils/download.ts` (shared `downloadBlob`)
+- Add `src/composables/useChartData.ts` (pure TS chart data builders, ClusterSizing -> ChartDataRow[])
+- Add optional `role?: 'hub' | 'spoke'` to `ClusterConfig` in `engine/types.ts`
+- Update `InputStateSchema` in `useUrlState.ts` with `.optional().default('standalone')` for `role`
+- Add `aggregateTotals` computed to `calculationStore` (pure arithmetic, CALC-02 compliant)
+- Add `copyWorkload(sourceId, targetId)` action to `inputStore`
 
-### Phase 3: SNO-with-Virt Profile
-**Rationale:** Low-risk, self-contained change to `calcSNO()`. Grouped separately from Phase 1 to keep PRs focused and reviewable. The SNO_VIRT_MIN constant and `SnoProfile` union extension are the only dependencies.
-**Delivers:** `SNO_VIRT_MIN` constant, `'virt'` entry in `calcSNO()` `profileMap`, `SNO_VIRT_SECOND_DISK_REQUIRED` warning, `SNO_NO_VM_HA` warning (SNO provides no VM HA).
-**Addresses:** SNO-with-Virt boosted minimums (table stakes P1 feature).
-**Avoids:** Pitfall 3 (SNO-virt minimum not boosted).
-**Research flag:** Standard pattern — additive profile entry, no architecture uncertainty.
+Rationale: Zero user-visible changes, pure infrastructure. Unlocks all parallel work in Phase 2. CALC-02 compliance must be verified before any other store work begins.
+Research flag: Standard patterns — no research phase needed.
 
-### Phase 4: RHOAI Add-On Calculator
-**Rationale:** RHOAI follows the identical post-dispatch add-on pattern as ODF/RHACM. The operator overhead must be modeled as an addend to existing workers (not new nodes) with a cluster minimum check. RHOAI + ODF dependency warning belongs here.
-**Delivers:** All RHOAI_* constants, `calcRHOAIWorkers()` in `addons.ts`, worker node floor enforcement (max of current vs RHOAI minimum), `RHOAI_MINIMUM_CLUSTER_REQUIRED` warning, `RHOAI_REQUIRES_STORAGE` warning when `odfEnabled=false`.
-**Addresses:** RHOAI operator overhead sizing (table stakes P1 feature).
-**Avoids:** Pitfall 6 (RHOAI overhead invisible in results).
-**Research flag:** RHOAI overhead numbers are MEDIUM confidence — validate 16 vCPU / 64 GB cluster minimum against official RHOAI 3.x sizing docs during phase planning.
+**Phase 2A: Session JSON Export/Import (depends on Phase 1 downloadBlob + existing InputStateSchema)**
+- Implement `useSessionExport.ts` (export: blob download; import: `file.text()` -> safeParse -> store patch)
+- Add JSON import/export buttons to `ExportToolbar.vue`
+- Error mapping: Zod errors -> user-readable toast messages
+- File input reset pattern (`event.target.value = ''` in `finally`)
+- `await nextTick()` after import before navigation
+- Session file size guard (100 KB max)
 
-### Phase 5: BoM Table and Exports
-**Rationale:** UI work is last because it depends on all ClusterSizing fields being finalized. The BoM table, CSV, PPTX, and PDF exports must all be updated atomically — partial export support is worse than none because it produces silent empty columns.
-**Delivers:** GPU node row in `BomTable.vue`, virt storage annotation row, RHOAI overhead row, updated CSV/PPTX/PDF export field reads for all new `ClusterSizing` fields.
-**Addresses:** Updated BoM table rows (table stakes P1 feature).
-**Avoids:** Pitfall 7 (export files missing new rows, type errors surface in BoM not engine).
-**Research flag:** Standard pattern — follow existing BomTable row pattern (null check + row render).
+Rationale: Lowest complexity, highest immediate user value. URL sharing breaks for large multi-cluster configs — session JSON unblocks that use case for pre-sales. Estimated effort: 1 day.
+Research flag: Standard patterns — no research phase needed.
 
-### Phase 6: Wizard Inputs and i18n
-**Rationale:** Wizard inputs and i18n strings are UI-only and carry no architectural risk. Grouping all four locales (EN/FR/IT/DE) in one phase ensures they are updated atomically. The GPU mode selector (native `<select>` cascade) and MIG profile selector reuse the existing wizard form pattern — no new component library needed.
-**Delivers:** Wizard Step 2/3 inputs for virt VM count/vCPU/RAM, GPU mode selector, MIG profile cascade, `VirtConfigSection.vue`, `GpuConfigSection.vue`, all new `messageKey` strings in all four locale files, live-migration toggle disabled/hidden when `gpuMode=passthrough`.
-**Addresses:** Wizard inputs for new fields, i18n keys (table stakes P1 features).
-**Research flag:** Standard pattern — existing wizard form pattern, no research needed.
+**Phase 2B: PPTX Redesign with Charts (depends on Phase 1 useChartData)**
+- Refactor Vue chart components to delegate data building to `useChartData.ts`
+- Redesign `usePptxExport.ts`: consolidated 1-slide layout, pptxgenjs native `slide.addChart()`
+- Bar chart: `BAR` (`barDir: 'col'`) — node counts by type
+- Stacked bar (if 3+ node types): vCPU contribution per pool
+- Doughnut (skip for SNO/compact-3node with <3 slices)
+- Red Hat color palette: primary `EE0000`, secondary `151515`, tertiary `CCCCCC`
+- Factory function for chart options objects (prevents options reuse pitfall)
+- Filter zero-count node pools before chart data construction
 
-### Phase Ordering Rationale
+Rationale: Single most-requested improvement — pre-sales ship PPTX to customers. Estimated effort: 2 days.
+Research flag: Standard patterns — pptxgenjs native chart API is well-documented.
 
-- **Type-first ordering** is mandatory because `ClusterSizing` and `AddOnConfig` changes touch every layer; doing this last would require re-reviewing all earlier PRs.
-- **Engine before UI** is the existing codebase discipline — zero Vue imports in `engine/`. Breaking this would make the engine untestable with plain Vitest.
-- **Validation warnings co-located with calculators** (Phases 1-4) prevents the "looks done but isn't" failure mode where a working calculator silently produces an invalid BoM.
-- **Exports atomic in Phase 5** prevents partial export support shipping to users.
-- **GPU and RHOAI as separate phases** keeps PR scope manageable and aligns with the natural `addons.ts` extension point.
+**Phase 2C: WARN-02 Fix (independent, no phase dependencies)**
+- Add `rwxStorageAvailable: boolean` (default `false`) to `AddOnConfig` in `engine/types.ts`
+- Update wizard Step 3: show "RWX-capable storage available" checkbox when `virtEnabled=true`
+- Change validation condition: `virtEnabled && !odfEnabled && !rwxStorageAvailable`
+- Rename warning code `VIRT_RWX_REQUIRES_ODF` -> `VIRT_RWX_STORAGE_REQUIRED`
+- Update all 4 locale files, all test fixtures, `createDefaultClusterConfig()` in `defaults.ts`
+- Add three test cases: ODF enabled, RWX available, neither
 
-### Research Flags
+Rationale: Self-contained correctness fix, no architectural dependencies. Can be merged independently. Estimated effort: 0.5 days.
+Research flag: No research needed — fix semantics are fully specified.
 
-Phases needing deeper research during planning:
-- **Phase 4 (RHOAI):** RHOAI operator overhead numbers are MEDIUM confidence. The "16 vCPU / 64 GB cluster minimum" comes from ai-on-openshift.io and Red Hat Customer Portal, not a single authoritative sizing table. Validate against current RHOAI 3.x supported configurations article before finalizing constants.
-- **Phase 2 (GPU vGPU mode):** vGPU density sizing is deliberately deferred to v2.1, but the `vgpu` mode must still produce a valid BoM for v2.0. The sizer cannot calculate density without a stable NVIDIA vGPU profile catalog — the Phase 2 plan must specify exactly what the BoM shows for vGPU mode (node count + static "density requires NVIDIA license" warning).
+**Phase 3: PDF Redesign with Charts (depends on Phase 1 useChartData)**
+- Redesign `usePdfExport.ts`: Chart.js offscreen canvas -> `canvas.toDataURL()` -> `doc.addImage()`
+- `animation: { duration: 0 }` enforced as a constant in the export helper
+- Replace `lastAutoTable` cast with `autoTable()` return value
+- Embed Unicode-capable font (NotoSans Base64 subset) via `addFileToVFS()` + `addFont()`
+- Summary KPI callout box between chart and BoM table
+- Validation warnings inline with severity color
+- Pre-warm dynamic jsPDF import in `onMounted` to preserve user gesture context
+- Set `rowPageBreak: 'avoid'` and `showHead: 'everyPage'` for multi-section tables
 
-Phases with well-documented patterns (research-phase not needed):
-- **Phase 1 (calcVirt engine):** KubeVirt overhead formula is documented in the Red Hat Developer blog (Jan 2025) and OCP 4.20 docs. The post-dispatch add-on pattern is identical to `calcODF()`.
-- **Phase 3 (SNO-virt):** Additive profileMap entry. Constants sourced from official Red Hat SNO docs.
-- **Phase 5 (BoM exports):** Null-check + row render is the existing BomTable pattern. No architectural uncertainty.
-- **Phase 6 (Wizard/i18n):** Existing wizard form patterns are sufficient. Two new sub-components, native `<select>` cascade.
+Rationale: Rounds out the export story after PPTX redesign. Estimated effort: 1-2 days.
+Research flag: Standard patterns — document canvas-to-PNG approach in code comments for future maintainers.
+
+**Phase 4: Multi-Cluster UI (depends on Phase 1 store extensions)**
+- ResultsPage: horizontal cluster tab bar above wizard, editable labels (double-click), Add (+) and Remove (x) controls
+- Tab click -> `inputStore.activeClusterIndex = idx` (zero store changes, purely reactive)
+- Wizard reuse: existing wizard operates on `activeClusterIndex` — no duplication needed
+- Hub+Spoke role selector in cluster tab or settings panel
+- `compareMode` toggle button in results header, visible when `clusters.length > 1`
+- `ComparisonView.vue`: sticky first column, scrollable cluster columns, max 5 columns
+- Component local state for comparison view (promote to uiStore only if URL sharing of comparison state is needed)
+
+Rationale: Enables the Hub+Spoke pre-sales use case, the primary driver for multi-cluster support. Estimated effort: 2-3 days.
+Research flag: Standard patterns — tab strip and comparison table are well-established UI patterns. Use table layout (not cards) per NNGroup research.
+
+**Phase 5: Aggregate Multi-Cluster Exports (depends on Phases 2B, 3, 4)**
+- Update `usePptxExport.ts`: optional `mode: 'active' | 'all'` parameter; `'all'` adds one slide per cluster + aggregate summary slide
+- Update `usePdfExport.ts`: one autoTable section per cluster (with cluster name header) + aggregate totals row
+- Update `useCsvExport.ts`: cluster name as grouping row, single-file output (avoid zip dependency)
+- Single download trigger per user action (never loop + download per cluster)
+- Guard: validate `clusterIdx` not out-of-bounds before filename construction
+
+Rationale: Builds on individual-cluster redesigns to add aggregate BoM — last export feature because it requires multi-cluster UI to exist for testing. Estimated effort: 1-2 days.
+Research flag: No research needed — patterns established in Phases 2B and 3.
+
+### Phase Ordering Summary
+
+| Phase | Delivers | Key Risk to Avoid |
+|-------|----------|-------------------|
+| 1: Foundation | useChartData, downloadBlob, role field, aggregateTotals | CALC-02 violation in new store computeds |
+| 2A: Session JSON | Export/import composable, toolbar buttons | Reactivity bug on import (use `await nextTick()`) |
+| 2B: PPTX Charts | Native pptxgenjs charts, 1-slide layout | Options object reuse, zero-value series |
+| 2C: WARN-02 | Corrected RWX validation, schema extension | Condition widened too broadly, stale tests |
+| 3: PDF Charts | Canvas chart images, Unicode font, KPI callout | Blank canvas (animation not disabled), finalY cast |
+| 4: Multi-Cluster UI | Tab strip, comparison view, cluster roles | Stale index after cluster removal |
+| 5: Aggregate Exports | Per-cluster + aggregate PPTX/PDF/CSV | Multiple simultaneous downloads (browser blocks) |
+
+Phases 2A, 2B, and 2C can be worked in parallel after Phase 1 completes.
+Phase 3 can begin alongside Phase 2B (same `useChartData` dependency, different export format).
+Phase 4 can begin alongside Phases 2-3 (different dependency chain: store extensions).
+Phase 5 requires all of 2B, 3, and 4 to be done before aggregate export is testable end-to-end.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Existing installed stack; zero new packages; patterns derived directly from live codebase |
-| Features | HIGH | Official Red Hat + NVIDIA docs; feature set aligns with vcf-sizer sister tool pattern |
-| Architecture | HIGH | Direct source code analysis; all patterns have existing examples in the codebase |
-| Pitfalls | MEDIUM-HIGH | KubeVirt/GPU constraints HIGH (official docs); RHOAI overhead MEDIUM (community + Customer Portal); MIG+vGPU+VM intersection LOW (limited GA surface) |
+| Stack | HIGH | All features verified against locally installed type definitions; zero new packages |
+| Features | HIGH | Official pptxgenjs + jsPDF docs; UX research from NNGroup for comparison table limits |
+| Architecture | HIGH | Direct source code analysis; multi-cluster data model already in place |
+| Pitfalls | HIGH for rendering pitfalls (reproduced from GitHub issues); MEDIUM for session migration patterns |
 
-**Overall confidence:** MEDIUM-HIGH
+**Overall confidence:** HIGH
 
 ### Gaps to Address
 
-- **RHOAI exact overhead numbers:** The 16 vCPU / 64 GB cluster minimum cited in research is from community sources. During Phase 4 planning, validate against the current RHOAI 3.x supported configurations article on the Red Hat Customer Portal. The formula for RHOAI pod requests per component (dashboard, KServe, ModelMesh, etc.) may differ from the aggregate estimate.
-- **vGPU mode BoM output for v2.0:** Research confirms vGPU density sizing is deferred, but the sizer must still handle `gpuMode=vgpu` without crashing. Phase 2 planning must decide: does v2.0 show a node spec with a static warning, or does it disable vGPU mode selection entirely until v2.1?
-- **MIG+vGPU+VM intersection stability:** The documented limitation (MIG-backed vGPU not supported for KubeVirt VMs) applies to NVIDIA GPU Operator 23.9-24.9. By implementation time (2026), newer GPU Operator versions may have lifted this restriction. Verify against the current GPU Operator release notes during Phase 2 planning.
-- **CephFS vs RBD Block for VM disks:** Research recommends emitting a `VIRT_PREFER_RBD_BLOCK` info warning, but the correct ODF storage class names are cluster-specific. The warning should reference the storage class type (RBD Block) rather than a specific StorageClass name.
+- **PDF Unicode font delivery:** The correct approach (NotoSans Base64 embedded via `addFileToVFS`) is known, but the specific font subset generation tooling (subsetting to cover FR/DE/IT characters only) is not pre-baked. Phase 3 planning should decide: embed full NotoSans-Regular (~300 KB) or generate a subset (~30 KB) via `pyftsubset` at build time.
+
+- **Safari iOS download limitation for JSON session export:** `<a download>` is not honoured in Safari on iOS. The clipboard fallback (copy JSON to clipboard) is the recommended degradation, but UX design for the fallback UI is not specified. Flag as a known limitation in release notes; implement clipboard fallback if stakeholder feedback indicates iPad usage by the target pre-sales audience.
+
+- **WARN-02 backward compatibility with v2.0 exported sessions:** v2.0 sessions will not have `rwxStorageAvailable` in their `AddOnConfig`. The Zod schema must use `.optional().default(false)` for this field to accept v2.0 imports without error. Verify the existing `InputStateSchema` uses `.optional()` or `.default()` consistently throughout before writing the new field.
+
+- **Comparison view URL sharing:** The current design uses component-local state for comparison view. If pre-sales engineers need to share a "comparison view" URL (e.g., to show a customer), this will not work until `comparisonClusterIds` is promoted to URL state. Defer to v2.2 unless explicitly requested.
+
+---
 
 ## Sources
 
-### Primary (HIGH confidence)
-- NVIDIA MIG User Guide — `docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html` — MIG profile names, slice counts, max instances per GPU
-- NVIDIA GPU Operator with OpenShift Virtualization — `docs.nvidia.com/datacenter/cloud-native/openshift/latest/openshift-virtualization.html` — GPU modes, node label system, mode exclusivity, passthrough blocks live migration
-- Red Hat OCP 4.20 Virtualization docs — `docs.redhat.com/en/documentation/openshift_container_platform/4.20/html-single/virtualization/index` — KubeVirt node overhead, RWX requirement, memory overhead formula
-- Memory management in OpenShift Virtualization — `developers.redhat.com/blog/2025/01/31/memory-management-openshift-virtualization` — per-VM overhead formula (218 MiB base + 8 MiB × vCPUs)
+### STACK.md Sources (HIGH confidence — locally verified)
+- pptxgenjs type definitions: `node_modules/pptxgenjs/types/index.d.ts` (v4.0.1)
+- jsPDF type definitions: `node_modules/jspdf/types/index.d.ts` (v4.2.1)
+- chart.js package.json: `node_modules/chart.js/package.json` (v4.5.1)
+- Pinia stores: `src/stores/inputStore.ts`, `src/stores/calculationStore.ts`
+- Browser File API (`File.text()`, `URL.createObjectURL()`): MDN Web Docs standard
 
-### Secondary (MEDIUM confidence)
-- Red Hat RHOAI supported configurations — `access.redhat.com/articles/rhoai-supported-configs` — minimum 2 workers × 8 vCPU / 32 GB RAM
-- KubeVirt node overcommit user guide — `kubevirt.io/user-guide/compute/node_overcommit/` — CPU allocation ratio 10:1 default
-- SNO + Virtualization second disk requirement — `access.redhat.com/solutions/7014308` — additional 50 GiB for hostpath-provisioner
-- NVIDIA How MIG maximizes GPU efficiency — `developers.redhat.com/articles/2025/02/06/how-mig-maximizes-gpu-efficiency-openshift-ai`
-- Storage considerations for OCP Virt — `developers.redhat.com/articles/2025/07/10/storage-considerations-openshift-virtualization`
+### FEATURES.md Sources
+- [PptxGenJS Charts API](https://gitbrent.github.io/PptxGenJS/docs/api-charts/)
+- [Table vs Cards vs List — UX Patterns for Developers](https://uxpatterns.dev/pattern-guide/table-vs-list-vs-cards)
+- [Comparison Table Pattern](https://uxpatterns.dev/patterns/data-display/comparison-table)
+- [Bar vs Pie Chart — Syncfusion](https://www.syncfusion.com/blogs/post/bar-vs-pie-blazor-charts)
+- [NNGroup — Comparison tables overwhelm beyond 5 options](https://smart-interface-design-patterns.com/articles/pricing-plans/)
 
-### Tertiary (LOW confidence — validate during implementation)
-- MIG+vGPU+VM incompatibility — NVIDIA GPU Operator 23.9-24.9 docs — version-dependent, may change in newer GPU Operator releases
-- RHOAI aggregate operator overhead (4 vCPU / 16 GB) — community estimate from ai-on-openshift.io, not an official sizing table
-- virt-handler RSS growth with VM count — kubevirt/kubevirt#13295 — upstream issue, not yet in official sizing guidance
+### ARCHITECTURE.md Sources
+- Direct code reading: `src/stores/inputStore.ts`, `src/stores/calculationStore.ts`, `src/stores/uiStore.ts`
+- Direct code reading: `src/composables/useUrlState.ts`, `usePptxExport.ts`, `usePdfExport.ts`, `useCsvExport.ts`
+- Direct code reading: `src/engine/types.ts`, `src/components/results/ResultsPage.vue`, `ExportToolbar.vue`
+
+### PITFALLS.md Sources
+- [PptxGenJS object mutation bug](https://github.com/gitbrent/PptxGenJS/issues) — options object mutated in-place
+- [PptxGenJS zero values missing in line chart #240](https://github.com/gitbrent/PptxGenJS/issues/240)
+- [jsPDF AutoTable UTF-8 support #391](https://github.com/simonbengtsson/jsPDF-AutoTable/issues/391)
+- [jsPDF Unicode languages support #2093](https://github.com/parallax/jsPDF/issues/2093)
+- [Pinia reactivity: array replacement patterns](https://pinia.vuejs.org/api/pinia/functions/storeToRefs.html)
+- [Pinia composing stores — useStore() before await](https://pinia.vuejs.org/cookbook/composing-stores.html)
+- [Firefox Blob URL memory release bug #939510](https://bugzilla.mozilla.org/show_bug.cgi?id=939510)
+- [Zod safeParse documentation](https://zod.dev/)
 
 ---
-*Research completed: 2026-04-01*
+
+*Research completed: 2026-04-04*
 *Ready for roadmap: yes*
