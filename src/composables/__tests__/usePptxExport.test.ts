@@ -45,6 +45,10 @@ function makeSizing(overrides: Partial<ClusterSizing> = {}): ClusterSizing {
     infraNodes: null,
     odfNodes: null,
     rhacmWorkers: null,
+    virtWorkerNodes: null,
+    gpuNodes: null,
+    virtStorageGB: 0,
+    rhoaiOverhead: null,
     totals: { vcpu: 24, ramGB: 96, storageGB: 360 },
     ...overrides,
   }
@@ -170,5 +174,40 @@ describe('buildBomTableRows', () => {
     expect(labels).toContain('ODF Storage')
     expect(labels).not.toContain('Infra Nodes')
     expect(labels).not.toContain('RHACM Hub')
+  })
+})
+
+// ── buildBomTableRows v2.0 rows ───────────────────────────────────────────────
+
+describe('buildBomTableRows v2.0 rows', () => {
+  it('includes Virt Workers row when virtWorkerNodes non-null', () => {
+    const rows = buildBomTableRows(
+      makeSizing({ virtWorkerNodes: { count: 4, vcpu: 16, ramGB: 64, storageGB: 200 } }),
+    )
+    const allText = rows.flat().map((c) => c.text).join('|')
+    expect(allText).toContain('Virt Workers')
+  })
+
+  it('includes GPU Nodes row when gpuNodes non-null', () => {
+    const rows = buildBomTableRows(
+      makeSizing({ gpuNodes: { count: 2, vcpu: 48, ramGB: 192, storageGB: 500 } }),
+    )
+    const allText = rows.flat().map((c) => c.text).join('|')
+    expect(allText).toContain('GPU Nodes')
+  })
+
+  it('appends RHOAI annotation row when rhoaiOverhead non-null', () => {
+    const rows = buildBomTableRows(makeSizing({ rhoaiOverhead: { vcpu: 4, ramGB: 16 } }))
+    const allText = rows.flat().map((c) => c.text).join('|')
+    expect(allText).toContain('RHOAI Overhead')
+    expect(allText).toContain('+4')
+  })
+
+  it('omits GPU and Virt rows when null', () => {
+    const rows = buildBomTableRows(makeSizing())
+    const allText = rows.flat().map((c) => c.text).join('|')
+    expect(allText).not.toContain('GPU Nodes')
+    expect(allText).not.toContain('Virt Workers')
+    expect(allText).not.toContain('RHOAI Overhead')
   })
 })
