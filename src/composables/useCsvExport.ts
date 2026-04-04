@@ -12,6 +12,8 @@ function getNodeEntries(sizing: ClusterSizing): NodeEntry[] {
     ...(sizing.infraNodes ? [{ label: 'Infra Nodes', spec: sizing.infraNodes }] : []),
     ...(sizing.odfNodes ? [{ label: 'ODF Storage', spec: sizing.odfNodes }] : []),
     ...(sizing.rhacmWorkers ? [{ label: 'RHACM Hub', spec: sizing.rhacmWorkers }] : []),
+    ...(sizing.virtWorkerNodes ? [{ label: 'Virt Workers', spec: sizing.virtWorkerNodes }] : []),
+    ...(sizing.gpuNodes ? [{ label: 'GPU Nodes', spec: sizing.gpuNodes }] : []),
   ]
 }
 
@@ -20,7 +22,12 @@ export function buildCsvContent(sizing: ClusterSizing): string {
   const rows = getNodeEntries(sizing).map(
     (e) => `${e.label},${e.spec.count},${e.spec.vcpu},${e.spec.ramGB},${e.spec.storageGB}`,
   )
-  return [header, ...rows].join('\n')
+  const rhoaiRow = sizing.rhoaiOverhead
+    ? [
+        `RHOAI Overhead (KServe / DS Pipelines / Model Registry),—,+${sizing.rhoaiOverhead.vcpu},+${sizing.rhoaiOverhead.ramGB},—`,
+      ]
+    : []
+  return [header, ...rows, ...rhoaiRow].join('\n')
 }
 
 function downloadBlob(content: string, filename: string, mimeType: string): void {

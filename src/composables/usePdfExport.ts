@@ -13,6 +13,8 @@ function getNodeEntries(sizing: ClusterSizing): NodeEntry[] {
     ...(sizing.infraNodes ? [{ label: 'Infra Nodes', spec: sizing.infraNodes }] : []),
     ...(sizing.odfNodes ? [{ label: 'ODF Storage', spec: sizing.odfNodes }] : []),
     ...(sizing.rhacmWorkers ? [{ label: 'RHACM Hub', spec: sizing.rhacmWorkers }] : []),
+    ...(sizing.virtWorkerNodes ? [{ label: 'Virt Workers', spec: sizing.virtWorkerNodes }] : []),
+    ...(sizing.gpuNodes ? [{ label: 'GPU Nodes', spec: sizing.gpuNodes }] : []),
   ]
 }
 
@@ -21,15 +23,27 @@ export function buildPdfTableData(sizing: ClusterSizing): {
   head: string[][]
   body: string[][]
 } {
+  const nodeRows = getNodeEntries(sizing).map((e) => [
+    e.label,
+    String(e.spec.count),
+    String(e.spec.vcpu),
+    String(e.spec.ramGB),
+    String(e.spec.storageGB),
+  ])
+  const rhoaiRows: string[][] = sizing.rhoaiOverhead
+    ? [
+        [
+          'RHOAI Overhead (KServe / DS Pipelines / Model Registry)',
+          '—',
+          `+${sizing.rhoaiOverhead.vcpu}`,
+          `+${sizing.rhoaiOverhead.ramGB}`,
+          '—',
+        ],
+      ]
+    : []
   return {
     head: [['Node Type', 'Count', 'vCPU', 'RAM (GB)', 'Storage (GB)']],
-    body: getNodeEntries(sizing).map((e) => [
-      e.label,
-      String(e.spec.count),
-      String(e.spec.vcpu),
-      String(e.spec.ramGB),
-      String(e.spec.storageGB),
-    ]),
+    body: [...nodeRows, ...rhoaiRows],
   }
 }
 

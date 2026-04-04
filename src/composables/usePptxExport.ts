@@ -66,6 +66,8 @@ export function buildBomTableRows(sizing: ClusterSizing): TableRow[] {
     ...(sizing.infraNodes ? [{ label: 'Infra Nodes', spec: sizing.infraNodes }] : []),
     ...(sizing.odfNodes ? [{ label: 'ODF Storage', spec: sizing.odfNodes }] : []),
     ...(sizing.rhacmWorkers ? [{ label: 'RHACM Hub', spec: sizing.rhacmWorkers }] : []),
+    ...(sizing.virtWorkerNodes ? [{ label: 'Virt Workers', spec: sizing.virtWorkerNodes }] : []),
+    ...(sizing.gpuNodes ? [{ label: 'GPU Nodes', spec: sizing.gpuNodes }] : []),
   ]
   const dataRows: TableRow[] = entries.map((e) => [
     cell(e.label),
@@ -74,7 +76,18 @@ export function buildBomTableRows(sizing: ClusterSizing): TableRow[] {
     cell(String(e.spec.ramGB)),
     cell(String(e.spec.storageGB)),
   ])
-  return [header, ...dataRows]
+  const rhoaiRows: TableRow[] = sizing.rhoaiOverhead
+    ? [
+        [
+          cell('RHOAI Overhead (KServe / DS Pipelines / Model Registry)'),
+          cell('—'),
+          cell(`+${sizing.rhoaiOverhead.vcpu}`),
+          cell(`+${sizing.rhoaiOverhead.ramGB}`),
+          cell('—'),
+        ],
+      ]
+    : []
+  return [header, ...dataRows, ...rhoaiRows]
 }
 
 // ── Main export function ──────────────────────────────────────────────────────
