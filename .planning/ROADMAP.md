@@ -93,7 +93,7 @@ Plans:
 - [x] 12-01-PLAN.md — ClusterSizing rhoaiOverhead + calcRHOAI update + i18n all keys (Wave 1)
 - [x] 12-02-PLAN.md — Step2 Wizard UI: Virt toggle, GPU toggle+sub-inputs, RHOAI toggle (Wave 2)
 - [x] 12-03-PLAN.md — Step3 Wizard UI: Virt VM sizing sub-inputs, snoVirtMode toggle (Wave 2)
-- [ ] 12-04-PLAN.md — BoM + Exports: virtWorkerNodes/gpuNodes/rhoaiOverhead rows in all 4 artifacts (Wave 3)
+- [x] 12-04-PLAN.md — BoM + Exports: virtWorkerNodes/gpuNodes/rhoaiOverhead rows in all 4 artifacts (Wave 3)
 - [ ] 12-05-PLAN.md — Component tests: export composables + BomTable v2.0 row coverage (Wave 4)
 **UI hint**: yes
 
@@ -112,7 +112,7 @@ Plans:
 | 9. Virt Engine Foundation | v2.0 | 4/4 | Complete   | 2026-04-01 |
 | 10. GPU Node Engine | v2.0 | 3/3 | Complete   | 2026-04-01 |
 | 11. RHOAI Add-On Engine | v2.0 | 3/3 | Complete   | 2026-04-01 |
-| 12. BoM, Exports, Wizard UI + i18n | v2.0 | 3/5 | In Progress|  |
+| 12. BoM, Exports, Wizard UI + i18n | v2.0 | 4/5 | In Progress|  |
 
 ---
 *v1.0 archived: 2026-04-01*
