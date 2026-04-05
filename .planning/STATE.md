@@ -71,10 +71,13 @@ v2.1 Milestone: Phase 16 of 19 (7 v2.1 phases total)
 - Phase 15: importSession rejects with typed Error('parse'|'schema'|'read') for clean caller error mapping
 - Phase 15: fileInputKey incremented in finally block ensures same-file re-import (D-08)
 - Phase 15: Error messages always use i18n keys — Zod internals never exposed to UI (T-15-06)
+- Phase 17: Roboto Regular (Apache 2.0, Google Fonts static CDN) chosen over NotoSans — classical look per user preference; Latin+Extended subset ~40KB embedded as base64 via addFileToVFS
+- Phase 17: buildChartImageDataUrl() and buildKpiStripData() exported as pure helpers (same testable pattern as buildPdfTableData) — no jsPDF in tests
+- Phase 17: generatePdfReport() signature extended with resolvedWarnings param (default []) — pure TS composable stays Vue-free; ExportToolbar resolves i18n before calling
 
 ## Blockers/Concerns
 
-- PDF Unicode: font subsetting approach (full NotoSans ~300KB vs pyftsubset subset ~30KB) — decide in Phase 17 planning
+- PDF Unicode resolved: Roboto Regular (Apache 2.0) via Google Fonts static CDN — no new npm package needed
 - Safari iOS: `<a download>` not honoured — known limitation for Session JSON export (documented)
 - WARN-04/05 resolved: rwxStorageAvailable field added with .optional().default(false) for backward compat; VIRT_RWX_REQUIRES_ODF renamed to VIRT_RWX_STORAGE_REQUIRED
 - 14-01 decision: VIRT_RWX_REQUIRES_ODF renamed to VIRT_RWX_STORAGE_REQUIRED — new code accurately reflects that the guard checks for absence of any RWX storage, not just ODF

@@ -117,11 +117,11 @@ Plans:
   2. Exported PDF includes a KPI summary callout box showing total vCPU, total RAM, and total Storage between the chart and the BoM table
   3. French, German, and Italian locale exports render accented and special characters correctly — no boxes or replacement characters appear in headers, labels, or table cells
   4. Exported PDF renders active validation warnings inline with severity-appropriate color differentiation
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 17-01: Implement Chart.js offscreen canvas rendering and embed chart image in PDF via doc.addImage
-- [ ] 17-02: Embed Unicode-capable font (NotoSans subset), add KPI callout box and inline warnings
+- [ ] 17-02: Embed Roboto Regular Unicode font, add KPI callout box and inline warnings; update ExportToolbar to pass resolved warnings
 
 ### Phase 18: Multi-Cluster UI
 **Goal**: Users can configure, label, and compare up to 5 independent clusters in a single session, with each cluster assignable a hub, spoke, or standalone role for Hub+Spoke pre-sales use cases
@@ -179,7 +179,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19
 | 14. Warning Fix | v2.1 | 1/1 | Complete   | 2026-04-05 |
 | 15. Session Portability | v2.1 | 2/2 | Complete   | 2026-04-05 |
 | 16. PPTX Redesign | v2.1 | 0/2 | Not started | - |
-| 17. PDF Redesign | v2.1 | 0/2 | Not started | - |
+| 17. PDF Redesign | v2.1 | 0/2 | Planned | - |
 | 18. Multi-Cluster UI | v2.1 | 0/2 | Not started | - |
 | 19. Aggregate Exports | v2.1 | 0/2 | Not started | - |
 
