@@ -2,23 +2,23 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: — Export
-current_phase: 15
+current_phase: 16
 current_plan: 2 complete
-status: Phase 15 Complete
-last_updated: "2026-04-05T17:35:00Z"
+status: Phase 16 Complete
+last_updated: "2026-04-05T18:30:00Z"
 last_activity: 2026-04-05
 progress:
   total_phases: 7
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 4
-  percent: 80
+  completed_phases: 4
+  total_plans: 7
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
 
 **Project:** os-sizer
-**Current Phase:** 15
+**Current Phase:** 16
 **Current Plan:** 2 complete
 **Last Updated:** 2026-04-05
 **Last Activity:** 2026-04-05
@@ -26,8 +26,8 @@ progress:
 ## Progress
 
 ```
-v2.1 Milestone: Phase 15 of 19 (7 v2.1 phases total)
-[████████░░] 80%  (Phase 15 complete — all 2 plans done, 276 tests passing)
+v2.1 Milestone: Phase 16 of 19 (7 v2.1 phases total)
+[█████████░] 86%  (Phase 16 complete — all 2 plans done, 292 tests passing)
 ```
 
 ## Status
@@ -42,6 +42,8 @@ v2.1 Milestone: Phase 15 of 19 (7 v2.1 phases total)
 - [x] Phase 14 Plan 01 complete — VIRT_RWX_STORAGE_REQUIRED warning fix + rwxStorageAvailable field wired end-to-end (270 tests passing)
 - [x] Phase 15 Plan 01 complete — useSessionExport composable (exportSession + importSession, 6 tests, pure TS)
 - [x] Phase 15 Plan 02 complete — ExportToolbar session buttons + i18n keys in 4 locales (276 tests passing)
+- [x] Phase 16 Plan 01 complete — single-slide PPTX layout with KPI strip + native BAR chart (node counts)
+- [x] Phase 16 Plan 02 complete — stacked vCPU chart (3+ pools), factory opts pattern (292 tests passing)
 
 ## Accumulated Context
 

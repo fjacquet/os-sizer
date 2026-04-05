@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { buildArchSummaryData, buildBomTableRows } from '../usePptxExport'
+import {
+  buildArchSummaryData,
+  buildBomTableRows,
+  buildNodeCountChartData,
+  shouldShowVcpuChart,
+  buildVcpuStackedChartData,
+  type PptxChartSeries,
+} from '../usePptxExport'
 import type { ClusterConfig, ClusterSizing, NodeSpec } from '@/engine/types'
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -223,5 +230,161 @@ describe('buildBomTableRows v2.0 rows', () => {
     expect(allText).not.toContain('GPU Nodes')
     expect(allText).not.toContain('Virt Workers')
     expect(allText).not.toContain('RHOAI Overhead')
+  })
+})
+
+// ── buildNodeCountChartData ───────────────────────────────────────────────────
+
+describe('buildNodeCountChartData', () => {
+  it('returns a single series named "Node Count"', () => {
+    const sizing = makeSizing({ masterNodes: makeNodeSpec({ count: 3 }) })
+    const data = buildNodeCountChartData(sizing)
+    expect(data).toHaveLength(1)
+    expect(data[0].name).toBe('Node Count')
+  })
+
+  it('labels and values match non-zero pools only', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3 }),
+      workerNodes: makeNodeSpec({ count: 6 }),
+      infraNodes: null,
+      odfNodes: makeNodeSpec({ count: 3 }),
+    })
+    const data = buildNodeCountChartData(sizing)
+    expect(data[0].labels).toEqual(['Control Plane', 'Workers', 'ODF Storage'])
+    expect(data[0].values).toEqual([3, 6, 3])
+  })
+
+  it('excludes pools with count=0 from labels and values', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3 }),
+      workerNodes: makeNodeSpec({ count: 0 }),
+    })
+    const data = buildNodeCountChartData(sizing)
+    expect(data[0].labels).not.toContain('Workers')
+    expect(data[0].values).not.toContain(0)
+  })
+
+  it('returns single label "Control Plane" when only masters exist', () => {
+    const sizing = makeSizing()
+    const data = buildNodeCountChartData(sizing)
+    expect(data[0].labels).toEqual(['Control Plane'])
+    expect(data[0].values).toEqual([3])
+  })
+})
+
+// ── shouldShowVcpuChart ───────────────────────────────────────────────────────
+
+describe('shouldShowVcpuChart', () => {
+  it('returns false when only 1 pool type (masters only)', () => {
+    expect(shouldShowVcpuChart(makeSizing())).toBe(false)
+  })
+
+  it('returns false when exactly 2 non-zero pool types', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3 }),
+      workerNodes: makeNodeSpec({ count: 6 }),
+    })
+    expect(shouldShowVcpuChart(sizing)).toBe(false)
+  })
+
+  it('returns true when exactly 3 non-zero pool types', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3 }),
+      workerNodes: makeNodeSpec({ count: 6 }),
+      odfNodes: makeNodeSpec({ count: 3 }),
+    })
+    expect(shouldShowVcpuChart(sizing)).toBe(true)
+  })
+
+  it('returns true when 4 or more non-zero pool types', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3 }),
+      workerNodes: makeNodeSpec({ count: 6 }),
+      odfNodes: makeNodeSpec({ count: 3 }),
+      infraNodes: makeNodeSpec({ count: 3 }),
+    })
+    expect(shouldShowVcpuChart(sizing)).toBe(true)
+  })
+
+  it('does not count zero-count pools toward the threshold', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3 }),
+      workerNodes: makeNodeSpec({ count: 0 }),
+      odfNodes: makeNodeSpec({ count: 0 }),
+    })
+    expect(shouldShowVcpuChart(sizing)).toBe(false)
+  })
+})
+
+// ── buildVcpuStackedChartData ─────────────────────────────────────────────────
+
+describe('buildVcpuStackedChartData', () => {
+  it('returns null when fewer than 3 non-zero pool types', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3 }),
+      workerNodes: makeNodeSpec({ count: 6 }),
+    })
+    expect(buildVcpuStackedChartData(sizing)).toBeNull()
+  })
+
+  it('returns null for a single pool type (masters only)', () => {
+    expect(buildVcpuStackedChartData(makeSizing())).toBeNull()
+  })
+
+  it('returns one series per non-zero pool when 3+ types exist', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3, vcpu: 8 }),
+      workerNodes: makeNodeSpec({ count: 6, vcpu: 16 }),
+      odfNodes: makeNodeSpec({ count: 3, vcpu: 12 }),
+    })
+    const data = buildVcpuStackedChartData(sizing)
+    expect(data).not.toBeNull()
+    expect(data).toHaveLength(3)
+  })
+
+  it('each series name matches pool label', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3, vcpu: 8 }),
+      workerNodes: makeNodeSpec({ count: 6, vcpu: 16 }),
+      odfNodes: makeNodeSpec({ count: 3, vcpu: 12 }),
+    })
+    const data = buildVcpuStackedChartData(sizing)!
+    expect(data.map((s) => s.name)).toEqual(['Control Plane', 'Workers', 'ODF Storage'])
+  })
+
+  it('each series has a single label "vCPU Distribution"', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3, vcpu: 8 }),
+      workerNodes: makeNodeSpec({ count: 6, vcpu: 16 }),
+      odfNodes: makeNodeSpec({ count: 3, vcpu: 12 }),
+    })
+    const data = buildVcpuStackedChartData(sizing)!
+    data.forEach((series) => {
+      expect(series.labels).toEqual(['vCPU Distribution'])
+    })
+  })
+
+  it('each series value equals count * vcpu for that pool', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3, vcpu: 8 }), // 24 vCPU
+      workerNodes: makeNodeSpec({ count: 6, vcpu: 16 }), // 96 vCPU
+      odfNodes: makeNodeSpec({ count: 3, vcpu: 12 }), // 36 vCPU
+    })
+    const data = buildVcpuStackedChartData(sizing)!
+    expect(data[0].values).toEqual([24])
+    expect(data[1].values).toEqual([96])
+    expect(data[2].values).toEqual([36])
+  })
+
+  it('excludes zero-count pools even when total pool list has 3+ entries', () => {
+    const sizing = makeSizing({
+      masterNodes: makeNodeSpec({ count: 3, vcpu: 8 }),
+      workerNodes: makeNodeSpec({ count: 0, vcpu: 16 }), // zero — excluded
+      odfNodes: makeNodeSpec({ count: 3, vcpu: 12 }),
+    })
+    // Only 2 non-zero pools → should return null
+    const data = buildVcpuStackedChartData(sizing)
+    expect(data).toBeNull()
   })
 })
