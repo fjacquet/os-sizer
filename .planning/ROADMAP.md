@@ -38,7 +38,7 @@
 
 - [x] **Phase 13: Foundation Infrastructure** - Extract shared utilities and extend data model to unblock all v2.1 feature work (completed 2026-04-05)
 - [x] **Phase 14: Warning Fix** - Correct WARN-02 to trigger on any absent RWX storage, not ODF exclusively (completed 2026-04-05)
-- [ ] **Phase 15: Session Portability** - Download and upload the full sizing session as a JSON file
+- [x] **Phase 15: Session Portability** - Download and upload the full sizing session as a JSON file (completed 2026-04-05)
 - [ ] **Phase 16: PPTX Redesign** - Consolidated 1-slide layout with native pptxgenjs charts
 - [ ] **Phase 17: PDF Redesign** - Chart images, Unicode font, KPI callout, and inline warnings
 - [ ] **Phase 18: Multi-Cluster UI** - Tab bar, role tagging, and side-by-side comparison view
@@ -89,8 +89,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01: Implement useSessionExport composable with export and import logic
-- [ ] 15-02: Add JSON import/export buttons to ExportToolbar with error handling UI
+- [x] 15-01: Implement useSessionExport composable with export and import logic
+- [x] 15-02: Add JSON import/export buttons to ExportToolbar with error handling UI
 **UI hint**: yes
 
 ### Phase 16: PPTX Redesign
@@ -177,7 +177,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19
 | 12. BoM, Exports, Wizard UI + i18n | v2.0 | 5/5 | Complete | 2026-04-04 |
 | 13. Foundation Infrastructure | v2.1 | 2/2 | Complete   | 2026-04-05 |
 | 14. Warning Fix | v2.1 | 1/1 | Complete   | 2026-04-05 |
-| 15. Session Portability | v2.1 | 0/2 | Not started | - |
+| 15. Session Portability | v2.1 | 2/2 | Complete   | 2026-04-05 |
 | 16. PPTX Redesign | v2.1 | 0/2 | Not started | - |
 | 17. PDF Redesign | v2.1 | 0/2 | Not started | - |
 | 18. Multi-Cluster UI | v2.1 | 0/2 | Not started | - |

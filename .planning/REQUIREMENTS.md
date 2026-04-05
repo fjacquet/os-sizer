@@ -35,8 +35,8 @@
 
 ### Session Portability (SESSION)
 
-- [ ] **SESSION-01**: User can download the current sizing session as a `.json` file from the export toolbar
-- [ ] **SESSION-02**: User can load a previously saved `.json` session file from the export toolbar; the file is validated via Zod schema with user-friendly error messages on validation failure
+- [x] **SESSION-01**: User can download the current sizing session as a `.json` file from the export toolbar
+- [x] **SESSION-02**: User can load a previously saved `.json` session file from the export toolbar; the file is validated via Zod schema with user-friendly error messages on validation failure
 
 ---
 
