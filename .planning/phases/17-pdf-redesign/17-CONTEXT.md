@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Exported PDFs are enhanced with a bar chart of node counts, a KPI summary callout box, and inline validation warnings with severity colors. Unicode font embedding for FR/DE/IT accented characters is explicitly deferred (PDF-03) — the PDF will use Helvetica (jsPDF default). PPTX redesign (Phase 16), multi-cluster exports (Phase 19), and session portability are separate phases.
+Exported PDFs are enhanced with a bar chart of node counts, a KPI summary callout box, inline validation warnings with severity colors, and correct rendering of accented/special characters for FR/DE/IT locales via an embedded Latin Extended font (Arial Nova or free equivalent). PPTX redesign (Phase 16), multi-cluster exports (Phase 19), and session portability are separate phases.
 
 </domain>
 
@@ -19,10 +19,10 @@ Exported PDFs are enhanced with a bar chart of node counts, a KPI summary callou
 - **D-03:** Chart data sourced from `useChartData.ts` builders (`buildChartRows`, `buildNodeCountData`) — zero-count pools excluded before passing to Chart.js
 - **D-04:** Bar chart placed above the BoM table; KPI callout box placed between chart and BoM table (per PDF-02 success criterion ordering)
 
-### Font Strategy (PDF-03 — Deferred)
-- **D-05:** No embedded font — use Helvetica (jsPDF default). Accented and special characters for FR/DE/IT locales will NOT render correctly
-- **D-06:** PDF-03 acceptance criterion is explicitly deferred to v2.2+. Known limitation: FR/DE/IT exports may display boxes or dropped characters in locale-specific strings
-- **D-07:** All PDF-generated text uses English strings only (node type labels, header text, KPI labels) — these are already in ASCII and unaffected
+### Font Strategy (PDF-03)
+- **D-05:** Embed a Latin Extended subset of a classical font (Arial Nova or a free equivalent with permissive license such as Roboto or Inter) to support accented characters for FR, DE, IT locales — covers Unicode range 0x0000–0x024F (é à ü ö ä ß ç è ì ò ù and all required diacritics)
+- **D-06:** Font subset embedded as base64 string in the composable, registered via `doc.addFileToVFS()` + `doc.addFont()` + `doc.setFont()` before any text rendering
+- **D-07:** Planner selects exact font: prefer Arial Nova (available on macOS/Windows) or Roboto Regular as a universally available free fallback (~40–50KB Latin+Extended subset)
 
 ### Validation Warnings (PDF-04)
 - **D-08:** `generatePdfReport()` function signature extended to accept pre-resolved warning strings: `resolvedWarnings: { text: string; severity: 'error' | 'warning' }[]`
@@ -61,7 +61,7 @@ Exported PDFs are enhanced with a bar chart of node counts, a KPI summary callou
 - `src/composables/__tests__/usePdfExport.test.ts` — existing test for `buildPdfTableData`; new tests follow same fixture pattern
 
 ### Requirements
-- `.planning/REQUIREMENTS.md` §PDF-01, PDF-02, PDF-04 — exact acceptance criteria (PDF-03 deferred)
+- `.planning/REQUIREMENTS.md` §PDF-01, PDF-02, PDF-03, PDF-04 — exact acceptance criteria (all 4 in scope)
 
 </canonical_refs>
 
@@ -91,15 +91,16 @@ Exported PDFs are enhanced with a bar chart of node counts, a KPI summary callou
 <specifics>
 ## Specific Ideas
 
-- Font strategy: "Use Helvetica by default, I don't know NotoSans" — user explicitly chose jsPDF default over custom font embedding
+- Font choice: "Arial Nova or equivalent — it has local proper characters" — user wants a classical/familiar font with Latin Extended support, not NotoSans
+- Planner should prefer Arial Nova if available or Roboto Regular (Apache 2.0 license, universally available via npm `@fontsource/roboto`) as the free fallback
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-- **PDF-03 (Unicode font)**: Accented character rendering for FR/DE/IT deferred to v2.2+. User preference: Helvetica default rather than font subsetting/embedding.
 - Stacked vCPU chart in PDF (analogous to PPTX-03) — not in v2.1 scope for PDF
+- Full Unicode beyond Latin Extended (CJK, Arabic, etc.) — v2.2+ if ever needed
 
 </deferred>
 
