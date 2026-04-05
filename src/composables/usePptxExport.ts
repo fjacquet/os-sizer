@@ -270,7 +270,7 @@ export async function generatePptxReport(): Promise<void> {
     dataLabelPosition: 'outEnd' as const,
     chartColors: [RH_RED],
   })
-  slide.addChart(pptx.charts.BAR, nodeCountData, makeNodeChartOpts())
+  slide.addChart('bar', nodeCountData, makeNodeChartOpts())
 
   // ── Stacked vCPU chart (only when 3+ distinct non-zero pool types) ─────────
   if (showVcpuChart) {
@@ -296,7 +296,7 @@ export async function generatePptxReport(): Promise<void> {
         showValue: false,
         chartColors: ['EE0000', 'CC0000', 'AA0000', '880000', '660000', '440000', '220000'],
       })
-      slide.addChart(pptx.charts.BAR, vcpuData, makeVcpuChartOpts())
+      slide.addChart('bar', vcpuData, makeVcpuChartOpts())
     }
   }
 

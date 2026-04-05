@@ -5,7 +5,6 @@ import {
   buildNodeCountChartData,
   shouldShowVcpuChart,
   buildVcpuStackedChartData,
-  type PptxChartSeries,
 } from '../usePptxExport'
 import type { ClusterConfig, ClusterSizing, NodeSpec } from '@/engine/types'
 
