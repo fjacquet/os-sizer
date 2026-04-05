@@ -3,6 +3,8 @@
 import { useInputStore } from '@/stores/inputStore'
 import { useCalculationStore } from '@/stores/calculationStore'
 import type { ClusterSizing, NodeSpec } from '@/engine/types'
+import { buildChartRows, buildNodeCountData } from './useChartData'
+import Chart from 'chart.js/auto'
 
 type NodeEntry = { label: string; spec: NodeSpec }
 
@@ -47,6 +49,64 @@ export function buildPdfTableData(sizing: ClusterSizing): {
   }
 }
 
+/**
+ * Renders a Chart.js bar chart of node counts to an offscreen canvas.
+ * Returns a PNG data URL, or null if all pools have zero count.
+ * Pure function — testable without jsPDF.
+ */
+export function buildChartImageDataUrl(sizing: ClusterSizing): string | null {
+  // Filter to non-zero rows
+  const allRows = buildChartRows(sizing)
+  const rows = allRows.filter((r) => r.spec.count > 0)
+  if (rows.length === 0) return null
+
+  const labels = rows.map((r) => r.label)
+  const data = buildNodeCountData(rows)
+
+  // Offscreen canvas — not mounted to DOM
+  const canvas = document.createElement('canvas')
+  canvas.width = 800
+  canvas.height = 200
+  const ctx = canvas.getContext('2d')!
+
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Node Count',
+          data,
+          backgroundColor: '#EE0000', // Red Hat red
+          borderRadius: 3,
+        },
+      ],
+    },
+    options: {
+      animation: { duration: 0 }, // CRITICAL: canvas captures blank without this
+      responsive: false,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: 'Node Count by Pool',
+          font: { size: 13 },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1, precision: 0 },
+        },
+      },
+    },
+  })
+
+  const dataUrl = canvas.toDataURL('image/png')
+  chart.destroy()
+  return dataUrl
+}
+
 export async function generatePdfReport(): Promise<void> {
   const input = useInputStore()
   const calc = useCalculationStore()
@@ -70,11 +130,19 @@ export async function generatePdfReport(): Promise<void> {
   doc.text(cluster.name, 40, 50)
   doc.text(`Generated: ${new Date().toLocaleDateString()}`, 40, 65)
 
+  // Chart image (PDF-01)
+  let tableStartY = 80
+  const chartDataUrl = buildChartImageDataUrl(result.sizing)
+  if (chartDataUrl) {
+    doc.addImage(chartDataUrl, 'PNG', 40, 80, 500, 130)
+    tableStartY = 220
+  }
+
   // Bill of Materials table
   autoTable(doc, {
     head,
     body,
-    startY: 80,
+    startY: tableStartY,
     styles: { fontSize: 10 },
     headStyles: { fillColor: [238, 0, 0], textColor: 255 }, // Red Hat red header
     alternateRowStyles: { fillColor: [248, 248, 248] },
