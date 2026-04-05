@@ -56,7 +56,7 @@
   3. `ClusterConfig` in `engine/types.ts` has an optional `role` field typed as `'hub' | 'spoke' | 'standalone'`
   4. `calculationStore` exposes an `aggregateTotals` computed value with zero `ref()` calls (CALC-02 compliant)
   5. All 256 existing tests continue to pass after refactoring
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 13-01: Extract downloadBlob utility and add useChartData pure TS module
