@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { buildPdfTableData, buildChartImageDataUrl } from '../usePdfExport'
+import { buildPdfTableData, buildChartImageDataUrl, buildKpiStripData } from '../usePdfExport'
 import type { ClusterSizing } from '@/engine/types'
 
 // Hoist mocks so they are available before vi.mock factory runs
@@ -93,6 +93,27 @@ describe('buildPdfTableData v2.0 rows', () => {
     expect(body.some((row) => row[0] === 'GPU Nodes')).toBe(false)
     expect(body.some((row) => row[0] === 'Virt Workers')).toBe(false)
     expect(body.some((row) => row[0].includes('RHOAI Overhead'))).toBe(false)
+  })
+})
+
+describe('buildKpiStripData', () => {
+  it('returns total vCPU from sizing.totals', () => {
+    const kpi = buildKpiStripData(sizing)
+    expect(kpi.vcpu).toBe(36)
+  })
+  it('returns total RAM from sizing.totals', () => {
+    const kpi = buildKpiStripData(sizing)
+    expect(kpi.ramGB).toBe(144)
+  })
+  it('returns total Storage from sizing.totals', () => {
+    const kpi = buildKpiStripData(sizing)
+    expect(kpi.storageGB).toBe(600)
+  })
+  it('formats label with vCPU, RAM and Storage values', () => {
+    const kpi = buildKpiStripData(sizing)
+    expect(kpi.label).toMatch(/Total vCPU:\s*36/)
+    expect(kpi.label).toMatch(/RAM:\s*144\s*GB/)
+    expect(kpi.label).toMatch(/Storage:\s*600\s*GB/)
   })
 })
 

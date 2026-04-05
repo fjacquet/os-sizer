@@ -107,7 +107,30 @@ export function buildChartImageDataUrl(sizing: ClusterSizing): string | null {
   return dataUrl
 }
 
-export async function generatePdfReport(): Promise<void> {
+export interface KpiStripData {
+  vcpu: number
+  ramGB: number
+  storageGB: number
+  label: string
+}
+
+/**
+ * Extracts KPI totals from sizing for the callout strip.
+ * Pure function — testable without jsPDF.
+ */
+export function buildKpiStripData(sizing: ClusterSizing): KpiStripData {
+  const { vcpu, ramGB, storageGB } = sizing.totals
+  return {
+    vcpu,
+    ramGB,
+    storageGB,
+    label: `Total vCPU: ${vcpu}   |   RAM: ${ramGB} GB   |   Storage: ${storageGB} GB`,
+  }
+}
+
+export async function generatePdfReport(
+  resolvedWarnings: { text: string; severity: 'error' | 'warning' }[] = [],
+): Promise<void> {
   const input = useInputStore()
   const calc = useCalculationStore()
   const clusterIdx = input.activeClusterIndex
@@ -134,9 +157,19 @@ export async function generatePdfReport(): Promise<void> {
   let tableStartY = 80
   const chartDataUrl = buildChartImageDataUrl(result.sizing)
   if (chartDataUrl) {
-    doc.addImage(chartDataUrl, 'PNG', 40, 80, 500, 130)
-    tableStartY = 220
+    doc.addImage(chartDataUrl, 'PNG', 40, 80, 500, 125)
+    tableStartY = 210
   }
+
+  // KPI summary strip (PDF-02)
+  const kpi = buildKpiStripData(result.sizing)
+  const kpiY = tableStartY + 5
+  doc.setFillColor(240, 240, 240) // #F0F0F0 light gray
+  doc.rect(40, kpiY, 760, 22, 'F')
+  doc.setFontSize(11)
+  doc.setTextColor(21, 21, 21)
+  doc.text(kpi.label, 50, kpiY + 14)
+  tableStartY = kpiY + 27
 
   // Bill of Materials table
   autoTable(doc, {
@@ -167,6 +200,23 @@ export async function generatePdfReport(): Promise<void> {
     40,
     finalY + 20,
   )
+
+  // Inline validation warnings (PDF-04)
+  if (resolvedWarnings.length > 0) {
+    let warnY = finalY + 35
+    doc.setFontSize(10)
+    for (const w of resolvedWarnings) {
+      if (w.severity === 'error') {
+        doc.setTextColor(238, 0, 0) // Red Hat red #EE0000
+      } else {
+        doc.setTextColor(249, 115, 22) // orange #F97316
+      }
+      const prefix = w.severity === 'error' ? '! ' : '> '
+      doc.text(`${prefix}${w.text}`, 40, warnY)
+      warnY += 14
+    }
+    doc.setTextColor(0, 0, 0)
+  }
 
   const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`
   doc.save(filename)

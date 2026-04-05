@@ -6,9 +6,13 @@ import { generatePptxReport } from '@/composables/usePptxExport'
 import { generateCsvReport } from '@/composables/useCsvExport'
 import { generatePdfReport } from '@/composables/usePdfExport'
 import { exportSession, importSession } from '@/composables/useSessionExport'
+import { useCalculationStore } from '@/stores/calculationStore'
+import { useInputStore } from '@/stores/inputStore'
 
 const { t } = useI18n()
 const copied = ref(false)
+const calc = useCalculationStore()
+const inputStore = useInputStore()
 
 async function handleShare() {
   const url = generateShareUrl()
@@ -34,7 +38,13 @@ function handleExportCsv() {
 async function handleExportPdf() {
   pdfLoading.value = true
   try {
-    await generatePdfReport()
+    const clusterIdx = inputStore.activeClusterIndex
+    const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+    const resolvedWarnings = (result?.validationErrors ?? []).map((w) => ({
+      text: t(w.messageKey),
+      severity: w.severity as 'error' | 'warning',
+    }))
+    await generatePdfReport(resolvedWarnings)
   } finally {
     pdfLoading.value = false
   }
