@@ -53,42 +53,56 @@ describe('validateInputs', () => {
   })
 })
 
-describe('WARN-02: VIRT_RWX_REQUIRES_ODF', () => {
-  it('emits warning when virtEnabled=true, odfEnabled=false, topology=standard-ha', () => {
+describe('WARN-04/05: VIRT_RWX_STORAGE_REQUIRED', () => {
+  it('emits warning when virtEnabled=true, odfEnabled=false, rwxStorageAvailable=false, topology=standard-ha', () => {
     const config = createDefaultClusterConfig(0)
     config.topology = 'standard-ha'
     config.addOns.virtEnabled = true
     config.addOns.odfEnabled = false
+    config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'VIRT_RWX_REQUIRES_ODF' && w.severity === 'warning')).toBe(true)
+    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED' && w.severity === 'warning')).toBe(true)
   })
 
   it('no warning when virtEnabled=true and odfEnabled=true', () => {
     const config = createDefaultClusterConfig(0)
     config.addOns.virtEnabled = true
     config.addOns.odfEnabled = true
+    config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'VIRT_RWX_REQUIRES_ODF')).toBe(false)
+    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
   })
 
   it('no warning when virtEnabled=false', () => {
     const config = createDefaultClusterConfig(0)
     config.addOns.virtEnabled = false
     config.addOns.odfEnabled = false
+    config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'VIRT_RWX_REQUIRES_ODF')).toBe(false)
+    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
   })
 
-  it('suppresses VIRT_RWX_REQUIRES_ODF for SNO topology and emits SNO_VIRT_NO_LIVE_MIGRATION instead', () => {
+  it('suppresses VIRT_RWX_STORAGE_REQUIRED for SNO topology and emits SNO_VIRT_NO_LIVE_MIGRATION instead', () => {
     const config = createDefaultClusterConfig(0)
     config.topology = 'sno'
     config.addOns.virtEnabled = true
     config.addOns.odfEnabled = false
+    config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
-    // VIRT_RWX_REQUIRES_ODF is suppressed on SNO
-    expect(warnings.some(w => w.code === 'VIRT_RWX_REQUIRES_ODF')).toBe(false)
+    // VIRT_RWX_STORAGE_REQUIRED is suppressed on SNO
+    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
     // SNO_VIRT_NO_LIVE_MIGRATION is emitted because virtEnabled=true on SNO topology
     expect(warnings.some(w => w.code === 'SNO_VIRT_NO_LIVE_MIGRATION' && w.severity === 'warning')).toBe(true)
+  })
+
+  it('no warning when virtEnabled=true, odfEnabled=false, but rwxStorageAvailable=true (WARN-04 core)', () => {
+    const config = createDefaultClusterConfig(0)
+    config.topology = 'standard-ha'
+    config.addOns.virtEnabled = true
+    config.addOns.odfEnabled = false
+    config.addOns.rwxStorageAvailable = true
+    const warnings = validateInputs(config)
+    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
   })
 })
 
