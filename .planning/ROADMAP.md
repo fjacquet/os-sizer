@@ -37,7 +37,7 @@
 **Milestone Goal:** Improve export quality, add multi-cluster sizing with side-by-side comparison, session portability, and fix the RWX storage live migration warning.
 
 - [x] **Phase 13: Foundation Infrastructure** - Extract shared utilities and extend data model to unblock all v2.1 feature work (completed 2026-04-05)
-- [ ] **Phase 14: Warning Fix** - Correct WARN-02 to trigger on any absent RWX storage, not ODF exclusively
+- [x] **Phase 14: Warning Fix** - Correct WARN-02 to trigger on any absent RWX storage, not ODF exclusively (completed 2026-04-05)
 - [ ] **Phase 15: Session Portability** - Download and upload the full sizing session as a JSON file
 - [ ] **Phase 16: PPTX Redesign** - Consolidated 1-slide layout with native pptxgenjs charts
 - [ ] **Phase 17: PDF Redesign** - Chart images, Unicode font, KPI callout, and inline warnings
@@ -75,7 +75,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 14-01: Add rwxStorageAvailable field, update validation guard, rename warning code, update locales and tests, add UI checkbox
+- [x] 14-01: Add rwxStorageAvailable field, update validation guard, rename warning code, update locales and tests, add UI checkbox
 
 ### Phase 15: Session Portability
 **Goal**: Users can save their complete sizing session to a JSON file and restore it later — enabling cross-browser portability and sharing without URL size limits
@@ -176,7 +176,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19
 | 11. RHOAI Add-On Engine | v2.0 | 3/3 | Complete | 2026-04-01 |
 | 12. BoM, Exports, Wizard UI + i18n | v2.0 | 5/5 | Complete | 2026-04-04 |
 | 13. Foundation Infrastructure | v2.1 | 2/2 | Complete   | 2026-04-05 |
-| 14. Warning Fix | v2.1 | 0/1 | Not started | - |
+| 14. Warning Fix | v2.1 | 1/1 | Complete   | 2026-04-05 |
 | 15. Session Portability | v2.1 | 0/2 | Not started | - |
 | 16. PPTX Redesign | v2.1 | 0/2 | Not started | - |
 | 17. PDF Redesign | v2.1 | 0/2 | Not started | - |

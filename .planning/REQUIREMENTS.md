@@ -10,8 +10,8 @@
 
 ### Validation Fix (WARN)
 
-- [ ] **WARN-04**: User sees a live migration warning only when virtualization is enabled AND no RWX-capable storage (ODF or any other RWX storage class) is configured — not exclusively when ODF is absent
-- [ ] **WARN-05**: Warning code, i18n keys, and test fixtures are updated from `VIRT_RWX_REQUIRES_ODF` to `VIRT_RWX_STORAGE_REQUIRED` consistently across all 4 locales (EN/FR/DE/IT) and all test files
+- [x] **WARN-04**: User sees a live migration warning only when virtualization is enabled AND no RWX-capable storage (ODF or any other RWX storage class) is configured — not exclusively when ODF is absent
+- [x] **WARN-05**: Warning code, i18n keys, and test fixtures are updated from `VIRT_RWX_REQUIRES_ODF` to `VIRT_RWX_STORAGE_REQUIRED` consistently across all 4 locales (EN/FR/DE/IT) and all test files
 
 ### PPTX Export (PPTX)
 
