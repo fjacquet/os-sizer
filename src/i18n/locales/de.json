@@ -142,7 +142,11 @@
       "exportCsv": "CSV exportieren",
       "exportPdf": "PDF exportieren",
       "exportPptx": "PPTX herunterladen",
-      "exportPptxLoading": "Wird generiert..."
+      "exportPptxLoading": "Wird generiert...",
+      "saveSession": "Sitzung speichern",
+      "loadSession": "Sitzung laden",
+      "sessionImportError": "Ungültige Sitzungsdatei. Bitte wählen Sie eine gültige os-sizer-Sitzung.",
+      "sessionImportSuccess": "Sitzung erfolgreich geladen"
     }
   },
   "validation": {

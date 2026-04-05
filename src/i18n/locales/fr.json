@@ -142,7 +142,11 @@
       "exportCsv": "Exporter CSV",
       "exportPdf": "Exporter PDF",
       "exportPptx": "Télécharger PPTX",
-      "exportPptxLoading": "Génération..."
+      "exportPptxLoading": "Génération...",
+      "saveSession": "Sauvegarder la session",
+      "loadSession": "Charger une session",
+      "sessionImportError": "Fichier de session invalide. Veuillez choisir un fichier os-sizer valide.",
+      "sessionImportSuccess": "Session chargée avec succès"
     }
   },
   "validation": {
