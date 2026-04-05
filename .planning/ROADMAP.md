@@ -39,7 +39,7 @@
 - [x] **Phase 13: Foundation Infrastructure** - Extract shared utilities and extend data model to unblock all v2.1 feature work (completed 2026-04-05)
 - [x] **Phase 14: Warning Fix** - Correct WARN-02 to trigger on any absent RWX storage, not ODF exclusively (completed 2026-04-05)
 - [x] **Phase 15: Session Portability** - Download and upload the full sizing session as a JSON file (completed 2026-04-05)
-- [ ] **Phase 16: PPTX Redesign** - Consolidated 1-slide layout with native pptxgenjs charts
+- [x] **Phase 16: PPTX Redesign** - Consolidated 1-slide layout with native pptxgenjs charts (completed 2026-04-05)
 - [ ] **Phase 17: PDF Redesign** - Chart images, Unicode font, KPI callout, and inline warnings
 - [ ] **Phase 18: Multi-Cluster UI** - Tab bar, role tagging, and side-by-side comparison view
 - [ ] **Phase 19: Aggregate Exports** - Per-cluster sections and aggregate totals in all export formats
