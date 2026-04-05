@@ -86,7 +86,7 @@ Plans:
   2. User can click "Load session" in the export toolbar, select a previously saved `.json` file, and see the sizing results restored without page reload
   3. User who selects an invalid or corrupted JSON file sees a user-readable error message (not a raw Zod error) and the current session is unchanged
   4. Importing the same file twice works correctly (file input resets after each attempt)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
 - [ ] 15-01: Implement useSessionExport composable with export and import logic
