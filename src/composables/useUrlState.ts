@@ -41,6 +41,8 @@ const AddOnConfigSchema = z
     gpuPerNode: z.number().int().min(1).default(1),
     // Phase 11: Red Hat OpenShift AI
     rhoaiEnabled: z.boolean().default(false),
+    // Phase 14: non-ODF RWX storage backward-compat field
+    rwxStorageAvailable: z.boolean().optional().default(false),
   })
   .strip()
 

@@ -103,7 +103,8 @@
     "vmsPerWorker": "VM per nodo worker",
     "virtAvgVmVcpu": "vCPU media per VM",
     "virtAvgVmRamGB": "RAM media per VM (GB)",
-    "virtAddon": "OpenShift Virtualization"
+    "virtAddon": "OpenShift Virtualization",
+    "rwxStorageAvailable": "Classe di storage RWX disponibile (non-ODF)"
   },
   "sno": {
     "profile": "Profilo SNO",
@@ -171,7 +172,7 @@
       "noHardware": "Le topologie cloud gestite (ROSA/ARO) sono dimensionate dal provider — nessuna distinta materiali hardware richiesta"
     },
     "virt": {
-      "rwxRequiresOdf": "OpenShift Virtualization richiede storage RWX (ODF) per la migrazione live. Senza ODF, la migrazione live non è disponibile."
+      "rwxStorageRequired": "OpenShift Virtualization richiede storage compatibile RWX per la migrazione live. Configurare ODF o un'altra classe di storage RWX per abilitare la migrazione live."
     },
     "sno": {
       "virtNoLiveMigration": "La topologia SNO non supporta la migrazione live — l'HA delle VM non è disponibile."

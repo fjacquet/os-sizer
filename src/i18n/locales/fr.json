@@ -103,7 +103,8 @@
     "vmsPerWorker": "VM par nœud worker",
     "virtAvgVmVcpu": "vCPU moyen par VM",
     "virtAvgVmRamGB": "RAM moyenne par VM (Go)",
-    "virtAddon": "OpenShift Virtualization"
+    "virtAddon": "OpenShift Virtualization",
+    "rwxStorageAvailable": "Classe de stockage RWX disponible (non-ODF)"
   },
   "sno": {
     "profile": "Profil SNO",
@@ -171,7 +172,7 @@
       "noHardware": "Les topologies cloud gérées (ROSA/ARO) sont dimensionnées par le fournisseur — aucune nomenclature matérielle requise"
     },
     "virt": {
-      "rwxRequiresOdf": "OpenShift Virtualization nécessite du stockage RWX (ODF) pour la migration en direct. Sans ODF, la migration en direct est indisponible."
+      "rwxStorageRequired": "OpenShift Virtualization nécessite un stockage compatible RWX pour la migration en direct. Configurez ODF ou une autre classe de stockage RWX pour activer la migration en direct."
     },
     "sno": {
       "virtNoLiveMigration": "La topologie SNO ne prend pas en charge la migration en direct — la haute disponibilité des VM est indisponible."

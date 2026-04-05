@@ -38,6 +38,7 @@ function makeClusterConfig(overrides: Partial<ClusterConfig> = {}): ClusterConfi
       migProfile: '',
       gpuPerNode: 1,
       rhoaiEnabled: false,
+      rwxStorageAvailable: false,
     },
     environment: 'datacenter',
     haRequired: true,
