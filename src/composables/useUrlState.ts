@@ -68,6 +68,8 @@ export const ClusterConfigSchema = z
     haRequired: z.boolean().default(true),
     airGapped: z.boolean().default(false),
     maxNodes: z.number().int().positive().nullable().default(null),
+    // Phase 13: multi-cluster topology role (.optional().default() for v2.0 session backward compat)
+    role: z.enum(['hub', 'spoke', 'standalone']).optional().default('standalone'),
   })
   .strip()
 // NOTE: id is excluded from schema — re-generated on hydration
