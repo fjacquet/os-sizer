@@ -72,10 +72,10 @@ Plans:
   3. User enabling virtualization with no RWX storage of any kind sees the `VIRT_RWX_STORAGE_REQUIRED` warning
   4. Warning key `VIRT_RWX_REQUIRES_ODF` no longer exists in any source file, locale file, or test fixture
   5. All 4 locale files (EN/FR/DE/IT) carry the updated warning message referencing RWX storage
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 14-01: Add rwxStorageAvailable field, update validation condition, rename warning code, update all locales and tests
+- [ ] 14-01: Add rwxStorageAvailable field, update validation guard, rename warning code, update locales and tests, add UI checkbox
 
 ### Phase 15: Session Portability
 **Goal**: Users can save their complete sizing session to a JSON file and restore it later — enabling cross-browser portability and sharing without URL size limits
