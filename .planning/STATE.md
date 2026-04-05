@@ -1,32 +1,32 @@
 ---
 gsd_state_version: 1.0
 milestone: v2.1
-milestone_name: Export
+milestone_name: — Export
 current_phase: 13
-current_plan: —
-status: Ready to plan
-last_updated: "2026-04-04T00:00:00.000Z"
-last_activity: 2026-04-04
+current_plan: 2
+status: Phase 13 Plan 01 Complete
+last_updated: "2026-04-05T05:10:00Z"
+last_activity: 2026-04-05
 progress:
   total_phases: 7
-  completed_phases: 0
-  total_plans: 13
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 2
+  completed_plans: 2
 ---
 
 # Project State
 
 **Project:** os-sizer
-**Current Phase:** 13 — Foundation Infrastructure
-**Current Plan:** —
-**Last Updated:** 2026-04-04
-**Last Activity:** 2026-04-04 — v2.1 roadmap created (7 phases, 15 requirements)
+**Current Phase:** 13
+**Current Plan:** 2
+**Last Updated:** 2026-04-05
+**Last Activity:** 2026-04-05
 
 ## Progress
 
 ```
 v2.1 Milestone: Phase 13 of 19 (7 v2.1 phases total)
-░░░░░░░░░░░░░░░░░░░░░░░░░░░░  0%
+[██████████] 100%  (2/2 plans in Phase 13 complete)
 ```
 
 ## Status
@@ -35,7 +35,7 @@ v2.1 Milestone: Phase 13 of 19 (7 v2.1 phases total)
 - [x] v2.0 complete (12 phases, 256 tests, shipped 2026-04-04)
 - [x] v2.1 requirements defined (15 requirements)
 - [x] v2.1 roadmap created (Phases 13-19)
-- [ ] Phase 13 planned
+- [x] Phase 13 Plan 01 complete — downloadBlob shared utils + useChartData pure TS module (265 tests passing)
 
 ## Accumulated Context
 
@@ -50,6 +50,9 @@ v2.1 Milestone: Phase 13 of 19 (7 v2.1 phases total)
 - Phase 13 is enabler (no requirements) — must complete before 14/15/16/17/18 can begin
 - Phases 14, 15, 16, 17, 18 can run in parallel after Phase 13
 - Phase 19 requires all of 16, 17, 18 complete
+- 13-01 decision: useChartData.ts has zero Vue imports — pure TS; ChartNodeRow labels are English (not i18n keys) for export-context safety
+- 13-01 decision: jsdom not installed; download.test.ts uses manual globalThis polyfills (Blob, URL, document) in node environment
+- src/composables/utils/ established as home for pure TS utilities with no Vue/Pinia dependencies
 
 ## Blockers/Concerns
 

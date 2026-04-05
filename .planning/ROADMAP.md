@@ -36,7 +36,7 @@
 
 **Milestone Goal:** Improve export quality, add multi-cluster sizing with side-by-side comparison, session portability, and fix the RWX storage live migration warning.
 
-- [ ] **Phase 13: Foundation Infrastructure** - Extract shared utilities and extend data model to unblock all v2.1 feature work
+- [x] **Phase 13: Foundation Infrastructure** - Extract shared utilities and extend data model to unblock all v2.1 feature work (completed 2026-04-05)
 - [ ] **Phase 14: Warning Fix** - Correct WARN-02 to trigger on any absent RWX storage, not ODF exclusively
 - [ ] **Phase 15: Session Portability** - Download and upload the full sizing session as a JSON file
 - [ ] **Phase 16: PPTX Redesign** - Consolidated 1-slide layout with native pptxgenjs charts
@@ -59,8 +59,8 @@
 **Plans**: 2 plans
 
 Plans:
-- [ ] 13-01: Extract downloadBlob utility and add useChartData pure TS module
-- [ ] 13-02: Extend ClusterConfig with role field and add aggregateTotals computed to calculationStore
+- [x] 13-01: Extract downloadBlob utility and add useChartData pure TS module
+- [x] 13-02: Extend ClusterConfig with role field and add aggregateTotals computed to calculationStore
 
 ### Phase 14: Warning Fix
 **Goal**: Users see the live migration storage warning only when virtualization is enabled and no RWX-capable storage is configured — not when ODF is absent but another RWX storage class exists
@@ -175,7 +175,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19
 | 10. GPU Node Engine | v2.0 | 3/3 | Complete | 2026-04-01 |
 | 11. RHOAI Add-On Engine | v2.0 | 3/3 | Complete | 2026-04-01 |
 | 12. BoM, Exports, Wizard UI + i18n | v2.0 | 5/5 | Complete | 2026-04-04 |
-| 13. Foundation Infrastructure | v2.1 | 0/2 | Not started | - |
+| 13. Foundation Infrastructure | v2.1 | 2/2 | Complete   | 2026-04-05 |
 | 14. Warning Fix | v2.1 | 0/1 | Not started | - |
 | 15. Session Portability | v2.1 | 0/2 | Not started | - |
 | 16. PPTX Redesign | v2.1 | 0/2 | Not started | - |
