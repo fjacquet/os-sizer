@@ -2,6 +2,7 @@
 import { useInputStore } from '@/stores/inputStore'
 import { useCalculationStore } from '@/stores/calculationStore'
 import type { ClusterSizing, NodeSpec } from '@/engine/types'
+import { downloadBlob } from './utils/download'
 
 type NodeEntry = { label: string; spec: NodeSpec }
 
@@ -28,16 +29,6 @@ export function buildCsvContent(sizing: ClusterSizing): string {
       ]
     : []
   return [header, ...rows, ...rhoaiRow].join('\n')
-}
-
-function downloadBlob(content: string, filename: string, mimeType: string): void {
-  const blob = new Blob([content], { type: mimeType })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  a.click()
-  URL.revokeObjectURL(url)
 }
 
 export function generateCsvReport(): void {

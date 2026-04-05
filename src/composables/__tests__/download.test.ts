@@ -1,21 +1,48 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { downloadBlob } from '../utils/download'
 
+// Polyfill DOM APIs in node environment
+const mockClick = vi.fn()
+const mockAnchor = {
+  href: '',
+  download: '',
+  click: mockClick,
+}
+
+const mockCreateObjectURL = vi.fn().mockReturnValue('blob:mock-url')
+const mockRevokeObjectURL = vi.fn()
+
+beforeEach(() => {
+  mockAnchor.href = ''
+  mockAnchor.download = ''
+  mockClick.mockClear()
+  mockCreateObjectURL.mockClear()
+  mockRevokeObjectURL.mockClear()
+
+  // Polyfill globals not available in node environment
+  globalThis.Blob = class MockBlob {
+    constructor(public parts: unknown[], public options: unknown) {}
+  } as unknown as typeof Blob
+
+  globalThis.URL = {
+    createObjectURL: mockCreateObjectURL,
+    revokeObjectURL: mockRevokeObjectURL,
+  } as unknown as typeof URL
+
+  globalThis.document = {
+    createElement: vi.fn().mockReturnValue(mockAnchor),
+  } as unknown as Document
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
 describe('downloadBlob', () => {
-  let mockAnchor: { href: string; download: string; click: ReturnType<typeof vi.fn> }
-  let mockRevokeObjectURL: ReturnType<typeof vi.fn>
-
-  beforeEach(() => {
-    mockAnchor = { href: '', download: '', click: vi.fn() }
-    vi.spyOn(document, 'createElement').mockReturnValue(mockAnchor as unknown as HTMLElement)
-    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-url')
-    mockRevokeObjectURL = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
-  })
-
   it('creates a Blob with the given content and MIME type', () => {
     downloadBlob('hello', 'test.txt', 'text/plain')
     expect(document.createElement).toHaveBeenCalledWith('a')
-    expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob))
+    expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Object))
   })
 
   it('sets href and download on the anchor element', () => {
@@ -26,7 +53,7 @@ describe('downloadBlob', () => {
 
   it('triggers click and revokes the object URL', () => {
     downloadBlob('data', 'file.json', 'application/json')
-    expect(mockAnchor.click).toHaveBeenCalledOnce()
+    expect(mockClick).toHaveBeenCalledOnce()
     expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
   })
 })
