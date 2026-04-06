@@ -70,8 +70,6 @@ export interface ClusterConfig {
   haRequired: boolean              // default true
   airGapped: boolean               // default false
   maxNodes: number | null          // default null (no limit)
-  // Phase 13: multi-cluster topology role
-  role?: 'hub' | 'spoke' | 'standalone'
 }
 
 export interface ClusterSizing {
