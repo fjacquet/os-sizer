@@ -5,6 +5,58 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.1.0] — 2026-04-06
+
+### Added — Multi-Cluster, Session Portability & Export Redesign
+
+#### Multi-Cluster Sizing (Phase 18)
+- Cluster tab bar with add/remove/rename for up to 5 independent clusters
+- Cluster role tagging: hub, spoke, or standalone — displayed on tab and in exports
+- Side-by-side comparison table (rows = metrics, columns = clusters, max 5)
+- `addCluster()` copies active cluster config for consistent defaults
+
+#### Session Portability (Phase 15)
+- Download current sizing session as `.json` file from export toolbar
+- Load previously saved `.json` session with Zod schema validation and user-friendly error messages
+
+#### Aggregate Exports (Phase 19)
+- PPTX: per-cluster slides + aggregate summary slide with totals
+- PDF: per-cluster sections with headers + aggregate total row
+- CSV: per-cluster grouping rows with repeated headers + aggregate totals
+
+#### PPTX Export Redesign (Phase 16)
+- Consolidated single-slide PPTX with title, KPI summary, chart, and BoM table
+- Vertical bar chart of node counts grouped by node pool type (native pptxgenjs BAR)
+- Stacked bar chart showing vCPU distribution when ≥3 node pool types
+
+#### PDF Export Redesign (Phase 17)
+- Bar chart of node counts displayed above BoM table
+- KPI summary callout box (total vCPU, RAM, Storage) between chart and BoM
+- Unicode-capable embedded font for FR/DE/IT locale rendering
+- Validation warnings rendered inline with severity-appropriate color and icon
+
+#### Validation Fix (Phase 14)
+- Live migration warning triggers on virt enabled + no RWX storage (not just ODF absence)
+- Warning code updated from `VIRT_RWX_REQUIRES_ODF` to `VIRT_RWX_STORAGE_REQUIRED` across all 4 locales
+
+#### Foundation Infrastructure (Phase 13)
+- Chart.js integration with `useChartData` composable for offscreen canvas rendering
+- Shared chart helpers for BoM visualization
+
+### Changed
+- `ClusterConfig` extended with `id`, `name`, `role` fields for multi-cluster support
+- `inputStore` manages `clusters[]` array and `activeClusterIndex` via Pinia
+- `calculationStore` computes `clusterResults[]` and `aggregateTotals` reactively
+- ClusterTabBar moved from Results page to App layout (accessible from all wizard steps)
+- Test suite expanded from 256 to 349 tests
+
+### Fixed
+- `addCluster()` now copies active cluster config instead of creating blank defaults
+- Duplicate `role` field removed from `ClusterConfig` type (merge artifact)
+- Warning code/i18n keys/test fixtures updated consistently across EN/FR/DE/IT
+
+---
+
 ## [2.0.0] — 2026-04-04
 
 ### Added — OpenShift Virtualization + AI Sizing
