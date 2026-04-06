@@ -51,11 +51,11 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 
 ### Active (v2.1)
 
-- [ ] WARN-02 fix: live migration requires any RWX storage (ODF/NFS/other), not ODF exclusively
-- [ ] PPTX redesign: consolidated 1-slide layout, charts/graphs, branding improvements
-- [ ] PDF redesign: graphs, improved layout, branding
-- [ ] Multi-cluster sizing: Hub+Spoke multi-site sizing + side-by-side topology comparison, aggregate BoM export
-- [ ] Session portability: export/import session as JSON file (portable across browsers)
+- [x] WARN-02 fix: live migration requires any RWX storage (ODF/NFS/other), not ODF exclusively — Validated in Phase 14: Warning Fix
+- [x] PPTX redesign: consolidated 1-slide layout, charts/graphs, branding improvements — Validated in Phase 16: PPTX Redesign
+- [x] PDF redesign: graphs, improved layout, branding — Validated in Phase 17: PDF Redesign
+- [x] Multi-cluster sizing: Hub+Spoke multi-site sizing + side-by-side topology comparison, aggregate BoM export — Validated in Phase 18: Multi-Cluster UI + Phase 19: Aggregate Exports
+- [x] Session portability: export/import session as JSON file (portable across browsers) — Validated in Phase 15: Session Portability
 
 ### Backlog (v2.2+)
 
@@ -124,4 +124,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 — v2.1 Export milestone started*
+*Last updated: 2026-04-06 — Phase 19 complete — v2.1 milestone all phases done (Phases 13–19)*
