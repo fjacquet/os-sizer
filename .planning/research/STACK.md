@@ -1,399 +1,274 @@
-# Stack Research
+# Stack Research — v2.1 Export Milestone
 
-**Domain:** OpenShift Virtualization + RHOAI/GPU sizing additions to existing Vue 3 + TypeScript sizer
-**Researched:** 2026-04-01
-**Confidence:** MEDIUM — engine patterns are HIGH (derive directly from existing code); GPU/KubeVirt overhead numbers are MEDIUM (Red Hat docs behind paywall, community sources used)
-
----
-
-## Existing Stack (DO NOT CHANGE)
-
-The v1.0 stack is already installed and working. No core dependency changes are needed for v2.0.
-
-| Technology | Installed Version | Role |
-|------------|-------------------|------|
-| Vue 3 | ^3.5.31 | UI framework |
-| TypeScript | via vue-tsc ^3.2.6 | Type safety |
-| Vite | ^8.0.3 | Build tool |
-| Tailwind CSS v4 | ^4.2.2 | Styling |
-| Pinia | ^3.0.4 | State management |
-| vue-i18n | ^11.3.0 | Internationalization |
-| Zod | ^4.3.6 | Schema validation + URL state |
-| chart.js + vue-chartjs | ^4.5.1 + ^5.3.3 | Charts |
-| pptxgenjs | ^4.0.1 | PPTX export |
-| jsPDF + jspdf-autotable | ^4.2.1 + ^5.0.7 | PDF export |
-| lz-string | ^1.5.0 | URL state compression |
-| @vueuse/core | ^14.2.1 | Composable utilities |
-| Vitest | ^4.1.2 | Testing |
+**Project:** os-sizer
+**Researched:** 2026-04-04
+**Scope:** PPTX charts, PDF charts, JSON session export/import, multi-cluster state management
 
 ---
 
-## New Dependencies Required for v2.0
+## Existing Stack (Do Not Re-research)
 
-**Verdict: Zero new npm packages needed.** All v2.0 features extend the existing engine, schema, and UI patterns without requiring new libraries. The rationale for each potential addition is below.
-
----
-
-## Engine Layer — New Constants and Calculators
-
-### New Constants (src/engine/constants.ts additions)
-
-All new constants follow the existing pattern: named exports, typed `NodeSpec` or plain numbers, sourced from Red Hat documentation.
-
-**KubeVirt worker node overhead (MEDIUM confidence — Red Hat docs + community sources):**
-
-```typescript
-// OpenShift Virtualization worker node overhead
-// Source: Red Hat docs — "2 additional cores + 10 GiB disk per node for OCP Virt management"
-export const VIRT_OVERHEAD_CPU_PER_NODE = 2       // vCPU reserved per virt-enabled worker
-export const VIRT_OVERHEAD_STORAGE_GB = 10         // disk for CNV components per node
-export const VIRT_OVERHEAD_RAM_MB = 2179           // MiB total across all infra (spread, ~218 MiB per component)
-
-// Per-VM overhead formula constants (KubeVirt virt-launcher pod overhead)
-// Source: Red Hat memory management doc — overhead ≈ 218 MiB + 8 MiB×vCPUs + 16 MiB×GPUs
-export const VIRT_VM_OVERHEAD_BASE_MIB = 218
-export const VIRT_VM_OVERHEAD_PER_VCPU_MIB = 8
-export const VIRT_VM_OVERHEAD_PER_GPU_MIB = 16
-
-// SNO-with-Virt boosted minimum
-// Source: Red Hat SNO docs — base SNO std (8 vCPU, 16 GB, 120 GB) + 50 GB additional virt disk
-export const SNO_VIRT_STORAGE_EXTRA_GB = 50        // additional disk for VM hostpath-provisioner
-
-// ODF RWX for live migration: existing ODF_MIN_* constants already apply
-// No new ODF constants needed — ODF nodes are sized the same way
-```
-
-**RHOAI operator overhead (MEDIUM confidence — community sources, not official sizing doc):**
-
-```typescript
-// RHOAI operator minimum worker node requirements
-// Source: Red Hat RHOAI 3.x docs — minimum 2 worker nodes × 8 CPU / 32 GB RAM each
-export const RHOAI_MIN_WORKER_NODES = 2
-export const RHOAI_MIN_WORKER_VCPU = 8
-export const RHOAI_MIN_WORKER_RAM_GB = 32
-// Overhead above base workers (reserved for RHOAI pods — odh-dashboard, model-registry, etc.)
-export const RHOAI_OVERHEAD_VCPU = 4               // ~4 vCPU reserved across RHOAI components
-export const RHOAI_OVERHEAD_RAM_GB = 16            // ~16 GB RAM for RHOAI operator pods
-```
-
-**GPU node profiles (HIGH confidence — NVIDIA official MIG documentation):**
-
-```typescript
-// GPU worker node modes — one mode per node (cannot mix)
-// Source: NVIDIA GPU Operator docs — "container | vm-passthrough | vm-vgpu" per node label
-export type GpuMode = 'container' | 'passthrough' | 'vgpu' | 'mig'
-
-// GPU node minimum specs (per node, beyond standard worker minimum)
-// Source: Red Hat hardware accelerators docs — GPU node needs standard worker spec
-export const GPU_MIN_WORKER_VCPU = 16              // minimum for GPU workloads
-export const GPU_MIN_WORKER_RAM_GB = 64            // minimum for GPU workloads (VRAM headroom)
-
-// MIG profile definitions — max instances per GPU card
-// Source: NVIDIA MIG User Guide (docs.nvidia.com/datacenter/tesla/mig-user-guide)
-// Profile name → max instances per physical GPU
-export const MIG_PROFILES = {
-  // A100-40GB
-  'a100-40gb-1g.5gb':  { gpuModel: 'A100-40GB', slicesPerGpu: 7,  memGb: 5  },
-  'a100-40gb-2g.10gb': { gpuModel: 'A100-40GB', slicesPerGpu: 3,  memGb: 10 },
-  'a100-40gb-3g.20gb': { gpuModel: 'A100-40GB', slicesPerGpu: 2,  memGb: 20 },
-  'a100-40gb-7g.40gb': { gpuModel: 'A100-40GB', slicesPerGpu: 1,  memGb: 40 },
-  // A100-80GB
-  'a100-80gb-1g.10gb': { gpuModel: 'A100-80GB', slicesPerGpu: 7,  memGb: 10 },
-  'a100-80gb-2g.20gb': { gpuModel: 'A100-80GB', slicesPerGpu: 3,  memGb: 20 },
-  'a100-80gb-3g.40gb': { gpuModel: 'A100-80GB', slicesPerGpu: 2,  memGb: 40 },
-  'a100-80gb-7g.80gb': { gpuModel: 'A100-80GB', slicesPerGpu: 1,  memGb: 80 },
-  // H100-80GB
-  'h100-80gb-1g.10gb': { gpuModel: 'H100-80GB', slicesPerGpu: 7,  memGb: 10 },
-  'h100-80gb-2g.20gb': { gpuModel: 'H100-80GB', slicesPerGpu: 3,  memGb: 20 },
-  'h100-80gb-3g.40gb': { gpuModel: 'H100-80GB', slicesPerGpu: 2,  memGb: 40 },
-  'h100-80gb-7g.80gb': { gpuModel: 'H100-80GB', slicesPerGpu: 1,  memGb: 80 },
-  // H200-141GB
-  'h200-141gb-1g.18gb': { gpuModel: 'H200-141GB', slicesPerGpu: 7, memGb: 18 },
-  'h200-141gb-2g.35gb': { gpuModel: 'H200-141GB', slicesPerGpu: 3, memGb: 35 },
-  'h200-141gb-7g.141gb': { gpuModel: 'H200-141GB', slicesPerGpu: 1, memGb: 141 },
-} as const
-```
+| Technology | Installed Version | Status |
+|------------|-------------------|--------|
+| Vue 3 | 3.5.31 | Validated v1.0 |
+| TypeScript | via vue-tsc 3.2.6 | Validated v1.0 |
+| Vite | 8.0.3 | Validated v1.0 |
+| Tailwind v4 | 4.2.2 | Validated v1.0 |
+| Pinia | 3.0.4 | Validated v1.0 |
+| vue-i18n | 11.3.0 | Validated v1.0 |
+| pptxgenjs | 4.0.1 | Validated v1.0 |
+| jsPDF | 4.2.1 | Validated v1.0 |
+| jspdf-autotable | 5.0.7 | Validated v1.0 |
+| lz-string | 1.5.0 | Validated v1.0 |
+| Zod | 4.3.6 | Validated v1.0 |
+| chart.js | 4.5.1 | Already in dependencies |
+| vue-chartjs | 5.3.3 | Already in dependencies |
 
 ---
 
-## Type System — New Types (src/engine/types.ts additions)
+## Feature 1: PPTX Charts
 
-Follow the existing zero-Vue-imports pattern. All additions are pure TypeScript.
+### pptxgenjs Native Chart API
+**Version:** 4.0.1 (already installed)
+**Purpose:** Render bar/pie/doughnut charts as native PowerPoint chart objects (not raster images)
+**Integration:** Dynamic import block in `usePptxExport.ts` — same async pattern as existing table generation
+**Why:** pptxgenjs 4.x has a built-in `slide.addChart()` API that produces vector PowerPoint chart objects — editable by recipients, resolution-independent, and indistinguishable from natively authored charts. No additional library required.
 
-### New union types
-
-```typescript
-// GPU operating mode — one per dedicated node pool
-// Source: NVIDIA GPU Operator — node label nvidia.com/gpu.workload.config
-export type GpuMode = 'container' | 'passthrough' | 'vgpu' | 'mig'
-
-// MIG profile key — corresponds to keys in MIG_PROFILES constant
-export type MigProfile = keyof typeof MIG_PROFILES
+**Available Chart Types (confirmed from `node_modules/pptxgenjs/types/index.d.ts`):**
+```
+'area' | 'bar' | 'bar3D' | 'bubble' | 'doughnut' | 'line' | 'pie' | 'radar' | 'scatter'
 ```
 
-### AddOnConfig extensions
-
-The existing `AddOnConfig` interface gains new optional fields:
-
+**API Signature:**
 ```typescript
-export interface AddOnConfig {
-  // ... existing fields unchanged ...
-  odfEnabled: boolean
-  odfExtraOsdCount: number
-  infraNodesEnabled: boolean
-  rhacmEnabled: boolean
-  rhacmManagedClusters: number
+slide.addChart(
+  type: CHART_NAME | IChartMulti[],
+  data: OptsChartData[],
+  options?: IChartOpts
+): Slide
+```
 
-  // NEW for v2.0
-  virtEnabled: boolean             // OpenShift Virtualization / CNV
-  virtVmCount: number              // total VMs to host across cluster
-  virtAvgVmVcpu: number            // average vCPU per VM (for density sizing)
-  virtAvgVmRamGB: number           // average RAM per VM (for density sizing)
-  rhoaiEnabled: boolean            // RHOAI operator add-on
-  gpuEnabled: boolean              // GPU node pool
-  gpuNodeCount: number             // number of dedicated GPU nodes
-  gpuMode: GpuMode                 // container | passthrough | vgpu | mig
-  gpuPerNode: number               // physical GPUs per node
-  migProfile: string | null        // MIG profile key, null unless gpuMode === 'mig'
+**Data Shape (`OptsChartData`):**
+```typescript
+interface OptsChartData {
+  name: string       // series label
+  labels: string[]   // X-axis categories
+  values: number[]   // Y-axis values
 }
 ```
 
-### ClusterSizing extensions
+**Recommended charts for sizing report:**
+- `'bar'` — vCPU/RAM/Storage totals by node type (stacked horizontal bar)
+- `'doughnut'` or `'pie'` — resource distribution by cluster role
+- Position alongside the BoM table on the consolidated 1-slide layout
 
+**No New Packages Required.** HIGH confidence — verified against installed type definitions.
+
+---
+
+## Feature 2: PDF Charts
+
+### Strategy: Chart.js Offscreen Canvas to PNG via jsPDF.addImage()
+
+**Why this strategy:** jsPDF's `addImage()` accepts `HTMLCanvasElement` directly (confirmed from
+`node_modules/jspdf/types/index.d.ts` overload: `addImage(imageData: string | HTMLImageElement | HTMLCanvasElement | Uint8Array, ...)`).
+Chart.js renders to a standard HTML canvas. The pipeline is: create an offscreen `<canvas>` element
+via `document.createElement('canvas')` (no DOM attachment needed) — render Chart.js chart onto it
+— pass the canvas element to `doc.addImage()`.
+
+**Libraries used:**
+- chart.js 4.5.1 (already installed)
+- jsPDF 4.2.1 (already installed)
+
+**Integration point:** `usePdfExport.ts` — create charts after `autoTable()`, embed as images before `doc.save()`
+
+**Pattern (no new packages):**
 ```typescript
-export interface ClusterSizing {
-  // ... existing fields unchanged ...
-  masterNodes: NodeSpec
-  workerNodes: NodeSpec | null
-  infraNodes: NodeSpec | null
-  odfNodes: NodeSpec | null
-  rhacmWorkers: NodeSpec | null
+import { Chart, BarController, CategoryScale, LinearScale, BarElement } from 'chart.js'
 
-  // NEW for v2.0
-  virtWorkerNodes: NodeSpec | null   // dedicated VM-hosting worker pool
-  gpuNodes: NodeSpec | null          // GPU worker pool
-  totals: { vcpu: number; ramGB: number; storageGB: number }
+Chart.register(BarController, CategoryScale, LinearScale, BarElement)
+
+const canvas = document.createElement('canvas')
+canvas.width = 600
+canvas.height = 300
+const ctx = canvas.getContext('2d')!
+const chart = new Chart(ctx, {
+  type: 'bar',
+  data: { labels: [...], datasets: [{ data: [...] }] },
+  options: { animation: { duration: 0 } }  // REQUIRED: disable animation for sync render
+})
+doc.addImage(canvas, 'PNG', x, y, width, height)
+chart.destroy()
+```
+
+**Critical:** Set `animation: { duration: 0 }` — Chart.js uses `requestAnimationFrame` by default.
+Without it, `addImage()` captures the canvas before the first paint and produces a blank image.
+
+**Alternative considered — html2canvas:** html2canvas 1.4.1 is already in node_modules (transitive jsPDF dependency). Rejected: requires a mounted DOM element, which breaks the headless composable pattern used throughout the codebase.
+
+**Alternative considered — pdfmake:** Separate PDF library with its own chart module. Rejected: doubles PDF bundle weight, conflicts with existing jsPDF usage.
+
+**No New Packages Required.** HIGH confidence — confirmed from installed type definitions.
+
+---
+
+## Feature 3: JSON Session Export / Import
+
+### File Download (Export)
+**Technology:** Browser-native `URL.createObjectURL()` + `<a download>` pattern
+**Version:** N/A — Web API, no package needed
+**Purpose:** Trigger a JSON file download from a JavaScript object
+**Integration:** New composable `useSessionExport.ts` — mirrors pattern of `useCsvExport.ts`
+**Why:** Standard browser pattern for file downloads without a server. Zero dependencies.
+
+**Pattern:**
+```typescript
+function exportSession(state: SessionSnapshot): void {
+  const json = JSON.stringify(state, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `os-sizer-session-${Date.now()}.json`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 ```
 
----
+### File Upload (Import)
+**Technology:** `<input type="file" accept=".json">` + `File.text()` Web API
+**Version:** N/A — Web API, no package needed
+**Purpose:** Load a session JSON file from disk into Pinia stores
+**Integration:** Hidden `<input>` element triggered by a button, handled via `@change` event. Zod validates before store patch.
 
-## Schema Layer — Zod Schema Extensions
-
-The existing `AddOnConfigSchema` in `useUrlState.ts` and `workloadSchema.ts` need new fields. The pattern is `.strip()` objects with `.default()` values — maintain backward compatibility with v1.0 URLs.
-
-### AddOnConfigSchema additions (useUrlState.ts)
-
+**Pattern:**
 ```typescript
-// Append to existing AddOnConfigSchema.shape:
-virtEnabled: z.boolean().default(false),
-virtVmCount: z.number().int().min(0).default(0),
-virtAvgVmVcpu: z.number().int().min(1).max(256).default(4),
-virtAvgVmRamGB: z.number().int().min(1).max(1024).default(8),
-rhoaiEnabled: z.boolean().default(false),
-gpuEnabled: z.boolean().default(false),
-gpuNodeCount: z.number().int().min(0).max(100).default(0),
-gpuMode: z.enum(['container', 'passthrough', 'vgpu', 'mig']).default('container'),
-gpuPerNode: z.number().int().min(1).max(16).default(1),
-migProfile: z.string().nullable().default(null),
+async function importSession(file: File): Promise<void> {
+  const text = await file.text()
+  const raw = JSON.parse(text)
+  const validated = SessionSnapshotSchema.parse(raw)  // throws on invalid shape
+  inputStore.$patch({ clusters: validated.clusters, activeClusterIndex: validated.activeClusterIndex })
+}
 ```
 
-**URL compatibility:** Zod `.default()` values mean v1.0 shared URLs still parse correctly — missing new fields fall back to their defaults. This is the existing pattern and it works.
+### Session Snapshot Schema
+**Technology:** Zod 4.3.6 (already installed)
+**Purpose:** Define and validate the serialized session shape
+**Integration:** New file `src/engine/session-schema.ts` — exports `SessionSnapshotSchema` and `SessionSnapshot` type
+**Why:** Prevents corrupt or malformed files from silently poisoning store state. Zod is already the validation library of choice (used for URL state).
 
-**No discriminated union needed** for GpuMode: the fields are independent config, not a sum type. A discriminated union would be over-engineering that adds validation complexity without benefit — the calc function handles the mode via a simple `switch`.
-
----
-
-## Calculator Pattern — New calcVirt() and calcRHOAI()
-
-The `calcCluster()` dispatcher in `calculators.ts` currently has two patterns:
-
-1. **Topology calculators** (switch-dispatched): `calcStandardHA`, `calcSNO`, etc.
-2. **Post-dispatch add-ons** (applied after topology): `calcODF`, `calcRHACM`
-
-For v2.0, both new calculators are **post-dispatch add-ons**, matching the `calcODF`/`calcRHACM` pattern in `addons.ts`.
-
-### calcVirt() — Post-dispatch add-on
-
+**Recommended schema:**
 ```typescript
-// Returns NodeSpec for dedicated virtualization worker pool
-// Formula:
-//   workersByVcpu = ceil((vmCount * avgVmVcpu) / (nodeVcpu * 0.70)) + 1  // +1 for migration headroom
-//   workersByRam  = ceil((vmCount * (avgVmRamGB + VM_OVERHEAD)) / (nodeRam * 0.70))
-//   count = max(workersByVcpu, workersByRam, 3)  // HA minimum
-//   vcpu = max(nodeVcpu, GPU_MIN_WORKER_VCPU or worker min)
-//   storageGB = vmCount * avgVmRamGB  // rough hostpath-provisioner estimate
-export function calcVirt(vmCount: number, avgVmVcpu: number, avgVmRamGB: number, nodeVcpu: number, nodeRamGB: number): NodeSpec
+const SessionSnapshotSchema = z.object({
+  version: z.enum(['2.0', '2.1']),   // accept both versions; migrate 2.0 to 2.1 before patch
+  exportedAt: z.string().datetime(),
+  clusters: z.array(ClusterConfigSchema),
+  activeClusterIndex: z.number().int().min(0),
+})
 ```
 
-### calcRHOAI() — Post-dispatch add-on
+**Backward compatibility note:** v2.0 exported sessions must be accepted. Use `.optional().default(...)` for any new v2.1 fields added to `ClusterConfig`.
 
+**No New Packages Required.** HIGH confidence — confirmed from Zod already in use and browser APIs.
+
+---
+
+## Feature 4: Multi-Cluster State Management
+
+### Pinia — Extend Existing inputStore (Architecture Already Present)
+**Version:** 3.0.4 (already installed)
+**Purpose:** Manage array of `ClusterConfig` objects for Hub+Spoke and side-by-side comparison
+**Integration:** Extend `src/stores/inputStore.ts` and `src/stores/calculationStore.ts`
+**Why:** The `inputStore` already contains `clusters: ref<ClusterConfig[]>` with `addCluster()`, `removeCluster()`, and `updateCluster()` methods. The `calculationStore` already maps all clusters to `clusterResults: computed<SizingResult[]>`. Multi-cluster sizing is an architectural feature that is already present at the state layer — v2.1 adds UI surface and aggregate calculations.
+
+**Current state (confirmed from source inspection):**
+- `inputStore.clusters` — reactive array, already supports N clusters
+- `inputStore.activeClusterIndex` — tracks focused cluster
+- `inputStore.addCluster()` / `removeCluster()` / `updateCluster()` — all present
+- `calculationStore.clusterResults` — already computes sizing for every cluster in the array
+
+**What v2.1 adds to `ClusterConfig` (engine types):**
 ```typescript
-// Returns NodeSpec for RHOAI operator overhead (added to existing workers, not new nodes)
-// RHOAI does not require dedicated nodes — it adds overhead to existing worker pool
-// Returns a synthetic NodeSpec representing the additional resource reservation:
-//   count = 0 (no new physical nodes — RHOAI pods run on existing workers)
-//   vcpu  = RHOAI_OVERHEAD_VCPU
-//   ramGB = RHOAI_OVERHEAD_RAM_GB
-// The BoM table shows this as "RHOAI operator overhead" row, not a node count row
-export function calcRHOAI(): NodeSpec
+clusterRole?: 'hub' | 'spoke' | 'standalone'  // optional — for Hub+Spoke labeling
 ```
 
-### calcGpuNodes() — Post-dispatch add-on
-
+**What v2.1 adds to `calculationStore`:**
 ```typescript
-// Returns NodeSpec for dedicated GPU worker node pool
-// GPU nodes are always dedicated (cannot mix container/passthrough/vgpu modes per node)
-//   count = gpuNodeCount  (user-specified — GPU nodes are hardware-constrained)
-//   vcpu  = max(GPU_MIN_WORKER_VCPU, user nodeVcpu)
-//   ramGB = max(GPU_MIN_WORKER_RAM_GB, user nodeRamGB)
-//   storageGB = WORKER_MIN.storageGB
-// If gpuMode === 'mig': gpuSlices = gpuNodeCount * gpuPerNode * MIG_PROFILES[migProfile].slicesPerGpu
-//   → surface as a warning/info field, not a NodeSpec field
-export function calcGpuNodes(gpuNodeCount: number, gpuMode: GpuMode, gpuPerNode: number, migProfile: string | null, nodeVcpu: number, nodeRamGB: number): NodeSpec
+const aggregateTotals = computed(() =>
+  clusterResults.value.reduce(
+    (acc, r) => ({
+      vcpu: acc.vcpu + r.sizing.totals.vcpu,
+      ramGB: acc.ramGB + r.sizing.totals.ramGB,
+      storageGB: acc.storageGB + r.sizing.totals.storageGB,
+    }),
+    { vcpu: 0, ramGB: 0, storageGB: 0 },
+  ),
+)
 ```
 
-### SNO-with-Virt boosted minimums
-
-Not a new calculator — a conditional in the existing `calcSNO()`:
-
+**What v2.1 adds to `inputStore`:**
 ```typescript
-// When addOns.virtEnabled is true on an SNO topology:
-// storageGB = SNO_STD_MIN.storageGB + SNO_VIRT_STORAGE_EXTRA_GB  (120 + 50 = 170 GB)
-// No vCPU/RAM boost required — SNO standard minimum (8/16) is sufficient for minimal VM workloads
-// Heavy VM workloads on SNO should raise a warning, not change the base spec
+const compareMode = ref(false)  // toggles side-by-side comparison view
 ```
 
----
+**Pattern discipline (existing codebase rule):** ZERO `ref()` in `calculationStore`, only `computed()`. All aggregate calculations derived reactively from `clusterResults`. State mutation only in `inputStore`. Follow `CALC-02` rule already in codebase comments.
 
-## UI Layer — No New Libraries Required
-
-The existing Tailwind v4 + Vue 3 component patterns are sufficient for all new UI elements.
-
-### GPU profile selector
-
-Use the existing `<select>` element pattern already in the wizard forms. The GPU model + MIG profile selection is a two-level cascade:
-
-1. Select GPU model (A100-40GB, A100-80GB, H100-80GB, H200-141GB, passthrough-custom)
-2. If MIG mode: select MIG profile from filtered list based on selected GPU model
-
-This is a standard `v-model` + computed filtered list — no headless UI library or combobox component needed. The existing wizard form pattern (Step2WorkloadForm, Step3ArchitectureForm) handles this exactly.
-
-**Why not add radix-vue, headless-ui, or vue3-select-component?**
-- The GPU profile list is short (~15 options per model, ~4 GPU models)
-- Existing native `<select>` is already styled with Tailwind v4 in the project
-- Adding a new component library for a single use case would inflate the bundle and create a style inconsistency
-- The existing wizard forms have no searchable comboboxes — this would be an orphaned pattern
-
-### Live-migration warning display
-
-The existing `WarningBanner` component pattern handles this. New warning codes in `ValidationWarning` are surfaced through the same `messageKey` i18n pattern.
+**No New Packages Required.** HIGH confidence — confirmed from source code inspection.
 
 ---
 
-## Chart Layer — No New Libraries Required
+## Summary: New Packages Required
 
-chart.js 4.5.1 + vue-chartjs 5.3.3 are already installed and sufficient.
+**None.** All four v2.1 features are achievable with the existing dependency set:
 
-### GPU visualization
-
-A GPU node row in the BoM table is sufficient for sizing output — no dedicated GPU chart needed. If a GPU utilization/density visualization is desired, it can be added as an additional `Bar` chart using the already-imported `vue-chartjs` components.
-
-The existing `ClusterSizing.totals` aggregation handles the total vCPU/RAM display. GPU-specific data (GPU count, MIG slices available) can be surfaced as annotation text in the existing results layout rather than a new chart type.
-
----
-
-## Validation Layer — New Warning Codes
-
-New `ValidationWarning` codes following the existing naming convention:
-
-| Code | Severity | Trigger Condition |
-|------|----------|-------------------|
-| `VIRT_PASSTHROUGH_BLOCKS_MIGRATION` | error | gpuMode === 'passthrough' && virtEnabled |
-| `VIRT_RWX_REQUIRED` | warning | virtEnabled (live migration requires ODF RWX) |
-| `SNO_VIRT_LIMITED` | warning | SNO topology && virtEnabled && vmCount > 5 |
-| `GPU_MODE_EXCLUSIVE` | warning | GPU passthrough/vGPU — node cannot mix workloads |
-| `MIG_NOT_SUPPORTED_WITH_VIRT` | error | gpuMode === 'mig' && virtEnabled (MIG-backed vGPUs not supported with KubeVirt) |
-| `RHOAI_INSUFFICIENT_WORKERS` | error | rhoaiEnabled && workerCount < RHOAI_MIN_WORKER_NODES |
-
-**Key constraint surfaced via warning:** NVIDIA GPU passthrough with KubeVirt blocks live migration. This is the most important cross-feature interaction and must be flagged at the validation layer.
-
----
-
-## Alternatives Considered
-
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| GPU profile UI | Native `<select>` + Vue 3 cascade | radix-vue Combobox, vue3-select-component | Overkill for a 15-item dropdown; adds bundle weight and style inconsistency |
-| GPU chart | Existing BoM table row | New chart type (d3, echarts) | The output is a node count and spec, not a time series — a table row communicates more clearly |
-| MIG profile typing | String key + lookup table | Zod discriminated union per GPU model | Discriminated unions on a 15-key lookup table add schema complexity without runtime benefit |
-| RHOAI sizing | Overhead reservation (no new nodes) | Dedicated RHOAI nodes | RHOAI pods run on existing workers in practice; dedicated nodes are only needed for very large deployments |
-| SNO+Virt | Storage boost + warning | Separate SNO-virt topology | Complexity not justified — SNO+virt is a single-node constraint, not a topology choice |
+| Feature | Approach | Libraries Used |
+|---------|----------|---------------|
+| PPTX charts | `slide.addChart()` native API | pptxgenjs 4.0.1 (installed) |
+| PDF charts | Chart.js offscreen canvas + `doc.addImage()` | chart.js 4.5.1 + jsPDF 4.2.1 (installed) |
+| JSON export | `URL.createObjectURL()` + Blob | Browser API (no package) |
+| JSON import | `File.text()` + Zod validation | Zod 4.3.6 (installed) |
+| Multi-cluster state | Extend existing Pinia stores | Pinia 3.0.4 (installed) |
 
 ---
 
 ## What NOT to Add
 
-| Avoid | Why | Use Instead |
-|-------|-----|-------------|
-| Any new npm dependency for v2.0 | Zero new packages needed; all patterns in existing stack | Extend existing engine/schema/UI patterns |
-| Zod discriminated union for GPU config | Adds schema fragility without benefit; GPU mode is config not a sum type | `z.enum` + nullable `migProfile` field |
-| GPU-specific chart library | Bundle weight, new API to learn, chart.js already present | `vue-chartjs` Bar chart with GPU annotation |
-| vGPU licensing checks in the sizer | Licensing changes frequently; out of scope per PROJECT.md | Show static warning: "vGPU requires per-node NVIDIA license" |
-| MIG time-slicing or MPS mode | Time-slicing is not hardware partitioning; MPS is advanced/uncommon | MIG only for hardware-isolated GPU slices |
+| Package | Why Not |
+|---------|---------|
+| `canvas` npm package | Node.js server-side canvas polyfill — not needed in browser |
+| `html2canvas` (new explicit usage) | Already a transitive dependency, but requires mounted DOM — breaks headless export pattern |
+| `pdfmake` | Duplicate PDF capability, ~200 KB bundle weight, conflicts with existing jsPDF |
+| `chartjs-node-canvas` | Node.js server-side only — not applicable in Vite browser build |
+| `FileSaver.js` | `URL.createObjectURL()` achieves the same with zero dependencies |
+| `chart.js` upgrade | 4.5.1 already installed — no need to upgrade for this milestone |
 
 ---
 
-## Stack Patterns by Variant
+## Integration Risks
 
-**If gpuMode === 'mig':**
-- Show MIG profile selector (cascade from GPU model selection)
-- Calculate GPU slice count = gpuNodeCount × gpuPerNode × MIG_PROFILES[profile].slicesPerGpu
-- Surface slice count in BoM table as "Available GPU slices" annotation
-- Emit MIG_NOT_SUPPORTED_WITH_VIRT if virtEnabled
+### Chart.js Animation in Offscreen Canvas (MEDIUM risk)
+**Issue:** If `animation: { duration: 0 }` is omitted, `addImage()` may capture a blank canvas during the animation frame. Chart.js uses `requestAnimationFrame` which does not fire synchronously.
+**Mitigation:** Enforce `animation: { duration: 0 }` as a constant in the export helper, not the caller's responsibility. Add a test that verifies canvas `width > 0` and that `toDataURL()` does not return the blank canvas data URL.
 
-**If gpuMode === 'passthrough':**
-- Each GPU node gets 1 VM per physical GPU
-- Block live migration (emit VIRT_PASSTHROUGH_BLOCKS_MIGRATION warning)
-- Surface GPU_MODE_EXCLUSIVE warning
+### pptxgenjs `addChart` data format mismatch (LOW risk)
+**Issue:** `OptsChartData` requires `labels` and `values` as parallel arrays of equal length. Mismatches produce silent empty charts (no error is thrown by pptxgenjs).
+**Mitigation:** Build chart data via pure helper functions (same pattern as existing `buildBomTableRows`). Test these functions independently from pptxgenjs.
 
-**If gpuMode === 'vgpu':**
-- vGPU density is license-constrained; sizer does not calculate density
-- Surface static warning about NVIDIA license requirement
-- Worker node specs use GPU_MIN_WORKER_VCPU / GPU_MIN_WORKER_RAM_GB
+### Zod v4 breaking changes (LOW risk)
+**Issue:** Zod v4 (installed: 4.3.6) introduced breaking changes from v3. Existing code uses `import { z } from 'zod'` which works in v4. New schemas must use v4 syntax — notably `z.object()` and `.parse()` are unchanged, but some error types differ.
+**Mitigation:** None required. Standard schema operations are stable across v3/v4.
 
-**If virtEnabled on SNO topology:**
-- Boost storageGB by SNO_VIRT_STORAGE_EXTRA_GB (50 GB additional disk)
-- Emit SNO_VIRT_LIMITED warning if vmCount > 5 (SNO is not a production virt platform)
-- SNO does not support live migration — emit VIRT_RWX_REQUIRED as informational only
-
----
-
-## Version Compatibility
-
-All existing packages are already installed and compatible. The v2.0 additions are pure TypeScript engine extensions — no compatibility risk.
-
-| Concern | Status |
-|---------|--------|
-| Zod v4 + new fields | Safe — `.default()` maintains backward compat with existing URL state |
-| chart.js 4.x + new BoM rows | Safe — existing `vue-chartjs` Bar components unchanged |
-| Pinia 3.x + new AddOnConfig fields | Safe — store `updateCluster()` uses `Object.assign(cluster, patch)` |
-| Vitest 4.x + new calculator tests | Safe — same pattern as existing `calculators.test.ts` |
+### JSON import version mismatch (MEDIUM risk)
+**Issue:** A session exported from v2.0 will not have v2.1-only fields (e.g., `clusterRole`). Direct `z.parse()` without `.optional()` defaults will throw.
+**Mitigation:** Use `.optional().default('standalone')` for all new `ClusterConfig` fields. Add a migration transform function that upgrades v2.0 payloads before store patch. Version gate via `z.enum(['2.0', '2.1'])`.
 
 ---
 
 ## Sources
 
-- NVIDIA MIG User Guide — `docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html` — MIG profile names, slice counts, max instances per GPU (HIGH confidence)
-- NVIDIA GPU Operator on OpenShift — `docs.nvidia.com/datacenter/cloud-native/openshift/latest/openshift-virtualization.html` — GPU modes (container/passthrough/vGPU), node label system, mode exclusivity constraint (HIGH confidence)
-- Red Hat OpenShift Virtualization memory management — `developers.redhat.com/blog/2025/01/31/memory-management-openshift-virtualization` — virt-launcher overhead formula (MEDIUM confidence — formula extracted from article example)
-- Red Hat OpenShift Virtualization worker node overhead — community + docs.openshift.com — "2 additional cores + 10 GiB disk per node" (MEDIUM confidence)
-- Red Hat RHOAI 3.x minimum requirements — community sources + access.redhat.com — "2 worker nodes × 8 CPU / 32 GB RAM" (MEDIUM confidence)
-- SNO virtualization storage — `access.redhat.com/solutions/7014308` — "additional 50 GiB disk for hostpath-provisioner" (MEDIUM confidence)
-- MIG + KubeVirt incompatibility — NVIDIA GPU Operator docs — "MIG-backed vGPUs not supported with KubeVirt in certain GPU Operator versions" (MEDIUM confidence — version-dependent)
-- GPU passthrough + live migration incompatibility — NVIDIA docs + Red Hat docs — passthrough uses vfio-pci, blocks live migration (HIGH confidence — architectural constraint)
-
----
-
-*Stack research for: OpenShift Virtualization + RHOAI/GPU sizing (v2.0 milestone)*
-*Researched: 2026-04-01*
+- pptxgenjs type definitions: `node_modules/pptxgenjs/types/index.d.ts` (v4.0.1, locally installed) — HIGH confidence
+- jsPDF type definitions: `node_modules/jspdf/types/index.d.ts` (v4.2.1, locally installed) — HIGH confidence
+- chart.js package.json: `node_modules/chart.js/package.json` (v4.5.1, locally installed) — HIGH confidence
+- Pinia stores: `src/stores/inputStore.ts`, `src/stores/calculationStore.ts` (current source) — HIGH confidence
+- Engine types: `src/engine/types.ts` (current source) — HIGH confidence
+- Browser File API (`File.text()`, `URL.createObjectURL()`): MDN Web Docs standard — HIGH confidence, available all modern browsers

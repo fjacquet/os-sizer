@@ -49,5 +49,17 @@ export const useCalculationStore = defineStore('calculation', () => {
     })
   })
 
-  return { clusterResults, recommendations, activeCluster }
+  // Phase 13: aggregate totals across all clusters — CALC-02 compliant (computed only)
+  const aggregateTotals = computed(() =>
+    clusterResults.value.reduce(
+      (acc, result) => ({
+        vcpu: acc.vcpu + result.sizing.totals.vcpu,
+        ramGB: acc.ramGB + result.sizing.totals.ramGB,
+        storageGB: acc.storageGB + result.sizing.totals.storageGB,
+      }),
+      { vcpu: 0, ramGB: 0, storageGB: 0 },
+    ),
+  )
+
+  return { clusterResults, recommendations, activeCluster, aggregateTotals }
 })

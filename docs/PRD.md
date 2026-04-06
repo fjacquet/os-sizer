@@ -1,7 +1,7 @@
 # os-sizer — Product Requirements Document
 
-**Version:** 2.0.0
-**Last Updated:** 2026-04-04
+**Version:** 2.1.0
+**Last Updated:** 2026-04-06
 **Core Value:** From constraints to proposal-ready hardware BoM in minutes — covering every supported OpenShift topology.
 
 ---
@@ -74,6 +74,50 @@
 
 ---
 
+## v2.1 Feature Requirements (shipped 2026-04-06)
+
+### WARN — Validation Fix
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| WARN-04 | Live migration warning only when virt enabled AND no RWX-capable storage configured | ✅ Complete |
+| WARN-05 | Warning code/i18n keys/test fixtures updated from `VIRT_RWX_REQUIRES_ODF` to `VIRT_RWX_STORAGE_REQUIRED` across all 4 locales | ✅ Complete |
+
+### PPTX — Export Redesign
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| PPTX-01 | Consolidated single-slide PPTX with title, KPI summary, chart, and BoM table | ✅ Complete |
+| PPTX-02 | Vertical bar chart of node counts grouped by node pool type (native pptxgenjs BAR) | ✅ Complete |
+| PPTX-03 | Stacked bar chart showing vCPU distribution when ≥3 distinct node pool types | ✅ Complete |
+
+### PDF — Export Redesign
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| PDF-01 | Bar chart of node counts displayed above BoM table | ✅ Complete |
+| PDF-02 | KPI summary callout box (total vCPU, RAM, Storage) between chart and BoM table | ✅ Complete |
+| PDF-03 | Unicode-capable embedded font for FR/DE/IT locale rendering | ✅ Complete |
+| PDF-04 | Validation warnings rendered inline with severity-appropriate color and icon | ✅ Complete |
+
+### CLUSTER — Multi-Cluster Sizing
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| CLUSTER-01 | Add/remove/rename up to 5 independent clusters via tab bar; each with own config | ✅ Complete |
+| CLUSTER-02 | Tag each cluster with role: hub, spoke, or standalone | ✅ Complete |
+| CLUSTER-03 | Side-by-side comparison table of all clusters (rows = metrics, columns = clusters, max 5) | ✅ Complete |
+| CLUSTER-04 | PPTX, PDF, CSV exports include per-cluster sections and aggregate totals row | ✅ Complete |
+
+### SESSION — Session Portability
+
+| ID | Requirement | Status |
+|----|-------------|--------|
+| SESSION-01 | Download current sizing session as `.json` file from export toolbar | ✅ Complete |
+| SESSION-02 | Load previously saved `.json` session with Zod schema validation | ✅ Complete |
+
+---
+
 ## v1.0 Feature Requirements (shipped 2026-04-01)
 
 All v1.0 requirements were delivered. Key capabilities:
@@ -89,16 +133,18 @@ All v1.0 requirements were delivered. Key capabilities:
 
 ---
 
-## Future Requirements (v2.1+)
+## Future Requirements (v2.2+)
 
 | Item | Notes |
 |------|-------|
-| Multi-cluster sizing | Multiple sites/environments in one session |
 | Air-gapped mirror registry sizing | Bastion host + 100–650 GB image storage |
 | ROSA/ARO/OSD managed cloud comparison | Side-by-side cloud vs. on-prem |
-| Side-by-side topology comparison | Compare two topologies in one view |
-| Save/load sessions (localStorage) | Persist and reload wizard state |
 | RWX/ODF storage row as dedicated BoM line | Separate storage sizing from compute |
+| Red Hat branding on PPTX | Red header band, logo, date/author footer |
+| Import preview before session replace | "3 clusters: Hub, Spoke-A, Spoke-B" |
+| Session JSON version field | Forward compatibility |
+| Cluster template inheritance | Hub settings propagated to spokes |
+| Comparison view URL sharing | Share multi-cluster comparison via URL |
 
 ---
 
@@ -125,7 +171,7 @@ All v1.0 requirements were delivered. Key capabilities:
 | PDF export | jsPDF + jspdf-autotable |
 | PPTX export | pptxgenjs |
 | URL compression | lz-string |
-| Tests | Vitest (256 tests at v2.0) |
+| Tests | Vitest (349 tests at v2.1) |
 
 ---
 

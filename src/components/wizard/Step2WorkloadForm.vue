@@ -47,6 +47,7 @@ const infraNodesEnabled = addOnField('infraNodesEnabled')
 const rhacmEnabled = addOnField('rhacmEnabled')
 const rhacmManagedClusters = addOnField('rhacmManagedClusters')
 const virtEnabled = addOnField('virtEnabled')
+const rwxStorageAvailable = addOnField('rwxStorageAvailable')
 const gpuEnabled = addOnField('gpuEnabled')
 const gpuNodeCount = addOnField('gpuNodeCount')
 const gpuMode = addOnField('gpuMode')
@@ -193,6 +194,19 @@ defineExpose({ validate })
           />
           <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.virtAddon') }}</span>
         </label>
+        <!-- RWX Storage Available checkbox (Phase 14 — visible only when virtEnabled) -->
+        <div v-if="virtEnabled" class="ml-6 mt-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              :checked="rwxStorageAvailable as boolean"
+              :aria-label="t('workload.rwxStorageAvailable')"
+              class="w-4 h-4 accent-blue-600"
+              @change="rwxStorageAvailable = ($event.target as HTMLInputElement).checked"
+            />
+            <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('workload.rwxStorageAvailable') }}</span>
+          </label>
+        </div>
         <!-- GPU Node Pool add-on (GPU-01) -->
         <label class="flex items-center gap-2 cursor-pointer">
           <input

@@ -43,4 +43,34 @@ describe('inputStore', () => {
     store.updateCluster(id, { topology: 'sno' })
     expect(store.clusters[0].topology).toBe('sno')
   })
+
+  it('addCluster copies active cluster config instead of using defaults', () => {
+    const store = useInputStore()
+    // Configure cluster 1 with non-default values (simulates user filling wizard)
+    store.updateCluster(store.clusters[0].id, {
+      topology: 'compact-3node',
+      environment: 'edge',
+      haRequired: false,
+      workload: { totalPods: 500, podCpuMillicores: 2000, podMemMiB: 4096, nodeVcpu: 32, nodeRamGB: 128 },
+      addOns: { ...store.clusters[0].addOns, odfEnabled: true, odfExtraOsdCount: 3 },
+    })
+    store.addCluster()
+    const newCluster = store.clusters[1]
+    // New cluster must copy workload from cluster 1, not defaults
+    expect(newCluster.workload.totalPods).toBe(500)
+    expect(newCluster.workload.podCpuMillicores).toBe(2000)
+    expect(newCluster.workload.podMemMiB).toBe(4096)
+    // New cluster must copy topology and environment
+    expect(newCluster.topology).toBe('compact-3node')
+    expect(newCluster.environment).toBe('edge')
+    expect(newCluster.haRequired).toBe(false)
+    // New cluster must copy addOns
+    expect(newCluster.addOns.odfEnabled).toBe(true)
+    expect(newCluster.addOns.odfExtraOsdCount).toBe(3)
+    // New cluster must have its own unique id
+    expect(newCluster.id).not.toBe(store.clusters[0].id)
+    // Modifying new cluster must not mutate source cluster
+    store.updateCluster(newCluster.id, { workload: { ...newCluster.workload, totalPods: 999 } })
+    expect(store.clusters[0].workload.totalPods).toBe(500)
+  })
 })

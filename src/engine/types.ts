@@ -51,11 +51,14 @@ export interface AddOnConfig {
   gpuPerNode: number                 // GPUs per node (default 1)
   // Phase 11: Red Hat OpenShift AI
   rhoaiEnabled: boolean              // RHOAI operator add-on enabled (default false)
+  /** Non-ODF RWX storage class available for live migration (Phase 14) */
+  rwxStorageAvailable: boolean
 }
 
 export interface ClusterConfig {
   id: string
   name: string
+  role?: 'hub' | 'spoke' | 'standalone'
   topology: TopologyType
   snoProfile: SnoProfile           // default 'standard'
   hcpHostedClusters: number        // default 1

@@ -8,7 +8,18 @@ A web-based OpenShift sizing and architecture recommendation tool for pre-sales 
 
 From constraints to proposal-ready hardware BoM in minutes — covering every supported OpenShift topology.
 
-## Current State (v2.0 shipped 2026-04-04)
+## Current Milestone: v2.1 Export
+
+**Goal:** Improve export quality, add multi-cluster sizing and session portability, and fix the ODF-only live migration validation warning.
+
+**Target features:**
+- Live migration bug fix (WARN-02: any RWX storage valid, not ODF-only)
+- PPTX redesign (1 slide, charts, branding)
+- PDF redesign (graphs, better layout, branding)
+- Multi-cluster sizing (Hub+Spoke + side-by-side topology comparison, aggregate BoM)
+- Session portability (export/import JSON)
+
+## Previous State (v2.0 shipped 2026-04-04)
 
 - 12 phases, 41 plans, ~6,400 LOC TypeScript/Vue
 - 256 tests passing (engine formulas, add-ons, stores, wizard components, export composables)
@@ -38,13 +49,18 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 - ✓ Validation warnings (WARN-01..03): passthrough blocks migration, virt requires ODF, MIG+KubeVirt unsupported — v2.0
 - ✓ 256 tests passing (70 new tests for v2.0 add-ons and UI components) — v2.0
 
-### Active (v2.1+)
+### Active (v2.1)
 
-- [ ] Multi-cluster sizing (multiple sites/environments in one session)
+- [x] WARN-02 fix: live migration requires any RWX storage (ODF/NFS/other), not ODF exclusively — Validated in Phase 14: Warning Fix
+- [x] PPTX redesign: consolidated 1-slide layout, charts/graphs, branding improvements — Validated in Phase 16: PPTX Redesign
+- [x] PDF redesign: graphs, improved layout, branding — Validated in Phase 17: PDF Redesign
+- [x] Multi-cluster sizing: Hub+Spoke multi-site sizing + side-by-side topology comparison, aggregate BoM export — Validated in Phase 18: Multi-Cluster UI + Phase 19: Aggregate Exports
+- [x] Session portability: export/import session as JSON file (portable across browsers) — Validated in Phase 15: Session Portability
+
+### Backlog (v2.2+)
+
 - [ ] Air-gapped mirror registry sizing (bastion host, storage for 100–650 GB images)
 - [ ] ROSA/ARO/OSD managed cloud comparison view
-- [ ] Side-by-side topology comparison
-- [ ] Save/load sessions (localStorage)
 - [ ] RWX/ODF storage row as separate BoM line
 - [ ] Fix SNO_VIRT_NO_HA warning surfacing (store drops .warnings from calcCluster return) — tech debt from v2.0
 - [ ] Remove orphan `gpuPerNode` field from AddOnConfig — tech debt from v2.0
@@ -108,4 +124,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 after v2.0 milestone*
+*Last updated: 2026-04-06 — Phase 19 complete — v2.1 milestone all phases done (Phases 13–19)*

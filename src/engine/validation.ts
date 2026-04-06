@@ -34,14 +34,20 @@ export function validateInputs(config: ClusterConfig): ValidationWarning[] {
     warnings.push({ code: 'RHACM_NO_CLUSTERS', severity: 'warning', messageKey: 'validation.rhacmNoClusters' })
   }
 
-  // WARN-02: RWX storage required for live migration when virt is enabled without ODF.
+  // WARN-04: RWX storage required for live migration
+  // Warn when virt is enabled but neither ODF nor any other RWX storage class is available.
   // For SNO topology, suppress this warning and emit SNO_VIRT_NO_LIVE_MIGRATION instead
   // (SNO + ODF is incompatible per existing ODF_INCOMPATIBLE_TOPOLOGY check).
-  if (config.addOns.virtEnabled && !config.addOns.odfEnabled && config.topology !== 'sno') {
+  if (
+    config.addOns.virtEnabled &&
+    !config.addOns.odfEnabled &&
+    !config.addOns.rwxStorageAvailable &&
+    config.topology !== 'sno'
+  ) {
     warnings.push({
-      code: 'VIRT_RWX_REQUIRES_ODF',
+      code: 'VIRT_RWX_STORAGE_REQUIRED',
       severity: 'warning',
-      messageKey: 'warnings.virt.rwxRequiresOdf',
+      messageKey: 'warnings.virt.rwxStorageRequired',
     })
   }
   // SNO_VIRT_NO_LIVE_MIGRATION fires on virtEnabled+sno regardless of snoVirtMode.
