@@ -153,30 +153,43 @@ export function buildVcpuStackedChartData(sizing: ClusterSizing): PptxChartSerie
   }))
 }
 
-// ── Main export function ──────────────────────────────────────────────────────
+// ── Aggregate slide data (pure, testable) ────────────────────────────────────
 
-export async function generatePptxReport(): Promise<void> {
-  const input = useInputStore()
-  const calc = useCalculationStore()
-  const clusterIdx = input.activeClusterIndex
-  const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
-  const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
-  const sizing = result.sizing
+export interface AggregateSlideData {
+  headerRow: TableRow
+  dataRows: TableRow[]
+}
 
-  // Dynamic import — pptxgenjs stays out of main bundle
-  const { default: PptxGenJS } = await import('pptxgenjs')
-  const pptx = new PptxGenJS()
+export function buildAggregateSlideData(
+  clusters: { name: string }[],
+  clusterTotals: { vcpu: number; ramGB: number; storageGB: number }[],
+  aggregateTotals: { vcpu: number; ramGB: number; storageGB: number },
+): AggregateSlideData {
+  const headerRow: TableRow = [
+    hdrCell('Metric'),
+    ...clusters.map((c) => hdrCell(c.name)),
+    hdrCell('TOTAL'),
+  ]
+  const metrics: { label: string; key: 'vcpu' | 'ramGB' | 'storageGB' }[] = [
+    { label: 'vCPU', key: 'vcpu' },
+    { label: 'RAM (GB)', key: 'ramGB' },
+    { label: 'Storage (GB)', key: 'storageGB' },
+  ]
+  const dataRows: TableRow[] = metrics.map(({ label, key }) => [
+    cell(label),
+    ...clusterTotals.map((t) => cell(String(t[key]))),
+    cell(String(aggregateTotals[key])),
+  ])
+  return { headerRow, dataRows }
+}
 
-  pptx.layout = 'LAYOUT_WIDE'
-  pptx.author = 'OpenShift Sizer'
-  pptx.subject = 'OpenShift Sizing Report'
-  pptx.title = 'OpenShift Architecture — ' + cluster.name
+// ── Private helper: render one cluster slide ──────────────────────────────────
 
-  // ── Single consolidated slide ─────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSizing): void {
   const slide = pptx.addSlide()
 
-  // ── Title band (full width, RH_RED) ──────────────────────────────────────
-  // WIDE slide: 13.33" × 7.5"
+  // ── Title band ──────────────────────────────────────────────────────────
   slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
   slide.addText('OpenShift Sizing Report — ' + cluster.name, {
     x: 0.3,
@@ -189,9 +202,7 @@ export async function generatePptxReport(): Promise<void> {
     valign: 'middle',
   })
 
-  // ── KPI callout boxes strip (y: 0.65", h: 1.1") ──────────────────────────
-  // 3 boxes side-by-side, each w=4.1", gap=0.18"
-  // Box positions: x = 0.3, 4.58, 8.86
+  // ── KPI callout boxes strip ──────────────────────────────────────────────
   const kpiBoxW = 4.1
   const kpiBoxH = 1.05
   const kpiY = 0.65
@@ -204,7 +215,6 @@ export async function generatePptxReport(): Promise<void> {
 
   kpiItems.forEach((kpi, i) => {
     const kx = kpiXPositions[i]
-    // Box background
     slide.addShape('rect', {
       x: kx,
       y: kpiY,
@@ -213,7 +223,6 @@ export async function generatePptxReport(): Promise<void> {
       fill: { color: RH_RED },
       line: { color: RH_RED },
     })
-    // Label row
     slide.addText(kpi.label, {
       x: kx,
       y: kpiY + 0.05,
@@ -225,7 +234,6 @@ export async function generatePptxReport(): Promise<void> {
       align: 'center',
       valign: 'middle',
     })
-    // Value row
     slide.addText(kpi.value, {
       x: kx,
       y: kpiY + 0.4,
@@ -240,23 +248,20 @@ export async function generatePptxReport(): Promise<void> {
     })
   })
 
-  // ── Content area (below KPI strip at y=1.8") ─────────────────────────────
-  // Left column: charts — x=0.3", w=7.0"
-  // Right column: BoM table — x=7.5", w=5.63"
+  // ── Content area ─────────────────────────────────────────────────────────
   const contentY = 1.8
-  const contentH = 5.5 // 7.5 - 1.8 - 0.2 footer margin
+  const contentH = 5.5
   const chartX = 0.3
   const chartW = 7.0
   const tableX = 7.5
   const tableW = 5.63
 
-  // ── Node count BAR chart (left column) ───────────────────────────────────
-  // vertical bars: barDir: 'col'
+  // ── Node count BAR chart ─────────────────────────────────────────────────
   const nodeCountData = buildNodeCountChartData(sizing)
   const showVcpuChart = shouldShowVcpuChart(sizing)
-
   const nodeChartH = showVcpuChart ? 2.55 : contentH
-  // Use a factory function — pptxgenjs mutates options objects in-place (STATE.md pitfall)
+
+  // Factory per iteration — pptxgenjs mutates options in-place (STATE.md pitfall)
   const makeNodeChartOpts = () => ({
     x: chartX,
     y: contentY,
@@ -272,16 +277,14 @@ export async function generatePptxReport(): Promise<void> {
   })
   slide.addChart('bar', nodeCountData, makeNodeChartOpts())
 
-  // ── Stacked vCPU chart (only when 3+ distinct non-zero pool types) ─────────
+  // ── Stacked vCPU chart ───────────────────────────────────────────────────
   if (showVcpuChart) {
     const vcpuData = buildVcpuStackedChartData(sizing)
     if (vcpuData) {
-      // vCPU chart positioned below node count chart in left column
-      // nodeChartH = 2.55 when showVcpuChart is true
       const vcpuChartY = contentY + nodeChartH + 0.1
       const vcpuChartH = contentH - nodeChartH - 0.1
 
-      // Factory function — pptxgenjs mutates options objects in-place (STATE.md pitfall)
+      // Factory per iteration — pptxgenjs mutates options in-place (STATE.md pitfall)
       const makeVcpuChartOpts = () => ({
         x: chartX,
         y: vcpuChartY,
@@ -300,7 +303,7 @@ export async function generatePptxReport(): Promise<void> {
     }
   }
 
-  // ── BoM table (right column) ──────────────────────────────────────────────
+  // ── BoM table ────────────────────────────────────────────────────────────
   const bomRows = buildBomTableRows(sizing)
   slide.addTable(bomRows, {
     x: tableX,
@@ -311,8 +314,208 @@ export async function generatePptxReport(): Promise<void> {
     fontSize: 9,
     rowH: 0.28,
   })
+}
 
-  // ── Download ───────────────────────────────────────────────────────────────
-  const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pptx`
-  await pptx.writeFile({ fileName: filename })
+// ── Main export function ──────────────────────────────────────────────────────
+
+export async function generatePptxReport(): Promise<void> {
+  const input = useInputStore()
+  const calc = useCalculationStore()
+
+  // Dynamic import — pptxgenjs stays out of main bundle
+  const { default: PptxGenJS } = await import('pptxgenjs')
+  const pptx = new PptxGenJS()
+
+  pptx.layout = 'LAYOUT_WIDE'
+  pptx.author = 'OpenShift Sizer'
+  pptx.subject = 'OpenShift Sizing Report'
+
+  if (input.clusters.length >= 2) {
+    // ── Multi-cluster path: N per-cluster slides + 1 aggregate summary slide ──
+    pptx.title = 'OpenShift Architecture - All Clusters'
+
+    const clusterTotals: { vcpu: number; ramGB: number; storageGB: number }[] = []
+
+    for (let i = 0; i < input.clusters.length; i++) {
+      const cluster = input.clusters[i]
+      const result = calc.clusterResults[i]
+      const sizing = result.sizing
+      clusterTotals.push(sizing.totals)
+      addClusterSlide(pptx, cluster, sizing)
+    }
+
+    // ── Aggregate summary slide ─────────────────────────────────────────────
+    const aggSlide = pptx.addSlide()
+
+    // Title band
+    aggSlide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+    aggSlide.addText('Aggregate Summary', {
+      x: 0.3,
+      y: 0,
+      w: 13.0,
+      h: 0.6,
+      fontSize: 20,
+      bold: true,
+      color: WHITE,
+      valign: 'middle',
+    })
+
+    // Side-by-side totals table
+    const { headerRow, dataRows } = buildAggregateSlideData(
+      input.clusters,
+      clusterTotals,
+      calc.aggregateTotals,
+    )
+    const metricColW = 1.5
+    const availW = 11.33 - metricColW
+    const clusterColW = availW / (input.clusters.length + 1)
+    const colW = [metricColW, ...Array(input.clusters.length + 1).fill(clusterColW)]
+
+    aggSlide.addTable([headerRow, ...dataRows], {
+      x: 1.0,
+      y: 1.2,
+      w: 11.33,
+      colW,
+      border: { type: 'solid', color: 'CCCCCC', pt: 0.5 },
+      fontSize: 12,
+      rowH: 0.45,
+    })
+
+    const filename = `os-sizer-all-clusters-${new Date().toISOString().split('T')[0]}.pptx`
+    await pptx.writeFile({ fileName: filename })
+  } else {
+    // ── Single-cluster path (D-01): identical to Phase 16 baseline ───────────
+    const clusterIdx = input.activeClusterIndex
+    const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
+    const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+    const sizing = result.sizing
+
+    pptx.title = 'OpenShift Architecture — ' + cluster.name
+
+    const slide = pptx.addSlide()
+
+    // ── Title band ──────────────────────────────────────────────────────────
+    slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+    slide.addText('OpenShift Sizing Report — ' + cluster.name, {
+      x: 0.3,
+      y: 0,
+      w: 13.0,
+      h: 0.6,
+      fontSize: 20,
+      bold: true,
+      color: WHITE,
+      valign: 'middle',
+    })
+
+    // ── KPI callout boxes strip ──────────────────────────────────────────────
+    const kpiBoxW = 4.1
+    const kpiBoxH = 1.05
+    const kpiY = 0.65
+    const kpiItems: Array<{ label: string; value: string }> = [
+      { label: 'Total vCPU', value: String(sizing.totals.vcpu) },
+      { label: 'Total RAM (GB)', value: String(sizing.totals.ramGB) },
+      { label: 'Total Storage (GB)', value: String(sizing.totals.storageGB) },
+    ]
+    const kpiXPositions = [0.3, 4.58, 8.86]
+
+    kpiItems.forEach((kpi, i) => {
+      const kx = kpiXPositions[i]
+      slide.addShape('rect', {
+        x: kx,
+        y: kpiY,
+        w: kpiBoxW,
+        h: kpiBoxH,
+        fill: { color: RH_RED },
+        line: { color: RH_RED },
+      })
+      slide.addText(kpi.label, {
+        x: kx,
+        y: kpiY + 0.05,
+        w: kpiBoxW,
+        h: 0.3,
+        fontSize: 10,
+        bold: true,
+        color: WHITE,
+        align: 'center',
+        valign: 'middle',
+      })
+      slide.addText(kpi.value, {
+        x: kx,
+        y: kpiY + 0.4,
+        w: kpiBoxW,
+        h: 0.6,
+        fontSize: 22,
+        bold: true,
+        color: WHITE,
+        align: 'center',
+        valign: 'middle',
+        fit: 'shrink',
+      })
+    })
+
+    // ── Content area ─────────────────────────────────────────────────────────
+    const contentY = 1.8
+    const contentH = 5.5
+    const chartX = 0.3
+    const chartW = 7.0
+    const tableX = 7.5
+    const tableW = 5.63
+
+    const nodeCountData = buildNodeCountChartData(sizing)
+    const showVcpuChart = shouldShowVcpuChart(sizing)
+    const nodeChartH = showVcpuChart ? 2.55 : contentH
+
+    const makeNodeChartOpts = () => ({
+      x: chartX,
+      y: contentY,
+      w: chartW,
+      h: nodeChartH,
+      barDir: 'col' as const,
+      showTitle: true,
+      title: 'Node Count by Pool',
+      showLegend: false,
+      showValue: true,
+      dataLabelPosition: 'outEnd' as const,
+      chartColors: [RH_RED],
+    })
+    slide.addChart('bar', nodeCountData, makeNodeChartOpts())
+
+    if (showVcpuChart) {
+      const vcpuData = buildVcpuStackedChartData(sizing)
+      if (vcpuData) {
+        const vcpuChartY = contentY + nodeChartH + 0.1
+        const vcpuChartH = contentH - nodeChartH - 0.1
+
+        const makeVcpuChartOpts = () => ({
+          x: chartX,
+          y: vcpuChartY,
+          w: chartW,
+          h: vcpuChartH,
+          barDir: 'col' as const,
+          barGrouping: 'stacked' as const,
+          showTitle: true,
+          title: 'vCPU Distribution',
+          showLegend: true,
+          legendPos: 'b' as const,
+          showValue: false,
+          chartColors: ['EE0000', 'CC0000', 'AA0000', '880000', '660000', '440000', '220000'],
+        })
+        slide.addChart('bar', vcpuData, makeVcpuChartOpts())
+      }
+    }
+
+    const bomRows = buildBomTableRows(sizing)
+    slide.addTable(bomRows, {
+      x: tableX,
+      y: contentY,
+      w: tableW,
+      colW: [2.0, 0.8, 0.9, 0.9, 1.03],
+      border: { type: 'solid', color: 'CCCCCC', pt: 0.5 },
+      fontSize: 9,
+      rowH: 0.28,
+    })
+
+    const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pptx`
+    await pptx.writeFile({ fileName: filename })
+  }
 }
