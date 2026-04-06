@@ -28,10 +28,10 @@
 
 ### Multi-Cluster (CLUSTER)
 
-- [ ] **CLUSTER-01**: User can add, remove, and rename up to 5 independent clusters via a tab bar on the Results page; each cluster has its own sizing configuration
-- [ ] **CLUSTER-02**: User can tag each cluster with a role: hub, spoke, or standalone — displayed on the cluster tab and included in export headers
-- [ ] **CLUSTER-03**: User can view a side-by-side comparison table of all configured clusters (rows = sizing metrics, columns = clusters, maximum 5 columns)
-- [ ] **CLUSTER-04**: PPTX, PDF, and CSV exports include per-cluster sections and an aggregate totals row summing across all clusters
+- [x] **CLUSTER-01**: User can add, remove, and rename up to 5 independent clusters via a tab bar on the Results page; each cluster has its own sizing configuration
+- [x] **CLUSTER-02**: User can tag each cluster with a role: hub, spoke, or standalone — displayed on the cluster tab and included in export headers
+- [x] **CLUSTER-03**: User can view a side-by-side comparison table of all configured clusters (rows = sizing metrics, columns = clusters, maximum 5 columns)
+- [x] **CLUSTER-04**: PPTX, PDF, and CSV exports include per-cluster sections and an aggregate totals row summing across all clusters
 
 ### Session Portability (SESSION)
 
