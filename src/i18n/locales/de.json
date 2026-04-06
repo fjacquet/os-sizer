@@ -124,6 +124,17 @@
       "exportPdf": "PDF exportieren",
       "exportPptx": "PPTX herunterladen",
       "exportPptxLoading": "Wird generiert..."
+    },
+    "clusters": {
+      "addCluster": "Cluster hinzufügen",
+      "removeCluster": "Cluster entfernen",
+      "roleHub": "Hub",
+      "roleSpoke": "Spoke",
+      "roleStandalone": "Eigenständig",
+      "maxClustersReached": "Maximal 5 Cluster erreicht",
+      "compareToggle": "Cluster vergleichen",
+      "compareTitle": "Cluster-Vergleich",
+      "roleLabel": "Rolle"
     }
   },
   "validation": {
