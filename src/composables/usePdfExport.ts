@@ -128,96 +128,224 @@ export function buildKpiStripData(sizing: ClusterSizing): KpiStripData {
   }
 }
 
+// ── Aggregate row helper (pure, testable) ─────────────────────────────────────
+
+export function buildAggregateRow(
+  aggregateTotals: { vcpu: number; ramGB: number; storageGB: number },
+): string[] {
+  return [
+    'AGGREGATE TOTAL',
+    '',
+    String(aggregateTotals.vcpu),
+    String(aggregateTotals.ramGB),
+    String(aggregateTotals.storageGB),
+  ]
+}
+
 export async function generatePdfReport(
   resolvedWarnings: { text: string; severity: 'error' | 'warning' }[] = [],
+  allResolvedWarnings: { text: string; severity: 'error' | 'warning' }[][] = [],
 ): Promise<void> {
   const input = useInputStore()
   const calc = useCalculationStore()
-  const clusterIdx = input.activeClusterIndex
-  const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
-  const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
-  const { head, body } = buildPdfTableData(result.sizing)
 
   // Dynamic import — jsPDF stays out of main bundle
   const { default: jsPDF } = await import('jspdf')
   const { default: autoTable } = await import('jspdf-autotable')
 
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })
+  if (input.clusters.length >= 2) {
+    // ── Multi-cluster path: per-cluster sections + aggregate totals row ──────
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })
 
-  // Title
-  doc.setFontSize(18)
-  doc.setTextColor(238, 0, 0) // Red Hat red
-  doc.text('OpenShift Sizing Report', 40, 30)
-  doc.setFontSize(12)
-  doc.setTextColor(0, 0, 0)
-  doc.text(cluster.name, 40, 50)
-  doc.text(`Generated: ${new Date().toLocaleDateString()}`, 40, 65)
-
-  // Chart image (PDF-01)
-  let tableStartY = 80
-  const chartDataUrl = buildChartImageDataUrl(result.sizing)
-  if (chartDataUrl) {
-    doc.addImage(chartDataUrl, 'PNG', 40, 80, 500, 125)
-    tableStartY = 210
-  }
-
-  // KPI summary strip (PDF-02)
-  const kpi = buildKpiStripData(result.sizing)
-  const kpiY = tableStartY + 5
-  doc.setFillColor(240, 240, 240) // #F0F0F0 light gray
-  doc.rect(40, kpiY, 760, 22, 'F')
-  doc.setFontSize(11)
-  doc.setTextColor(21, 21, 21)
-  doc.text(kpi.label, 50, kpiY + 14)
-  tableStartY = kpiY + 27
-
-  // Bill of Materials table
-  autoTable(doc, {
-    head,
-    body,
-    startY: tableStartY,
-    styles: { fontSize: 10 },
-    headStyles: { fillColor: [238, 0, 0], textColor: 255 }, // Red Hat red header
-    alternateRowStyles: { fillColor: [248, 248, 248] },
-    theme: 'striped',
-    columnStyles: {
-      0: { cellWidth: 120 },
-      1: { cellWidth: 60, halign: 'center' },
-      2: { cellWidth: 60, halign: 'center' },
-      3: { cellWidth: 80, halign: 'center' },
-      4: { cellWidth: 100, halign: 'center' },
-    },
-  })
-
-  // Summary footer
-  const totals = result.sizing.totals
-  const finalY =
-    (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY ?? 200
-  doc.setFontSize(10)
-  doc.setTextColor(100, 100, 100)
-  doc.text(
-    `Total: ${totals.vcpu} vCPU | ${totals.ramGB} GB RAM | ${totals.storageGB} GB Storage`,
-    40,
-    finalY + 20,
-  )
-
-  // Inline validation warnings (PDF-04)
-  if (resolvedWarnings.length > 0) {
-    let warnY = finalY + 35
-    doc.setFontSize(10)
-    for (const w of resolvedWarnings) {
-      if (w.severity === 'error') {
-        doc.setTextColor(238, 0, 0) // Red Hat red #EE0000
-      } else {
-        doc.setTextColor(249, 115, 22) // orange #F97316
-      }
-      const prefix = w.severity === 'error' ? '! ' : '> '
-      doc.text(`${prefix}${w.text}`, 40, warnY)
-      warnY += 14
-    }
+    // Title page header
+    doc.setFontSize(18)
+    doc.setTextColor(238, 0, 0)
+    doc.text('OpenShift Sizing Report', 40, 30)
+    doc.setFontSize(12)
     doc.setTextColor(0, 0, 0)
-  }
+    doc.text('All Clusters', 40, 50)
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 40, 65)
 
-  const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`
-  doc.save(filename)
+    let currentY = 80
+
+    for (let i = 0; i < input.clusters.length; i++) {
+      const cluster = input.clusters[i]
+      const result = calc.clusterResults[i]
+      const sizing = result.sizing
+
+      // Page overflow check
+      if (currentY > 450) {
+        doc.addPage()
+        currentY = 40
+      }
+
+      // Cluster name header row (D-06): red background, white text
+      doc.setFillColor(238, 0, 0)
+      doc.rect(40, currentY, 760, 20, 'F')
+      doc.setFontSize(12)
+      doc.setTextColor(255, 255, 255)
+      doc.text(cluster.name, 50, currentY + 14)
+      currentY += 24
+
+      // Chart image (D-08)
+      const chartDataUrl = buildChartImageDataUrl(sizing)
+      if (chartDataUrl) {
+        doc.addImage(chartDataUrl, 'PNG', 40, currentY, 500, 125)
+        currentY += 130
+      }
+
+      // KPI strip
+      const kpi = buildKpiStripData(sizing)
+      doc.setFillColor(240, 240, 240)
+      doc.rect(40, currentY, 760, 22, 'F')
+      doc.setFontSize(11)
+      doc.setTextColor(21, 21, 21)
+      doc.text(kpi.label, 50, currentY + 14)
+      currentY += 27
+
+      // BoM table
+      const { head, body } = buildPdfTableData(sizing)
+      autoTable(doc, {
+        head,
+        body,
+        startY: currentY,
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [238, 0, 0], textColor: 255 },
+        alternateRowStyles: { fillColor: [248, 248, 248] },
+        theme: 'striped',
+        columnStyles: {
+          0: { cellWidth: 120 },
+          1: { cellWidth: 60, halign: 'center' },
+          2: { cellWidth: 60, halign: 'center' },
+          3: { cellWidth: 80, halign: 'center' },
+          4: { cellWidth: 100, halign: 'center' },
+        },
+      })
+      currentY =
+        (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY ??
+        currentY + 100
+
+      // Per-cluster warnings
+      const clusterWarnings = allResolvedWarnings[i]
+      if (clusterWarnings && clusterWarnings.length > 0) {
+        doc.setFontSize(10)
+        for (const w of clusterWarnings) {
+          if (w.severity === 'error') {
+            doc.setTextColor(238, 0, 0)
+          } else {
+            doc.setTextColor(249, 115, 22)
+          }
+          const prefix = w.severity === 'error' ? '! ' : '> '
+          doc.text(`${prefix}${w.text}`, 40, currentY + 14)
+          currentY += 14
+        }
+        doc.setTextColor(0, 0, 0)
+      }
+
+      // Gap before next cluster
+      currentY += 15
+    }
+
+    // Aggregate totals section (D-07)
+    if (currentY > 500) {
+      doc.addPage()
+      currentY = 40
+    }
+    const aggRow = buildAggregateRow(calc.aggregateTotals)
+    autoTable(doc, {
+      head: [['AGGREGATE TOTAL', '', 'vCPU', 'RAM (GB)', 'Storage (GB)']],
+      body: [[aggRow[0], aggRow[1], aggRow[2], aggRow[3], aggRow[4]]],
+      startY: currentY,
+      headStyles: { fillColor: [238, 0, 0], textColor: 255, fontStyle: 'bold' },
+      styles: { fontSize: 11 },
+    })
+
+    const filename = `os-sizer-all-clusters-${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(filename)
+  } else {
+    // ── Single-cluster path (D-01): identical to Phase 17 baseline ───────────
+    const clusterIdx = input.activeClusterIndex
+    const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
+    const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+    const { head, body } = buildPdfTableData(result.sizing)
+
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })
+
+    // Title
+    doc.setFontSize(18)
+    doc.setTextColor(238, 0, 0)
+    doc.text('OpenShift Sizing Report', 40, 30)
+    doc.setFontSize(12)
+    doc.setTextColor(0, 0, 0)
+    doc.text(cluster.name, 40, 50)
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 40, 65)
+
+    // Chart image (PDF-01)
+    let tableStartY = 80
+    const chartDataUrl = buildChartImageDataUrl(result.sizing)
+    if (chartDataUrl) {
+      doc.addImage(chartDataUrl, 'PNG', 40, 80, 500, 125)
+      tableStartY = 210
+    }
+
+    // KPI summary strip (PDF-02)
+    const kpi = buildKpiStripData(result.sizing)
+    const kpiY = tableStartY + 5
+    doc.setFillColor(240, 240, 240)
+    doc.rect(40, kpiY, 760, 22, 'F')
+    doc.setFontSize(11)
+    doc.setTextColor(21, 21, 21)
+    doc.text(kpi.label, 50, kpiY + 14)
+    tableStartY = kpiY + 27
+
+    // Bill of Materials table
+    autoTable(doc, {
+      head,
+      body,
+      startY: tableStartY,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [238, 0, 0], textColor: 255 },
+      alternateRowStyles: { fillColor: [248, 248, 248] },
+      theme: 'striped',
+      columnStyles: {
+        0: { cellWidth: 120 },
+        1: { cellWidth: 60, halign: 'center' },
+        2: { cellWidth: 60, halign: 'center' },
+        3: { cellWidth: 80, halign: 'center' },
+        4: { cellWidth: 100, halign: 'center' },
+      },
+    })
+
+    // Summary footer
+    const totals = result.sizing.totals
+    const finalY =
+      (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable?.finalY ?? 200
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    doc.text(
+      `Total: ${totals.vcpu} vCPU | ${totals.ramGB} GB RAM | ${totals.storageGB} GB Storage`,
+      40,
+      finalY + 20,
+    )
+
+    // Inline validation warnings (PDF-04)
+    if (resolvedWarnings.length > 0) {
+      let warnY = finalY + 35
+      doc.setFontSize(10)
+      for (const w of resolvedWarnings) {
+        if (w.severity === 'error') {
+          doc.setTextColor(238, 0, 0)
+        } else {
+          doc.setTextColor(249, 115, 22)
+        }
+        const prefix = w.severity === 'error' ? '! ' : '> '
+        doc.text(`${prefix}${w.text}`, 40, warnY)
+        warnY += 14
+      }
+      doc.setTextColor(0, 0, 0)
+    }
+
+    const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(filename)
+  }
 }

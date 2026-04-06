@@ -38,13 +38,26 @@ function handleExportCsv() {
 async function handleExportPdf() {
   pdfLoading.value = true
   try {
-    const clusterIdx = inputStore.activeClusterIndex
-    const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
-    const resolvedWarnings = (result?.validationErrors ?? []).map((w) => ({
-      text: t(w.messageKey),
-      severity: w.severity as 'error' | 'warning',
-    }))
-    await generatePdfReport(resolvedWarnings)
+    const clusters = inputStore.clusters
+    if (clusters.length >= 2) {
+      // Multi-cluster: build warnings per cluster
+      const allResolvedWarnings = calc.clusterResults.map((result) =>
+        (result?.validationErrors ?? []).map((w) => ({
+          text: t(w.messageKey),
+          severity: w.severity as 'error' | 'warning',
+        })),
+      )
+      await generatePdfReport([], allResolvedWarnings)
+    } else {
+      // Single-cluster: existing behavior
+      const clusterIdx = inputStore.activeClusterIndex
+      const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+      const resolvedWarnings = (result?.validationErrors ?? []).map((w) => ({
+        text: t(w.messageKey),
+        severity: w.severity as 'error' | 'warning',
+      }))
+      await generatePdfReport(resolvedWarnings)
+    }
   } finally {
     pdfLoading.value = false
   }
