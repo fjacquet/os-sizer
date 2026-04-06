@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { buildPdfTableData, buildChartImageDataUrl, buildKpiStripData } from '../usePdfExport'
+import { buildPdfTableData, buildChartImageDataUrl, buildKpiStripData, buildAggregateRow } from '../usePdfExport'
 import type { ClusterSizing } from '@/engine/types'
 
 // Hoist mocks so they are available before vi.mock factory runs
@@ -195,5 +195,29 @@ describe('buildChartImageDataUrl', () => {
     const labels: string[] = callArgs[1].data.labels
     expect(labels).not.toContain('Workers')
     expect(labels).toContain('Control Plane')
+  })
+})
+
+// ── buildAggregateRow ─────────────────────────────────────────────────────────
+
+describe('buildAggregateRow', () => {
+  it('returns a row with AGGREGATE TOTAL in first cell', () => {
+    const row = buildAggregateRow({ vcpu: 100, ramGB: 384, storageGB: 2400 })
+    expect(row[0]).toBe('AGGREGATE TOTAL')
+  })
+
+  it('returns correct stringified values for vcpu, ramGB, storageGB', () => {
+    const row = buildAggregateRow({ vcpu: 100, ramGB: 384, storageGB: 2400 })
+    expect(row).toEqual(['AGGREGATE TOTAL', '', '100', '384', '2400'])
+  })
+
+  it('second cell is empty string (placeholder for Count column)', () => {
+    const row = buildAggregateRow({ vcpu: 48, ramGB: 192, storageGB: 720 })
+    expect(row[1]).toBe('')
+  })
+
+  it('works with zero values', () => {
+    const row = buildAggregateRow({ vcpu: 0, ramGB: 0, storageGB: 0 })
+    expect(row).toEqual(['AGGREGATE TOTAL', '', '0', '0', '0'])
   })
 })
