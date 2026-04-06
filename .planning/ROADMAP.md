@@ -42,7 +42,7 @@
 - [x] **Phase 16: PPTX Redesign** - Consolidated 1-slide layout with native pptxgenjs charts (completed 2026-04-05)
 - [x] **Phase 17: PDF Redesign** - Chart images, Unicode font, KPI callout, and inline warnings (completed 2026-04-05)
 - [x] **Phase 18: Multi-Cluster UI** - Tab bar, role tagging, and side-by-side comparison view (completed 2026-04-06)
-- [ ] **Phase 19: Aggregate Exports** - Per-cluster sections and aggregate totals in all export formats
+- [x] **Phase 19: Aggregate Exports** - Per-cluster sections and aggregate totals in all export formats (completed 2026-04-06)
 
 ## Phase Details
 
@@ -152,8 +152,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 19-01-PLAN.md — Multi-cluster PPTX and PDF export with per-cluster sections and aggregate summary
-- [ ] 19-02-PLAN.md — Multi-cluster CSV export with cluster grouping rows and end-to-end validation
+- [x] 19-01-PLAN.md — Multi-cluster PPTX and PDF export with per-cluster sections and aggregate summary
+- [x] 19-02-PLAN.md — Multi-cluster CSV export with cluster grouping rows and end-to-end validation
 
 ## Progress
 
@@ -181,7 +181,7 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19
 | 16. PPTX Redesign | v2.1 | 0/2 | Not started | - |
 | 17. PDF Redesign | v2.1 | 2/2 | Complete   | 2026-04-05 |
 | 18. Multi-Cluster UI | v2.1 | 2/2 | Complete   | 2026-04-06 |
-| 19. Aggregate Exports | v2.1 | 0/2 | Not started | - |
+| 19. Aggregate Exports | v2.1 | 2/2 | Complete    | 2026-04-06 |
 
 ---
 *v1.0 archived: 2026-04-01*
