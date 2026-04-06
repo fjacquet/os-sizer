@@ -8,6 +8,7 @@ import Step1EnvironmentForm from '@/components/wizard/Step1EnvironmentForm.vue'
 import Step2WorkloadForm from '@/components/wizard/Step2WorkloadForm.vue'
 import Step3ArchitectureForm from '@/components/wizard/Step3ArchitectureForm.vue'
 import ResultsPage from '@/components/results/ResultsPage.vue'
+import ClusterTabBar from '@/components/results/ClusterTabBar.vue'
 
 const { t } = useI18n()
 const ui = useUiStore()
@@ -24,6 +25,7 @@ const ui = useUiStore()
     </header>
     <main role="main" class="max-w-4xl mx-auto px-3 py-4 sm:px-6 sm:py-6">
       <WizardStepper />
+      <ClusterTabBar />
       <div class="mt-6">
         <!-- Step 1: Environment Constraints (03-02) -->
         <div v-if="ui.currentWizardStep === 1">

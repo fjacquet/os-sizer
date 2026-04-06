@@ -11,7 +11,6 @@ import ArchOverviewCard from './ArchOverviewCard.vue'
 import WarningBanner from '@/components/shared/WarningBanner.vue'
 import ChartsSection from './ChartsSection.vue'
 import ExportToolbar from './ExportToolbar.vue'
-import ClusterTabBar from './ClusterTabBar.vue'
 import ClusterComparisonTable from './ClusterComparisonTable.vue'
 
 const { t } = useI18n()
@@ -31,9 +30,6 @@ const showComparison = ref(false)
 
 <template>
   <div class="space-y-4">
-    <!-- Cluster tab bar (Phase 18) -->
-    <ClusterTabBar />
-
     <!-- Compare toggle — only when 2+ clusters exist (D-10) -->
     <div v-if="clusters.length >= 2" class="flex items-center gap-2">
       <button
