@@ -40,8 +40,8 @@
 - [x] **Phase 14: Warning Fix** - Correct WARN-02 to trigger on any absent RWX storage, not ODF exclusively (completed 2026-04-05)
 - [x] **Phase 15: Session Portability** - Download and upload the full sizing session as a JSON file (completed 2026-04-05)
 - [x] **Phase 16: PPTX Redesign** - Consolidated 1-slide layout with native pptxgenjs charts (completed 2026-04-05)
-- [ ] **Phase 17: PDF Redesign** - Chart images, Unicode font, KPI callout, and inline warnings
-- [ ] **Phase 18: Multi-Cluster UI** - Tab bar, role tagging, and side-by-side comparison view
+- [x] **Phase 17: PDF Redesign** - Chart images, Unicode font, KPI callout, and inline warnings (completed 2026-04-05)
+- [x] **Phase 18: Multi-Cluster UI** - Tab bar, role tagging, and side-by-side comparison view (completed 2026-04-06)
 - [ ] **Phase 19: Aggregate Exports** - Per-cluster sections and aggregate totals in all export formats
 
 ## Phase Details
@@ -120,8 +120,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 17-01: Implement Chart.js offscreen canvas rendering and embed chart image in PDF via doc.addImage
-- [ ] 17-02: Embed Roboto Regular Unicode font, add KPI callout box and inline warnings; update ExportToolbar to pass resolved warnings
+- [x] 17-01: Implement Chart.js offscreen canvas rendering and embed chart image in PDF via doc.addImage
+- [x] 17-02: Embed Roboto Regular Unicode font, add KPI callout box and inline warnings; update ExportToolbar to pass resolved warnings
 
 ### Phase 18: Multi-Cluster UI
 **Goal**: Users can configure, label, and compare up to 5 independent clusters in a single session, with each cluster assignable a hub, spoke, or standalone role for Hub+Spoke pre-sales use cases
@@ -136,8 +136,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 18-01: Add cluster tab bar to ResultsPage with add, remove, rename, and active-cluster switching
-- [ ] 18-02: Add role selector to cluster tab and implement ComparisonView component
+- [x] 18-01: Add cluster tab bar to ResultsPage with add, remove, rename, and active-cluster switching
+- [x] 18-02: Add role selector to cluster tab and implement ComparisonView component
 **UI hint**: yes
 
 ### Phase 19: Aggregate Exports
@@ -149,11 +149,11 @@ Plans:
   2. PDF export includes one autoTable section per cluster (with cluster name header) and an aggregate totals row at the end
   3. CSV export includes per-cluster data with a cluster name grouping row and a single-file aggregate totals row
   4. All three export formats trigger a single download per user action (no multiple simultaneous downloads)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 19-01: Update usePptxExport and usePdfExport with multi-cluster mode and aggregate section
-- [ ] 19-02: Update useCsvExport with cluster grouping rows and validate all three export formats end-to-end
+- [ ] 19-01-PLAN.md — Multi-cluster PPTX and PDF export with per-cluster sections and aggregate summary
+- [ ] 19-02-PLAN.md — Multi-cluster CSV export with cluster grouping rows and end-to-end validation
 
 ## Progress
 
@@ -179,8 +179,8 @@ Phases execute in numeric order: 13 → 14 → 15 → 16 → 17 → 18 → 19
 | 14. Warning Fix | v2.1 | 1/1 | Complete   | 2026-04-05 |
 | 15. Session Portability | v2.1 | 2/2 | Complete   | 2026-04-05 |
 | 16. PPTX Redesign | v2.1 | 0/2 | Not started | - |
-| 17. PDF Redesign | v2.1 | 0/2 | Planned | - |
-| 18. Multi-Cluster UI | v2.1 | 0/2 | Not started | - |
+| 17. PDF Redesign | v2.1 | 2/2 | Complete   | 2026-04-05 |
+| 18. Multi-Cluster UI | v2.1 | 2/2 | Complete   | 2026-04-06 |
 | 19. Aggregate Exports | v2.1 | 0/2 | Not started | - |
 
 ---
