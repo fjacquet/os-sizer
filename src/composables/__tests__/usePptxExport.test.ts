@@ -5,6 +5,7 @@ import {
   buildNodeCountChartData,
   shouldShowVcpuChart,
   buildVcpuStackedChartData,
+  buildAggregateSlideData,
 } from '../usePptxExport'
 import type { ClusterConfig, ClusterSizing, NodeSpec } from '@/engine/types'
 
@@ -385,5 +386,81 @@ describe('buildVcpuStackedChartData', () => {
     // Only 2 non-zero pools → should return null
     const data = buildVcpuStackedChartData(sizing)
     expect(data).toBeNull()
+  })
+})
+
+// ── buildAggregateSlideData ───────────────────────────────────────────────────
+
+describe('buildAggregateSlideData', () => {
+  const clusterA = { name: 'Cluster A' }
+  const clusterB = { name: 'Cluster B' }
+  const clusterC = { name: 'Cluster C' }
+
+  const totalsA = { vcpu: 24, ramGB: 96, storageGB: 360 }
+  const totalsB = { vcpu: 48, ramGB: 192, storageGB: 720 }
+  const totalsC = { vcpu: 12, ramGB: 48, storageGB: 180 }
+  const aggregateTotals2 = { vcpu: 72, ramGB: 288, storageGB: 1080 }
+  const aggregateTotals3 = { vcpu: 84, ramGB: 336, storageGB: 1260 }
+
+  it('with 2 clusters returns a header row with 4 cells (Metric + 2 cluster names + TOTAL)', () => {
+    const { headerRow } = buildAggregateSlideData(
+      [clusterA, clusterB],
+      [totalsA, totalsB],
+      aggregateTotals2,
+    )
+    expect(headerRow).toHaveLength(4)
+    expect(headerRow[0].text).toBe('Metric')
+    expect(headerRow[1].text).toBe('Cluster A')
+    expect(headerRow[2].text).toBe('Cluster B')
+    expect(headerRow[3].text).toBe('TOTAL')
+  })
+
+  it('with 3 clusters returns a header row with 5 cells (Metric + 3 cluster names + TOTAL)', () => {
+    const { headerRow } = buildAggregateSlideData(
+      [clusterA, clusterB, clusterC],
+      [totalsA, totalsB, totalsC],
+      aggregateTotals3,
+    )
+    expect(headerRow).toHaveLength(5)
+    expect(headerRow[4].text).toBe('TOTAL')
+  })
+
+  it('data rows contain exactly 3 rows for vCPU, RAM (GB), Storage (GB)', () => {
+    const { dataRows } = buildAggregateSlideData(
+      [clusterA, clusterB],
+      [totalsA, totalsB],
+      aggregateTotals2,
+    )
+    expect(dataRows).toHaveLength(3)
+    expect(dataRows[0][0].text).toBe('vCPU')
+    expect(dataRows[1][0].text).toBe('RAM (GB)')
+    expect(dataRows[2][0].text).toBe('Storage (GB)')
+  })
+
+  it('TOTAL column values match aggregateTotals input', () => {
+    const { dataRows } = buildAggregateSlideData(
+      [clusterA, clusterB],
+      [totalsA, totalsB],
+      aggregateTotals2,
+    )
+    // TOTAL is the last cell in each data row (index 3 for 2 clusters)
+    expect(dataRows[0][3].text).toBe('72')   // vcpu
+    expect(dataRows[1][3].text).toBe('288')  // ramGB
+    expect(dataRows[2][3].text).toBe('1080') // storageGB
+  })
+
+  it('per-cluster column values match each clusterTotals[i]', () => {
+    const { dataRows } = buildAggregateSlideData(
+      [clusterA, clusterB],
+      [totalsA, totalsB],
+      aggregateTotals2,
+    )
+    // Cluster A (index 1), Cluster B (index 2)
+    expect(dataRows[0][1].text).toBe('24')  // A vcpu
+    expect(dataRows[0][2].text).toBe('48')  // B vcpu
+    expect(dataRows[1][1].text).toBe('96')  // A ramGB
+    expect(dataRows[1][2].text).toBe('192') // B ramGB
+    expect(dataRows[2][1].text).toBe('360') // A storageGB
+    expect(dataRows[2][2].text).toBe('720') // B storageGB
   })
 })
