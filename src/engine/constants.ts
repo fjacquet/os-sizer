@@ -54,3 +54,66 @@ export const INFRA_SIZING_TABLE = [
 export const TARGET_UTILIZATION = 0.70
 export const MAX_PODS_PER_NODE = 200
 export const CP_SAFETY_FACTOR = 0.60  // max 60% CP utilization
+
+// KubeVirt worker node per-node CPU overhead
+// Source: Red Hat OpenShift Virtualization docs — "2 additional cores per virt-enabled node"
+export const VIRT_OVERHEAD_CPU_PER_NODE = 2          // vCPU reserved per virt-enabled worker
+
+// KubeVirt per-VM memory overhead formula constants (virt-launcher pod overhead)
+// Source: developers.redhat.com/blog/2025/01/31/memory-management-openshift-virtualization
+// Formula: overheadMiB = VIRT_VM_OVERHEAD_BASE_MIB + VIRT_VM_OVERHEAD_PER_VCPU_MIB * vCPUs + VIRT_VM_OVERHEAD_GUEST_RAM_RATIO * guestRAM_MiB
+export const VIRT_VM_OVERHEAD_BASE_MIB = 218
+export const VIRT_VM_OVERHEAD_PER_VCPU_MIB = 8
+export const VIRT_VM_OVERHEAD_GUEST_RAM_RATIO = 0.002  // 0.2% of guest RAM in MiB
+
+// SNO-with-Virt minimum hardware profile (SNO-01)
+// Source: Red Hat SNO docs + access.redhat.com/solutions/7014308
+// Base SNO_STD_MIN is 8 vCPU / 16 GB / 120 GB — virt requires 14 vCPU / 32 GB / 170 GB
+// storageGB 170 = 120 GB root disk + 50 GB second disk for VM PVCs (hostpath-provisioner)
+export const SNO_VIRT_MIN: Readonly<NodeSpec> = { count: 1, vcpu: 14, ramGB: 32, storageGB: 170 }
+export const SNO_VIRT_STORAGE_EXTRA_GB = 50           // second disk for VM PVCs
+
+// MIG profiles for GPU nodes — static lookup table (GPU-04)
+// Source: NVIDIA MIG User Guide — docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html
+// Scope: A100-40GB is the v2.0 primary target per REQUIREMENTS.md GPU-04; A100-80GB and H100-80GB follow identical structure
+export const MIG_PROFILES: Readonly<Record<string, Readonly<Record<string, number>>>> = {
+  'A100-40GB': {
+    '1g.5gb':  7,  // 7 instances × 5 GB = 35 GB (1 slice reserved for system)
+    '2g.10gb': 3,  // 3 instances × 10 GB
+    '3g.20gb': 2,  // 2 instances × 20 GB
+    '7g.40gb': 1,  // 1 instance (whole GPU in MIG mode)
+  },
+  'A100-80GB': {
+    '1g.10gb': 7,
+    '2g.20gb': 3,
+    '3g.40gb': 2,
+    '7g.80gb': 1,
+  },
+  'H100-80GB': {
+    '1g.10gb': 7,
+    '2g.20gb': 3,
+    '3g.40gb': 2,
+    '7g.80gb': 1,
+  },
+} as const
+
+// GPU node hardware minimums (Phase 10)
+// No authoritative Red Hat sizing table exists for GPU nodes; values reflect general bare-metal GPU server minimums
+export const GPU_NODE_MIN_VCPU = 16        // typical bare-metal GPU node baseline
+export const GPU_NODE_MIN_RAM_GB = 64      // GPU nodes require sufficient CPU-side RAM for driver + workloads
+export const GPU_NODE_MIN_STORAGE_GB = 200 // OS + GPU drivers + container images
+
+// RHOAI worker node per-node minimum (RHOAI-02)
+// Source: RHOAI Self-Managed 3.0/3.3 install docs — "A minimum of 2 worker nodes with at least
+// 8 CPUs and 32 GiB RAM each is required to install the Operator."
+// Confirmed across RHOAI 2.25, 3.0, 3.3, and Cloud Service 1.x — HIGH confidence.
+// These are per-node floors, not aggregate cluster minimums.
+export const RHOAI_WORKER_MIN_VCPU = 8
+export const RHOAI_WORKER_MIN_RAM_GB = 32
+
+// RHOAI operator component overhead on infra nodes (RHOAI-03)
+// Source: community estimate (ai-on-openshift.io) — no official aggregate table published by Red Hat.
+// Covers: dashboard, KServe controller, DS Pipelines controller, Model Registry controller pods.
+// MEDIUM confidence — re-validate against current RHOAI release notes when upgrading beyond RHOAI 3.x.
+export const RHOAI_INFRA_OVERHEAD_VCPU = 4
+export const RHOAI_INFRA_OVERHEAD_RAM_GB = 16

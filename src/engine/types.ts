@@ -35,17 +35,41 @@ export interface AddOnConfig {
   infraNodesEnabled: boolean  // default false
   rhacmEnabled: boolean       // default false
   rhacmManagedClusters: number // default 0
+  // Phase 9: OpenShift Virtualization
+  virtEnabled: boolean               // OpenShift Virtualization / CNV enabled
+  vmCount: number                    // total number of VMs to host (default 50)
+  vmsPerWorker: number               // target VM density per worker node (default 10)
+  virtAvgVmVcpu: number              // average vCPU count per VM (default 4)
+  virtAvgVmRamGB: number             // average RAM per VM in GB (default 8)
+  snoVirtMode: boolean               // SNO-with-Virt profile (SNO-01)
+  // Phase 10: GPU Node Engine
+  gpuEnabled: boolean                // dedicated GPU node pool enabled (default false)
+  gpuNodeCount: number               // number of GPU nodes in pool — user-specified (default 1)
+  gpuMode: 'container' | 'passthrough' | 'vgpu'  // GPU workload mode (default 'container')
+  gpuModel: 'A100-40GB' | 'A100-80GB' | 'H100-80GB'  // GPU model (default 'A100-40GB')
+  migProfile: string                 // MIG profile name e.g. '1g.5gb' — empty string = no MIG (default '')
+  gpuPerNode: number                 // GPUs per node (default 1)
+  // Phase 11: Red Hat OpenShift AI
+  rhoaiEnabled: boolean              // RHOAI operator add-on enabled (default false)
+  /** Non-ODF RWX storage class available for live migration (Phase 14) */
+  rwxStorageAvailable: boolean
 }
 
 export interface ClusterConfig {
   id: string
   name: string
+  role?: 'hub' | 'spoke' | 'standalone'
   topology: TopologyType
   snoProfile: SnoProfile           // default 'standard'
   hcpHostedClusters: number        // default 1
   hcpQpsPerCluster: number         // default 1000
   workload: WorkloadProfile
   addOns: AddOnConfig
+  // Environment constraint fields — used by recommendation engine
+  environment: EnvironmentType     // default 'datacenter'
+  haRequired: boolean              // default true
+  airGapped: boolean               // default false
+  maxNodes: number | null          // default null (no limit)
 }
 
 export interface ClusterSizing {
@@ -54,6 +78,10 @@ export interface ClusterSizing {
   infraNodes: NodeSpec | null
   odfNodes: NodeSpec | null
   rhacmWorkers: NodeSpec | null
+  virtWorkerNodes: NodeSpec | null  // Phase 9: dedicated VM-hosting worker pool
+  gpuNodes: NodeSpec | null         // Phase 9: placeholder for Phase 10 GPU calculator
+  virtStorageGB: number             // Phase 9: estimated storage budget for VM PVCs
+  rhoaiOverhead: { vcpu: number; ramGB: number } | null  // Phase 12: RHOAI operator overhead addend (set by calcRHOAI, null otherwise)
   totals: { vcpu: number; ramGB: number; storageGB: number }
 }
 
@@ -76,7 +104,7 @@ export interface RecommendationConstraints {
   maxNodes: number | null
   airGapped: boolean
   estimatedWorkers: number
-  addOns: { odf: boolean; rhacm: boolean }
+  addOns: { odf: boolean; rhacm: boolean; virt: boolean }
 }
 
 export interface TopologyRecommendation {

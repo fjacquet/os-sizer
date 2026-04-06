@@ -26,6 +26,7 @@ function clusterField<K extends keyof ClusterConfig>(key: K) {
 const environment = clusterField('environment')
 const haRequired = clusterField('haRequired')
 const airGapped = clusterField('airGapped')
+const maxNodes = clusterField('maxNodes')
 
 const validationErrors = ref<string[]>([])
 
@@ -58,14 +59,14 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
 </script>
 
 <template>
-  <section class="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+  <section class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-6">
     <div>
-      <h2 class="text-lg font-semibold text-gray-900">{{ t('wizard.step1.title') }}</h2>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ t('wizard.step1.title') }}</h2>
     </div>
 
     <!-- Environment type -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700" id="env-type-label">{{ t('environment.label') }}</label>
+      <label id="env-type-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('environment.label') }}</label>
       <div
         class="flex flex-wrap gap-2"
         role="radiogroup"
@@ -80,7 +81,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
           :class="['px-4 py-2 text-sm rounded-md border font-medium transition-colors',
             environment === opt.value
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400']"
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400']"
           @click="environment = opt.value"
         >
           {{ t(opt.labelKey) }}
@@ -90,7 +91,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
 
     <!-- Connectivity -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700" id="connectivity-label">{{ t('environment.connectivity') }}</label>
+      <label id="connectivity-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('environment.connectivity') }}</label>
       <div
         class="flex gap-2"
         role="radiogroup"
@@ -103,7 +104,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
           :class="['px-4 py-2 text-sm rounded-md border font-medium transition-colors',
             !airGapped
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400']"
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400']"
           @click="airGapped = false"
         >
           {{ t('environment.connected') }}
@@ -114,7 +115,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
           :class="['px-4 py-2 text-sm rounded-md border font-medium transition-colors',
             airGapped
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400']"
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400']"
           @click="airGapped = true"
         >
           {{ t('environment.airGapped') }}
@@ -124,7 +125,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
 
     <!-- HA Level -->
     <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700" id="ha-level-label">{{ t('environment.haLevel') }}</label>
+      <label id="ha-level-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('environment.haLevel') }}</label>
       <div
         class="flex gap-2"
         role="radiogroup"
@@ -137,7 +138,7 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
           :class="['px-4 py-2 text-sm rounded-md border font-medium transition-colors',
             haRequired
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400']"
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400']"
           @click="haRequired = true"
         >
           {{ t('environment.haRequired') }}
@@ -148,12 +149,32 @@ const envOptions: { value: EnvironmentType; labelKey: string }[] = [
           :class="['px-4 py-2 text-sm rounded-md border font-medium transition-colors',
             !haRequired
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400']"
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400']"
           @click="haRequired = false"
         >
           {{ t('environment.haOptional') }}
         </button>
       </div>
+    </div>
+
+    <!-- Max Nodes (optional constraint) -->
+    <div class="space-y-2">
+      <label for="max-nodes-input" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ t('environment.maxNodes') }}
+      </label>
+      <input
+        id="max-nodes-input"
+        type="number"
+        min="1"
+        :value="maxNodes ?? ''"
+        :placeholder="t('environment.maxNodesPlaceholder')"
+        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        aria-describedby="max-nodes-hint"
+        @input="maxNodes = ($event.target as HTMLInputElement).value === '' ? null : Number(($event.target as HTMLInputElement).value)"
+      />
+      <p id="max-nodes-hint" class="text-xs text-gray-500 dark:text-gray-400">
+        {{ t('environment.maxNodesHint') }}
+      </p>
     </div>
 
     <!-- Validation errors -->

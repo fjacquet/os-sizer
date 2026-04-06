@@ -28,7 +28,10 @@
     "vcpu": "vCPU",
     "ramGB": "RAM (GB)",
     "storageGB": "Speicher (GB)",
-    "count": "Anzahl"
+    "count": "Anzahl",
+    "virtWorkers": "Virt-Worker-Knoten",
+    "gpu": "GPU-Knoten",
+    "rhoaiOverhead": "RHOAI-Overhead"
   },
   "wizard": {
     "step1": {
@@ -72,7 +75,10 @@
     "airGapped": "Luftspalt (Air-Gap)",
     "haLevel": "Hochverfügbarkeitsstufe",
     "haRequired": "HA erforderlich",
-    "haOptional": "HA optional"
+    "haOptional": "HA optional",
+    "maxNodes": "Maximales Knotenbudget",
+    "maxNodesPlaceholder": "Keine Begrenzung",
+    "maxNodesHint": "Optional — begrenzt die Gesamtknotenanzahl für Topologieempfehlungen"
   },
   "workload": {
     "label": "Arbeitslastprofil",
@@ -86,13 +92,26 @@
     "gpuNodes": "GPU-Knoten",
     "rhacmHub": "RHACM-Hub",
     "nodeVcpu": "Worker-Knoten vCPU",
-    "nodeRam": "Worker-Knoten RAM"
+    "nodeRam": "Worker-Knoten RAM",
+    "rhoaiAddon": "Red Hat OpenShift AI (RHOAI)",
+    "gpuNodePool": "GPU-Knoten-Pool",
+    "gpuNodeCount": "Anzahl GPU-Knoten",
+    "gpuMode": "GPU-Modus",
+    "gpuModel": "GPU-Modell",
+    "migProfile": "MIG-Profil",
+    "vmCount": "Gesamtanzahl VMs",
+    "vmsPerWorker": "VMs pro Worker-Knoten",
+    "virtAvgVmVcpu": "Durchschnittliche vCPU pro VM",
+    "virtAvgVmRamGB": "Durchschnittlicher RAM pro VM (GB)",
+    "virtAddon": "OpenShift Virtualization",
+    "rwxStorageAvailable": "RWX-Speicherklasse verfügbar (nicht ODF)"
   },
   "sno": {
     "profile": "SNO-Profil",
     "standard": "Standard",
     "edge": "Edge",
-    "telecomVdu": "Telekom vDU"
+    "telecomVdu": "Telekom vDU",
+    "virtMode": "SNO mit Virtualisierungsprofil"
   },
   "hcp": {
     "clusterCount": "Anzahl gehosteter Cluster",
@@ -123,7 +142,22 @@
       "exportCsv": "CSV exportieren",
       "exportPdf": "PDF exportieren",
       "exportPptx": "PPTX herunterladen",
-      "exportPptxLoading": "Wird generiert..."
+      "exportPptxLoading": "Wird generiert...",
+      "saveSession": "Sitzung speichern",
+      "loadSession": "Sitzung laden",
+      "sessionImportError": "Ungültige Sitzungsdatei. Bitte wählen Sie eine gültige os-sizer-Sitzung.",
+      "sessionImportSuccess": "Sitzung erfolgreich geladen"
+    },
+    "clusters": {
+      "addCluster": "Cluster hinzufügen",
+      "removeCluster": "Cluster entfernen",
+      "roleHub": "Hub",
+      "roleSpoke": "Spoke",
+      "roleStandalone": "Eigenständig",
+      "maxClustersReached": "Maximal 5 Cluster erreicht",
+      "compareToggle": "Cluster vergleichen",
+      "compareTitle": "Cluster-Vergleich",
+      "roleLabel": "Rolle"
     }
   },
   "validation": {
@@ -151,11 +185,22 @@
     },
     "managedCloud": {
       "noHardware": "Verwaltete Cloud-Topologien (ROSA/ARO) werden vom Anbieter dimensioniert — keine Hardware-Stückliste erforderlich"
+    },
+    "virt": {
+      "rwxStorageRequired": "OpenShift Virtualization benötigt RWX-fähigen Speicher für die Live-Migration. Konfigurieren Sie ODF oder eine andere RWX-Speicherklasse, um die Live-Migration zu aktivieren."
+    },
+    "sno": {
+      "virtNoLiveMigration": "SNO-Topologie unterstützt keine Live-Migration — VM-HA ist nicht verfügbar."
+    },
+    "gpu": {
+      "passthroughBlocksLiveMigration": "GPU-Passthrough-Modus blockiert die Live-Migration auf betroffenen Knoten dauerhaft.",
+      "migProfileWithKubevirtUnsupported": "MIG-Profile in Kombination mit KubeVirt-VMs werden vom Standard-GPU-Operator nicht unterstützt."
     }
   },
   "recommendation": {
     "standardHa": {
-      "production": "Ideal für Produktionsworkloads mit vollständiger HA im Rechenzentrum"
+      "production": "Ideal für Produktionsworkloads mit vollständiger HA im Rechenzentrum",
+      "virtWorkloads": "Empfohlen für VM-Workloads — Standard-HA bietet Live-Migration und Knotenredundanz."
     },
     "compact3Node": {
       "budgetFriendly": "Geeignet für ressourcenbeschränkte Umgebungen mit HA — Master dienen auch als Worker"
@@ -178,6 +223,21 @@
     "managedCloud": {
       "noHardwareManagement": "Anbieter-verwaltetes OpenShift — kein Hardware-Sizing erforderlich (ROSA/ARO/OSD)"
     }
+  },
+  "gpu": {
+    "modeContainer": "Container (ganzer GPU pro Pod)",
+    "modePassthrough": "Passthrough (ganzer GPU pro VM)",
+    "modeVgpu": "vGPU (gemeinsam genutzt über VMs)",
+    "migNone": "Keine MIG-Partitionierung",
+    "densityTableTitle": "vGPU-Dichte-Referenz (geschätzt, treiberabhängig)",
+    "densityNote": "Werte sind Schätzungen. Die tatsächliche Dichte hängt von der NVIDIA-vGPU-Treiberversion und Lizenzstufe ab."
+  },
+  "rhoai": {
+    "label": "Red Hat OpenShift AI",
+    "bomRow": "RHOAI-Operator-Overhead",
+    "kserve": "KServe",
+    "dsPipelines": "Data Science Pipelines",
+    "modelRegistry": "Modell-Registry"
   },
   "print": {
     "header": {

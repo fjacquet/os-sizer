@@ -71,17 +71,21 @@ function scoreTopology(
 
 /**
  * Standard HA — 3 masters + N workers. Best for datacenter HA workloads.
- * base 70 + 20 datacenter + 10 haRequired − 50 if maxNodes < 5
+ * base 70 + 20 datacenter + 10 haRequired − 50 if maxNodes < 5 + 25 if virt workloads
  */
 function scoreStandardHa(c: RecommendationConstraints): TopologyRecommendation {
   let score = 70
   if (c.environment === 'datacenter') score += 20
   if (c.haRequired) score += 10
   if (c.maxNodes !== null && c.maxNodes < 5) score -= 50
+  // VIRT-04: boost standard-ha when VM workloads are present
+  if (c.addOns.virt) score += 25
   return {
     topology: 'standard-ha',
     fitScore: clampScore(score),
-    justificationKey: 'recommendation.standardHa.production',
+    justificationKey: c.addOns.virt
+      ? 'recommendation.standardHa.virtWorkloads'
+      : 'recommendation.standardHa.production',
     warningKeys: [],
   }
 }

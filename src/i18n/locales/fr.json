@@ -28,7 +28,10 @@
     "vcpu": "vCPU",
     "ramGB": "RAM (Go)",
     "storageGB": "Stockage (Go)",
-    "count": "Nombre"
+    "count": "Nombre",
+    "virtWorkers": "Nœuds Workers Virt",
+    "gpu": "Nœuds GPU",
+    "rhoaiOverhead": "Surcharge RHOAI"
   },
   "wizard": {
     "step1": {
@@ -72,7 +75,10 @@
     "airGapped": "Déconnecté (air-gap)",
     "haLevel": "Niveau de haute disponibilité",
     "haRequired": "HA requise",
-    "haOptional": "HA optionnelle"
+    "haOptional": "HA optionnelle",
+    "maxNodes": "Budget maximal de nœuds",
+    "maxNodesPlaceholder": "Aucune limite",
+    "maxNodesHint": "Optionnel — limite le nombre total de nœuds pour les recommandations"
   },
   "workload": {
     "label": "Profil de charge de travail",
@@ -86,13 +92,26 @@
     "gpuNodes": "Nœuds GPU",
     "rhacmHub": "Hub RHACM",
     "nodeVcpu": "vCPU du nœud worker",
-    "nodeRam": "RAM du nœud worker"
+    "nodeRam": "RAM du nœud worker",
+    "rhoaiAddon": "Red Hat OpenShift AI (RHOAI)",
+    "gpuNodePool": "Pool de nœuds GPU",
+    "gpuNodeCount": "Nombre de nœuds GPU",
+    "gpuMode": "Mode GPU",
+    "gpuModel": "Modèle GPU",
+    "migProfile": "Profil MIG",
+    "vmCount": "Nombre total de VM",
+    "vmsPerWorker": "VM par nœud worker",
+    "virtAvgVmVcpu": "vCPU moyen par VM",
+    "virtAvgVmRamGB": "RAM moyenne par VM (Go)",
+    "virtAddon": "OpenShift Virtualization",
+    "rwxStorageAvailable": "Classe de stockage RWX disponible (non-ODF)"
   },
   "sno": {
     "profile": "Profil SNO",
     "standard": "Standard",
     "edge": "Périphérie",
-    "telecomVdu": "Telecom vDU"
+    "telecomVdu": "Telecom vDU",
+    "virtMode": "Profil SNO avec virtualisation"
   },
   "hcp": {
     "clusterCount": "Nombre de clusters hébergés",
@@ -123,7 +142,22 @@
       "exportCsv": "Exporter CSV",
       "exportPdf": "Exporter PDF",
       "exportPptx": "Télécharger PPTX",
-      "exportPptxLoading": "Génération..."
+      "exportPptxLoading": "Génération...",
+      "saveSession": "Sauvegarder la session",
+      "loadSession": "Charger une session",
+      "sessionImportError": "Fichier de session invalide. Veuillez choisir un fichier os-sizer valide.",
+      "sessionImportSuccess": "Session chargée avec succès"
+    },
+    "clusters": {
+      "addCluster": "Ajouter un cluster",
+      "removeCluster": "Supprimer le cluster",
+      "roleHub": "Hub",
+      "roleSpoke": "Spoke",
+      "roleStandalone": "Autonome",
+      "maxClustersReached": "Maximum de 5 clusters atteint",
+      "compareToggle": "Comparer les clusters",
+      "compareTitle": "Comparaison des clusters",
+      "roleLabel": "Rôle"
     }
   },
   "validation": {
@@ -151,11 +185,22 @@
     },
     "managedCloud": {
       "noHardware": "Les topologies cloud gérées (ROSA/ARO) sont dimensionnées par le fournisseur — aucune nomenclature matérielle requise"
+    },
+    "virt": {
+      "rwxStorageRequired": "OpenShift Virtualization nécessite un stockage compatible RWX pour la migration en direct. Configurez ODF ou une autre classe de stockage RWX pour activer la migration en direct."
+    },
+    "sno": {
+      "virtNoLiveMigration": "La topologie SNO ne prend pas en charge la migration en direct — la haute disponibilité des VM est indisponible."
+    },
+    "gpu": {
+      "passthroughBlocksLiveMigration": "Le mode passthrough GPU bloque définitivement la migration en direct sur les nœuds concernés.",
+      "migProfileWithKubevirtUnsupported": "Les profils MIG combinés avec les VM KubeVirt ne sont pas pris en charge par l'opérateur GPU standard."
     }
   },
   "recommendation": {
     "standardHa": {
-      "production": "Idéal pour les charges de travail de production nécessitant une HA complète en datacenter"
+      "production": "Idéal pour les charges de travail de production nécessitant une HA complète en datacenter",
+      "virtWorkloads": "Recommandé pour les charges de travail VM — la haute disponibilité standard fournit la migration en direct et la redondance des nœuds."
     },
     "compact3Node": {
       "budgetFriendly": "Adapté aux environnements contraints avec HA — les maîtres servent aussi de workers"
@@ -178,6 +223,21 @@
     "managedCloud": {
       "noHardwareManagement": "OpenShift géré par le fournisseur — aucun dimensionnement matériel requis (ROSA/ARO/OSD)"
     }
+  },
+  "gpu": {
+    "modeContainer": "Conteneur (GPU entier par pod)",
+    "modePassthrough": "Passthrough (GPU entier par VM)",
+    "modeVgpu": "vGPU (partagé entre VM)",
+    "migNone": "Pas de partitionnement MIG",
+    "densityTableTitle": "Référence de densité vGPU (estimée, dépendante du pilote)",
+    "densityNote": "Les valeurs sont des estimations. La densité réelle dépend de la version du pilote NVIDIA vGPU et du niveau de licence."
+  },
+  "rhoai": {
+    "label": "Red Hat OpenShift AI",
+    "bomRow": "Surcharge opérateur RHOAI",
+    "kserve": "KServe",
+    "dsPipelines": "Data Science Pipelines",
+    "modelRegistry": "Registre de modèles"
   },
   "print": {
     "header": {

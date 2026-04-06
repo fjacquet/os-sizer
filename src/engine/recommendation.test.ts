@@ -9,7 +9,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 10,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     expect(result.length).toBeGreaterThan(0)
     expect(result[0].topology).toBe('standard-ha')
@@ -24,7 +24,7 @@ describe('recommend', () => {
       maxNodes: 1,
       airGapped: false,
       estimatedWorkers: 0,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     const top2 = result.slice(0, 2).map((r) => r.topology)
     expect(top2.some((t) => t === 'sno' || t === 'microshift')).toBe(true)
@@ -38,7 +38,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: true,
       estimatedWorkers: 10,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     expect(result.every((r) => r.topology !== 'managed-cloud')).toBe(true)
   })
@@ -50,7 +50,7 @@ describe('recommend', () => {
       maxNodes: 3,
       airGapped: false,
       estimatedWorkers: 5,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     const top2 = result.slice(0, 2).map((r) => r.topology)
     expect(top2).toContain('compact-3node')
@@ -63,7 +63,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 0,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     expect(result.length).toBeGreaterThan(0)
     expect(result[0].topology).toBe('managed-cloud')
@@ -76,7 +76,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 5,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     }
     const result = recommend(constraints)
     for (const r of result) {
@@ -91,7 +91,7 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 10,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     for (let i = 0; i < result.length - 1; i++) {
       expect(result[i].fitScore).toBeGreaterThanOrEqual(result[i + 1].fitScore)
@@ -105,9 +105,79 @@ describe('recommend', () => {
       maxNodes: null,
       airGapped: false,
       estimatedWorkers: 10,
-      addOns: { odf: false, rhacm: false },
+      addOns: { odf: false, rhacm: false, virt: false },
     })
     expect(result.every((r) => r.topology !== 'sno')).toBe(true)
     expect(result.every((r) => r.topology !== 'microshift')).toBe(true)
+  })
+
+  // VIRT-04: standard-ha score boost when VM workloads are present
+  it('virt=true: standard-ha justificationKey is recommendation.standardHa.virtWorkloads', () => {
+    const result = recommend({
+      environment: 'datacenter',
+      haRequired: false,
+      maxNodes: null,
+      airGapped: false,
+      estimatedWorkers: 10,
+      addOns: { odf: false, rhacm: false, virt: true },
+    })
+    const standardHa = result.find((r) => r.topology === 'standard-ha')
+    expect(standardHa).toBeDefined()
+    expect(standardHa!.justificationKey).toBe('recommendation.standardHa.virtWorkloads')
+  })
+
+  it('virt=false: standard-ha justificationKey is recommendation.standardHa.production', () => {
+    const result = recommend({
+      environment: 'datacenter',
+      haRequired: false,
+      maxNodes: null,
+      airGapped: false,
+      estimatedWorkers: 10,
+      addOns: { odf: false, rhacm: false, virt: false },
+    })
+    const standardHa = result.find((r) => r.topology === 'standard-ha')
+    expect(standardHa).toBeDefined()
+    expect(standardHa!.justificationKey).toBe('recommendation.standardHa.production')
+  })
+
+  it('virt=true: standard-ha fitScore is 25 points higher than virt=false (other factors equal)', () => {
+    // Use edge environment to avoid datacenter+haRequired clamping (base 70 only)
+    const base = {
+      environment: 'edge' as const,
+      haRequired: false,
+      maxNodes: null,
+      airGapped: false,
+      estimatedWorkers: 10,
+    }
+    const withVirt = recommend({ ...base, addOns: { odf: false, rhacm: false, virt: true } })
+    const withoutVirt = recommend({ ...base, addOns: { odf: false, rhacm: false, virt: false } })
+    const scoreWithVirt = withVirt.find((r) => r.topology === 'standard-ha')!.fitScore
+    const scoreWithoutVirt = withoutVirt.find((r) => r.topology === 'standard-ha')!.fitScore
+    expect(scoreWithVirt - scoreWithoutVirt).toBe(25)
+  })
+
+  it('datacenter + haRequired + virt=true: standard-ha fitScore capped at 100', () => {
+    const result = recommend({
+      environment: 'datacenter',
+      haRequired: true,
+      maxNodes: null,
+      airGapped: false,
+      estimatedWorkers: 10,
+      addOns: { odf: false, rhacm: false, virt: true },
+    })
+    const standardHa = result.find((r) => r.topology === 'standard-ha')
+    expect(standardHa!.fitScore).toBe(100)
+  })
+
+  it('default constraints + virt=true: standard-ha ranked first', () => {
+    const result = recommend({
+      environment: 'datacenter',
+      haRequired: false,
+      maxNodes: null,
+      airGapped: false,
+      estimatedWorkers: 10,
+      addOns: { odf: false, rhacm: false, virt: true },
+    })
+    expect(result[0].topology).toBe('standard-ha')
   })
 })

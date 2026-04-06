@@ -28,7 +28,10 @@
     "vcpu": "vCPU",
     "ramGB": "RAM (GB)",
     "storageGB": "Storage (GB)",
-    "count": "Count"
+    "count": "Count",
+    "virtWorkers": "Virt Worker Nodes",
+    "gpu": "GPU Nodes",
+    "rhoaiOverhead": "RHOAI Overhead"
   },
   "wizard": {
     "step1": {
@@ -45,7 +48,10 @@
     "step3": {
       "number": "3",
       "label": "Architecture",
-      "title": "Architecture Selection"
+      "title": "Architecture Selection",
+      "selectionRequired": "Please confirm an architecture to continue",
+      "showOverride": "Override recommendation",
+      "hideOverride": "Hide override"
     },
     "step4": {
       "number": "4",
@@ -69,7 +75,10 @@
     "airGapped": "Air-Gapped",
     "haLevel": "High Availability Level",
     "haRequired": "HA Required",
-    "haOptional": "HA Optional"
+    "haOptional": "HA Optional",
+    "maxNodes": "Maximum Node Budget",
+    "maxNodesPlaceholder": "No limit",
+    "maxNodesHint": "Optional — limits total node count for topology recommendations"
   },
   "workload": {
     "label": "Workload Profile",
@@ -81,13 +90,28 @@
     "odfStorage": "ODF Storage",
     "infraNodes": "Infrastructure Nodes",
     "gpuNodes": "GPU Nodes",
-    "rhacmHub": "RHACM Hub"
+    "rhacmHub": "RHACM Hub",
+    "nodeVcpu": "Worker Node vCPU",
+    "nodeRam": "Worker Node RAM",
+    "rhoaiAddon": "Red Hat OpenShift AI (RHOAI)",
+    "gpuNodePool": "GPU Node Pool",
+    "gpuNodeCount": "GPU Node Count",
+    "gpuMode": "GPU Mode",
+    "gpuModel": "GPU Model",
+    "migProfile": "MIG Profile",
+    "vmCount": "Total VM Count",
+    "vmsPerWorker": "VMs per Worker Node",
+    "virtAvgVmVcpu": "Average VM vCPU",
+    "virtAvgVmRamGB": "Average VM RAM (GB)",
+    "virtAddon": "OpenShift Virtualization",
+    "rwxStorageAvailable": "RWX Storage Class Available (non-ODF)"
   },
   "sno": {
     "profile": "SNO Profile",
     "standard": "Standard",
     "edge": "Edge",
-    "telecomVdu": "Telecom vDU"
+    "telecomVdu": "Telecom vDU",
+    "virtMode": "SNO with Virtualization Profile"
   },
   "hcp": {
     "clusterCount": "Hosted Cluster Count",
@@ -98,20 +122,122 @@
     "totalCpu": "Total vCPU",
     "totalRam": "Total RAM",
     "totalStorage": "Total Storage",
+    "bom": {
+      "rhacmWorkers": "RHACM Hub Workers"
+    },
+    "charts": {
+      "vcpu": "vCPU Distribution",
+      "ram": "RAM Distribution (GB)",
+      "storage": "Storage Distribution (GB)"
+    },
+    "overview": {
+      "environment": "Environment",
+      "haStatus": "HA Status",
+      "haEnabled": "High Availability",
+      "haDisabled": "No HA"
+    },
     "toolbar": {
       "share": "Share URL",
       "copied": "Copied!",
       "exportCsv": "Export CSV",
       "exportPdf": "Export PDF",
       "exportPptx": "Download PPTX",
-      "exportPptxLoading": "Generating..."
+      "exportPptxLoading": "Generating...",
+      "saveSession": "Save Session",
+      "loadSession": "Load Session",
+      "sessionImportError": "Invalid session file. Please select a valid os-sizer session.",
+      "sessionImportSuccess": "Session loaded successfully"
+    },
+    "clusters": {
+      "addCluster": "Add cluster",
+      "removeCluster": "Remove cluster",
+      "roleHub": "Hub",
+      "roleSpoke": "Spoke",
+      "roleStandalone": "Standalone",
+      "maxClustersReached": "Maximum of 5 clusters reached",
+      "compareToggle": "Compare clusters",
+      "compareTitle": "Cluster Comparison",
+      "roleLabel": "Role"
     }
   },
   "validation": {
     "required": "This field is required",
     "minPods": "Minimum 1 pod required",
     "minCpu": "Minimum 1 millicore required",
-    "minRam": "Minimum 1 MiB required"
+    "minRam": "Minimum 1 MiB required",
+    "techPreviewNotForProduction": "Technology Preview — not supported for production use",
+    "redfishBmcRequired": "Requires Redfish-compatible BMC on both nodes",
+    "managedCloudNoHardware": "Managed cloud topologies (ROSA/ARO) are sized by the provider — no hardware BoM is required",
+    "negativePods": "Pod count cannot be negative",
+    "workerRamBelowMin": "Worker node RAM is below the 8 GB minimum — sizing may be invalid",
+    "workerCpuBelowMin": "Worker node vCPU is below the 2 vCPU minimum — sizing may be invalid",
+    "zeroPodsWithResources": "Pod count is zero but CPU/RAM requests are set — check your workload profile",
+    "odfIncompatibleTopology": "ODF storage is not compatible with SNO, MicroShift, or Managed Cloud topologies",
+    "rhacmNoClusters": "RHACM is enabled but no managed cluster count is set — enter expected cluster count"
+  },
+  "warnings": {
+    "tna": {
+      "techPreview": "Two-Node with Arbiter is a Technology Preview feature"
+    },
+    "tnf": {
+      "techPreview": "Two-Node with Fencing is a Technology Preview feature",
+      "redfishRequired": "Requires Redfish-compatible BMC on both nodes"
+    },
+    "managedCloud": {
+      "noHardware": "Managed cloud topologies (ROSA/ARO) are sized by the provider — no hardware BoM is required"
+    },
+    "virt": {
+      "rwxStorageRequired": "OpenShift Virtualization requires RWX-capable storage for live migration. Configure ODF or another RWX storage class to enable live migration."
+    },
+    "sno": {
+      "virtNoLiveMigration": "SNO topology does not support live migration — VM HA is unavailable."
+    },
+    "gpu": {
+      "passthroughBlocksLiveMigration": "GPU passthrough mode permanently blocks live migration on affected nodes.",
+      "migProfileWithKubevirtUnsupported": "MIG profiles combined with KubeVirt VMs are unsupported by the standard GPU Operator."
+    }
+  },
+  "recommendation": {
+    "standardHa": {
+      "production": "Best for production workloads requiring full HA in a datacenter",
+      "virtWorkloads": "Recommended for VM workloads — standard HA provides live migration and node redundancy."
+    },
+    "compact3Node": {
+      "budgetFriendly": "Suitable for resource-constrained environments with HA — masters double as workers"
+    },
+    "sno": {
+      "edgeSingleSite": "Single node deployment for edge or far-edge locations"
+    },
+    "tna": {
+      "minimalHa": "Minimal HA with a witness/arbiter node — budget-friendly two-node cluster"
+    },
+    "tnf": {
+      "twoNodeFencing": "Two-node cluster with hardware fencing for bare-metal HA"
+    },
+    "hcp": {
+      "multiClusterEfficiency": "Efficient multi-cluster management with hosted control planes"
+    },
+    "microshift": {
+      "constrainedEdge": "Minimal footprint for far-edge IoT and device workloads"
+    },
+    "managedCloud": {
+      "noHardwareManagement": "Provider-managed OpenShift — no hardware sizing required (ROSA/ARO/OSD)"
+    }
+  },
+  "gpu": {
+    "modeContainer": "Container (whole GPU per pod)",
+    "modePassthrough": "Passthrough (whole GPU per VM)",
+    "modeVgpu": "vGPU (shared across VMs)",
+    "migNone": "No MIG partitioning",
+    "densityTableTitle": "vGPU Density Reference (estimated, driver-dependent)",
+    "densityNote": "Values are estimates. Actual density depends on NVIDIA vGPU driver version and license tier."
+  },
+  "rhoai": {
+    "label": "Red Hat OpenShift AI",
+    "bomRow": "RHOAI Operator Overhead",
+    "kserve": "KServe",
+    "dsPipelines": "Data Science Pipelines",
+    "modelRegistry": "Model Registry"
   },
   "print": {
     "header": {

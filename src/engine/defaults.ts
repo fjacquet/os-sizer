@@ -23,6 +23,27 @@ export function createDefaultClusterConfig(index: number): ClusterConfig {
       infraNodesEnabled: false,
       rhacmEnabled: false,
       rhacmManagedClusters: 0,
+      // Phase 9: OpenShift Virtualization
+      virtEnabled: false,
+      vmCount: 50,
+      vmsPerWorker: 10,
+      virtAvgVmVcpu: 4,
+      virtAvgVmRamGB: 8,
+      snoVirtMode: false,
+      // Phase 10: GPU Node Engine
+      gpuEnabled: false,
+      gpuNodeCount: 1,
+      gpuMode: 'container' as const,
+      gpuModel: 'A100-40GB' as const,
+      migProfile: '',
+      gpuPerNode: 1,
+      // Phase 11: Red Hat OpenShift AI
+      rhoaiEnabled: false,
+      rwxStorageAvailable: false,
     },
+    environment: 'datacenter',
+    haRequired: true,
+    airGapped: false,
+    maxNodes: null,
   }
 }

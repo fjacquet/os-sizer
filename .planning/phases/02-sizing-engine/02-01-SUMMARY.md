@@ -43,6 +43,7 @@ metrics:
 ### Task 1: Types, Constants, Defaults, Barrel Index
 
 **src/engine/types.ts** — Extended from 4 to 12 exported types/interfaces:
+
 - Added `SnoProfile` union (`standard | edge | telecom-vdu`)
 - Added `EnvironmentType` union (`datacenter | edge | far-edge | cloud`)
 - Added `WorkloadProfile` interface (pods, CPU, RAM, node sizing inputs)
@@ -53,6 +54,7 @@ metrics:
 - Added `RecommendationConstraints` and `TopologyRecommendation` interfaces
 
 **src/engine/constants.ts** — New file with all Red Hat hardware minimums:
+
 - CP/Worker minimums: `CP_MIN`, `WORKER_MIN`
 - SNO profiles: `SNO_STD_MIN`, `SNO_EDGE_MIN`, `SNO_TELECOM_MIN`
 - TNA: `TNA_CP_MIN`, `TNA_ARBITER_MIN`
@@ -70,6 +72,7 @@ metrics:
 ### Task 2: Wave-0 Test Stubs
 
 5 test stub files created with 54 total `it.todo()` stubs covering all Phase 2 requirements:
+
 - `formulas.test.ts`: 19 stubs — cpSizing, allocatableRamGB, workerCount, infraNodeSizing
 - `calculators.test.ts`: 20 stubs — all 8 topology calculators
 - `addons.test.ts`: 8 stubs — calcODF, calcInfraNodes, calcRHACM

@@ -1,87 +1,83 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-current_phase: 05
+milestone: v2.1
+milestone_name: — Export
+current_phase: 19
 current_plan: Not started
 status: Milestone complete
-last_updated: "2026-03-31T18:07:47.159Z"
+last_updated: "2026-04-06T08:19:38.328Z"
+last_activity: 2026-04-06
 progress:
-  total_phases: 5
-  completed_phases: 3
-  total_plans: 23
-  completed_plans: 22
+  total_phases: 7
+  completed_phases: 6
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
 
 **Project:** os-sizer
-**Current Phase:** 05
+**Current Phase:** 19
 **Current Plan:** Not started
-**Last Updated:** 2026-03-31
-**Last Session:** 2026-03-31T17:19:33.469Z
+**Last Updated:** 2026-04-05
+**Last Activity:** 2026-04-06
 
 ## Progress
 
 ```
-Phase 01: [██████████] 3/3 plans complete (PHASE COMPLETE)
-Overall:  [████......] 3/15 plans complete (estimate)
+v2.1 Milestone: Phase 16 of 19 (7 v2.1 phases total)
+[█████████░] 86%  (Phase 16 complete — all 2 plans done, 292 tests passing)
 ```
 
 ## Status
 
-- [x] Project initialized
-- [x] Research complete (hardware-sizing.md, app-architecture.md)
-- [x] REQUIREMENTS.md created (52 v1 requirements)
-- [x] ROADMAP.md created (5 phases)
-- [x] Phase 1 Plan 1: Project Foundation Scaffold (COMPLETE)
-- [x] Phase 1 Plan 2: Pinia Stores (inputStore, uiStore, calculationStore) (COMPLETE)
-- [x] Phase 1 Plan 3: i18n Setup (FR, EN, IT, DE locales) (COMPLETE)
-- [x] Phase 2: Sizing Engine (COMPLETE — 85/85 tests)
-- [x] Phase 3: Wizard UI (COMPLETE — Steps 1-4 + i18n)
-- [x] Phase 4: Results, Exports & Sharing (COMPLETE — 117/117 tests)
-- [ ] Phase 5: Polish & Release
+- [x] v1.0 complete (8 phases, 186 tests, shipped 2026-04-01)
+- [x] v2.0 complete (12 phases, 256 tests, shipped 2026-04-04)
+- [x] v2.1 requirements defined (15 requirements)
+- [x] v2.1 roadmap created (Phases 13-19)
+- [x] Phase 13 Plan 01 complete — downloadBlob shared utils + useChartData pure TS module (265 tests passing)
+- [x] Phase 13 Plan 02 complete — ClusterConfig role field + aggregateTotals computed (269 tests passing)
+- [x] Phase 13 VERIFIED — 8/8 must-haves confirmed, CALC-02 invariant preserved
+- [x] Phase 14 Plan 01 complete — VIRT_RWX_STORAGE_REQUIRED warning fix + rwxStorageAvailable field wired end-to-end (270 tests passing)
+- [x] Phase 15 Plan 01 complete — useSessionExport composable (exportSession + importSession, 6 tests, pure TS)
+- [x] Phase 15 Plan 02 complete — ExportToolbar session buttons + i18n keys in 4 locales (276 tests passing)
+- [x] Phase 16 Plan 01 complete — single-slide PPTX layout with KPI strip + native BAR chart (node counts)
+- [x] Phase 16 Plan 02 complete — stacked vCPU chart (3+ pools), factory opts pattern (292 tests passing)
 
-## Decisions Made
+## Accumulated Context
 
-- VueI18nPlugin configured without `include` option (Vite 8 rolldown/JSON conflict workaround)
-- TypeScript 6.0 requires `"ignoreDeprecations": "6.0"` for `baseUrl` in paths
-- vite-env.d.ts required for CSS side-effect imports with `noUncheckedSideEffectImports: true`
-- [Phase 01]: uiStore wizard step typed as ref<1|2|3|4> — os-sizer has 4 steps, not 3 like vcf-sizer
-- [Phase 01]: calculationStore has zero ref() calls — only computed() (CALC-02 compliant)
-- [Phase 01]: loadLocale() uses explicit if/else branches (not template literals) for Vite 8 rolldown compatibility
-- [Phase 01]: Locale codes for non-EN are fr-CH, de-CH, it-CH with explicit Swiss numberFormats (not inherited from parent locale)
-- [Phase 01]: EN locale eagerly bundled, FR/DE/IT lazy-loaded via explicit dynamic imports as separate chunks
-- [Phase 02]: ClusterSizing.workerNodes typed as NodeSpec | null to model SNO/compact/MicroShift topologies where workers don't exist separately
-- [Phase 02]: CP_SAFETY_FACTOR (0.60) added as explicit constant alongside TARGET_UTILIZATION (0.70) — captures two different utilization targets from hardware-sizing.md
-- [Phase 02]: fitScore=0 used as hard-exclusion sentinel for incompatible topology combinations
-- [Phase 02-sizing-engine]: allocatableRamGB(16) is 13.4 GB not 12.4 GB — plan arithmetic comment had typo; formula (2.6 GB reserved) is correct per hardware-sizing.md specification
-- [Phase 02-sizing-engine]: All 4 sizing formulas use decimal.js for intermediate arithmetic and return plain numbers, maintaining zero Vue imports (CALC-01)
-- [Phase 05]: Swiss German uses proper umlauts (ä, ö, ü) throughout — only eszett (ß) is forbidden; corrected prior ASCII transliterations
-- [Phase 05]: French nœud ligature used consistently for 'nœuds' throughout FR locale
-- [Phase 05-01]: v-if/v-else split for active wizard step renders literal aria-current=step satisfying static analysis
-- [Phase 05-03]: CI pipeline uses Node 22 with npm cache; Build step added beyond vcf-sizer pattern to catch production build regressions; targets main branch
-- [Phase 05]: deploy.yml uses actions/upload-pages-artifact@v3 and actions/deploy-pages@v4 (current stable); environment block added for GitHub UI deployment URL tracking
-
-## Key Context
-
-- Tech stack: Vue 3 + TypeScript + Vite 8 + Tailwind v4 + Pinia + vue-i18n + pptxgenjs
+- Tech stack: Vue 3 + TypeScript + Vite 8 + Tailwind v4 + Pinia + vue-i18n + pptxgenjs + jsPDF
 - Pattern source: /Users/fjacquet/Projects/vcf-sizer (mirror architecture exactly)
-- New additions vs vcf-sizer: jsPDF+jspdf-autotable (PDF), CSV export, IT+DE locales
 - Critical pitfall: vue-i18n VueI18nPlugin must NOT use `include` option (Vite 8 rolldown bug)
-- Architecture doc: docs/Architectures de déploiement OpenShift supportées.md
+- CALC-02 invariant: calculationStore must contain zero ref() — only computed()
+- Export libs: pptxgenjs (PPTX), jsPDF + jspdf-autotable (PDF), native CSV
+- pptxgenjs pitfall: options objects mutated in-place — use factory function per addChart() call
+- jsPDF pitfall: animation must be { duration: 0 } or canvas captures blank on first paint
+- Session import pitfall: use clusters.value = newArray (not index assignment) for reactivity
+- Phase 13 is enabler (no requirements) — completed; unblocks Phases 14/15/16/17/18
+- Phases 14, 15, 16, 17, 18 can run in parallel now that Phase 13 is complete
+- Phase 19 requires all of 16, 17, 18 complete
+- 13-01 decision: useChartData.ts has zero Vue imports — pure TS; ChartNodeRow labels are English (not i18n keys) for export-context safety
+- 13-01 decision: jsdom not installed; download.test.ts uses manual globalThis polyfills (Blob, URL, document) in node environment
+- src/composables/utils/ established as home for pure TS utilities with no Vue/Pinia dependencies
+- 13-02 decision: role field is optional in ClusterConfig (undefined = no role assigned); URL schema defaults to 'standalone' for backward compatibility
+- 15-01 decision: vi.stubGlobal() required for crypto polyfill in tests — globalThis.crypto is read-only in Node/Vitest environment
+- 15-02 decision: ExportToolbar wrapped in outer div to allow sibling error/success p elements after flex button row
 
-## Performance Metrics
+## Decisions
 
-| Phase | Plan | Duration | Tasks | Files |
-|-------|------|----------|-------|-------|
-| 01 | 01 | ~15 min | 3 | 20 |
-| 01 | 02 | 10 min | 2 | 8 |
-| 01 | 03 | 15 min | 3 | 7 |
-| Phase 02 P01 | 5 min | 2 tasks | 9 files |
-| Phase 02 P05 | 2 | 2 tasks | 2 files |
-| Phase 02-sizing-engine P02 | 3 | 2 tasks | 2 files |
-| Phase 05 P02 | 15 | 2 tasks | 3 files |
-| Phase 05 P01 | 7 min | 2 tasks | 7 files |
-| Phase 05 P03 | 3 min | 1 tasks | 1 files |
-| Phase 05 P04 | 5 | 2 tasks | 2 files |
+- Phase 15: useSessionExport reuses InputStateSchema from useUrlState.ts — no new Zod schema
+- Phase 15: importSession rejects with typed Error('parse'|'schema'|'read') for clean caller error mapping
+- Phase 15: fileInputKey incremented in finally block ensures same-file re-import (D-08)
+- Phase 15: Error messages always use i18n keys — Zod internals never exposed to UI (T-15-06)
+- Phase 17: Roboto Regular (Apache 2.0, Google Fonts static CDN) chosen over NotoSans — classical look per user preference; Latin+Extended subset ~40KB embedded as base64 via addFileToVFS
+- Phase 17: buildChartImageDataUrl() and buildKpiStripData() exported as pure helpers (same testable pattern as buildPdfTableData) — no jsPDF in tests
+- Phase 17: generatePdfReport() signature extended with resolvedWarnings param (default []) — pure TS composable stays Vue-free; ExportToolbar resolves i18n before calling
+
+## Blockers/Concerns
+
+- PDF Unicode resolved: Roboto Regular (Apache 2.0) via Google Fonts static CDN — no new npm package needed
+- Safari iOS: `<a download>` not honoured — known limitation for Session JSON export (documented)
+- WARN-04/05 resolved: rwxStorageAvailable field added with .optional().default(false) for backward compat; VIRT_RWX_REQUIRES_ODF renamed to VIRT_RWX_STORAGE_REQUIRED
+- 14-01 decision: VIRT_RWX_REQUIRES_ODF renamed to VIRT_RWX_STORAGE_REQUIRED — new code accurately reflects that the guard checks for absence of any RWX storage, not just ODF

@@ -7,6 +7,7 @@
 ---
 
 <phase_requirements>
+
 ## Phase Requirements
 
 | ID | Description | Research Support |
@@ -500,6 +501,7 @@ app.mount('#app')
 ### eslint.config.js (copy verbatim)
 
 Key rules:
+
 - `@typescript-eslint/no-unused-vars`: error with `argsIgnorePattern: '^_'`
 - `@typescript-eslint/no-explicit-any`: warn
 - `vue/multi-word-component-names`: off
@@ -509,6 +511,7 @@ Key rules:
 ### tsconfig.json (copy verbatim)
 
 References three project configs:
+
 - `tsconfig.app.json` — src/ compilation
 - `tsconfig.node.json` — vite.config.ts, vitest.config.ts
 - `tsconfig.vitest.json` — test files with `vitest/globals` types
@@ -668,6 +671,7 @@ The environment audit is minimal for this phase: it is a pure scaffold/code task
 ## Metadata
 
 **Confidence breakdown:**
+
 - Standard stack: HIGH — exact versions from production package.json
 - Architecture: HIGH — direct code reading, not documentation inference
 - Pitfalls: HIGH — documented from vcf-sizer source comments and app-architecture.md; all verified against source code

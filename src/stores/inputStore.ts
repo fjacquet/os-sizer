@@ -9,7 +9,15 @@ export const useInputStore = defineStore('input', () => {
   const activeClusterIndex = ref(0)
 
   function addCluster() {
-    clusters.value.push(createDefaultClusterConfig(clusters.value.length))
+    const source = clusters.value[activeClusterIndex.value]
+    const newCluster = {
+      ...source,
+      workload: { ...source.workload },
+      addOns: { ...source.addOns },
+      id: crypto.randomUUID(),
+      name: `Cluster-${clusters.value.length + 1}`,
+    }
+    clusters.value.push(newCluster)
     activeClusterIndex.value = clusters.value.length - 1
   }
 
