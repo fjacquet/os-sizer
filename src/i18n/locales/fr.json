@@ -147,6 +147,17 @@
       "loadSession": "Charger une session",
       "sessionImportError": "Fichier de session invalide. Veuillez choisir un fichier os-sizer valide.",
       "sessionImportSuccess": "Session chargée avec succès"
+    },
+    "clusters": {
+      "addCluster": "Ajouter un cluster",
+      "removeCluster": "Supprimer le cluster",
+      "roleHub": "Hub",
+      "roleSpoke": "Spoke",
+      "roleStandalone": "Autonome",
+      "maxClustersReached": "Maximum de 5 clusters atteint",
+      "compareToggle": "Comparer les clusters",
+      "compareTitle": "Comparaison des clusters",
+      "roleLabel": "Rôle"
     }
   },
   "validation": {

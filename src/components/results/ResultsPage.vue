@@ -11,6 +11,7 @@ import ArchOverviewCard from './ArchOverviewCard.vue'
 import WarningBanner from '@/components/shared/WarningBanner.vue'
 import ChartsSection from './ChartsSection.vue'
 import ExportToolbar from './ExportToolbar.vue'
+import ClusterTabBar from './ClusterTabBar.vue'
 
 const { t } = useI18n()
 const calc = useCalculationStore()
@@ -26,6 +27,9 @@ const activeCluster = computed(() => clusters.value[activeClusterIndex.value] ??
 
 <template>
   <div class="space-y-4">
+    <!-- Cluster tab bar (Phase 18) -->
+    <ClusterTabBar />
+
     <!-- Page heading -->
     <h2 class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ t('wizard.step4.title') }}</h2>
 

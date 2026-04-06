@@ -147,6 +147,17 @@
       "loadSession": "Load Session",
       "sessionImportError": "Invalid session file. Please select a valid os-sizer session.",
       "sessionImportSuccess": "Session loaded successfully"
+    },
+    "clusters": {
+      "addCluster": "Add cluster",
+      "removeCluster": "Remove cluster",
+      "roleHub": "Hub",
+      "roleSpoke": "Spoke",
+      "roleStandalone": "Standalone",
+      "maxClustersReached": "Maximum of 5 clusters reached",
+      "compareToggle": "Compare clusters",
+      "compareTitle": "Cluster Comparison",
+      "roleLabel": "Role"
     }
   },
   "validation": {
