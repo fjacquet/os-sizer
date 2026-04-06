@@ -109,6 +109,62 @@
 
 ---
 
+## Milestone: v2.1 — Export
+
+**Shipped:** 2026-04-06
+**Phases:** 7 | **Plans:** 13 | **Sessions:** ~3
+
+### What Was Built
+
+- Foundation infrastructure: shared `downloadBlob` utility, `useChartData` pure-TS module, `aggregateTotals` computed
+- Validation fix: `VIRT_RWX_STORAGE_REQUIRED` warning gate with `rwxStorageAvailable` field across type/defaults/Zod/validation/locales/UI
+- Session portability: `useSessionExport` composable with Zod validation, export/import buttons in ExportToolbar
+- PPTX redesign: consolidated 1-slide layout with native pptxgenjs BAR chart + stacked vCPU chart (3+ pools)
+- PDF redesign: Chart.js offscreen canvas images, Roboto Unicode font, KPI callout box, inline validation warnings
+- Multi-cluster UI: ClusterTabBar (add/remove/rename/role), ClusterComparisonTable with compare toggle
+- Aggregate exports: per-cluster sections + aggregate totals in PPTX/PDF/CSV behind `clusters.length >= 2` guard
+- Test suite grew from 256 to 349 passing tests (93 new tests)
+
+### What Worked
+
+- **Enabler phase pattern**: Phase 13 extracted shared utilities and extended the data model before any feature work. All 6 feature phases (14-19) built on this foundation without duplication.
+- **Parallel phase execution**: Phases 14, 15, 16, 17, 18 ran independently after Phase 13, with Phase 19 as the integration capstone. Clean dependency graph.
+- **`clusters.length >= 2` guard pattern**: All multi-cluster code paths activate only with 2+ clusters, preserving single-cluster baselines perfectly. Zero regressions in existing functionality.
+- **Pure helper function pattern for exports**: `buildAggregateSlideData()`, `buildAggregateRow()`, `buildMultiClusterCsvContent()` are pure exported functions testable without mocking pptxgenjs/jsPDF.
+- **TDD caught real bugs**: The `addCluster()` copy-vs-default bug was found by a user before tests existed. Writing the failing test first (RED) then fixing (GREEN) confirmed the root cause and prevented regression.
+- **Milestone audit before completion**: Found duplicate `role` field in ClusterConfig (merge artifact), orphaned chart helpers, and confirmed all 8 requirements satisfied.
+
+### What Was Inefficient
+
+- **`addCluster()` shipped with wrong behavior**: Created blank defaults instead of copying active cluster config. Users expected inheritance. Root cause: no TDD for the store action — it was wired during Phase 18 UI work without a dedicated test.
+- **ClusterTabBar placement error**: Initially placed only on ResultsPage; users needed it on all wizard steps to configure clusters before reaching results. Had to relocate to App.vue post-execution.
+- **SUMMARY.md frontmatter inconsistency**: Several Phase 15-17 SUMMARY files lacked proper `one_liner` frontmatter, causing `gsd-tools summary-extract` to output "One-liner:" and "Status:" placeholders in MILESTONES.md.
+- **Phase 16 roadmap stale status**: ROADMAP.md progress table showed Phase 16 as "0/2 Not started" even though both plans were complete on disk. The roadmap status was never updated during Phase 16 execution.
+- **Branch merge complexity at release**: `gsd/v2.1-export` branch targeting `gsd/v1.0-milestone` instead of `main` caused a multi-step merge process with conflict resolution.
+
+### Patterns Established
+
+- **Enabler phase → parallel feature phases → integration capstone**: Clean 3-tier dependency graph for milestone-scale work.
+- **Deep copy for `addCluster()`**: `{ ...source, workload: { ...source.workload }, addOns: { ...source.addOns } }` with fresh `id` and sequential `name`.
+- **pptxgenjs factory opts pattern**: Options objects must be fresh per `addChart()` call — pptxgenjs mutates them in-place.
+- **Roboto Regular for PDF Unicode**: Apache 2.0, ~40KB base64 embedded via `addFileToVFS`, covers Latin+Extended for FR/DE/IT.
+
+### Key Lessons
+
+1. **Write tests for store actions, not just engine functions.** The `addCluster()` bug would have been caught if TDD was applied to Pinia actions, not just engine `calc*()` functions.
+2. **UI component placement is a UX decision, not a code decision.** ClusterTabBar belongs wherever the user needs to switch clusters — which is all wizard steps, not just results.
+3. **Standardize SUMMARY.md frontmatter across all executors.** The `one_liner` field must be present and populated. Add a frontmatter validator to the executor workflow.
+4. **Update ROADMAP.md progress table during phase execution, not just at milestone close.** Stale status entries create confusion during audit.
+5. **Target PRs to `main`, not milestone branches.** The intermediate `gsd/v1.0-milestone` branch caused unnecessary merge complexity.
+
+### Cost Observations
+
+- Model mix: ~75% sonnet (executors, integration checker), ~25% opus (planners, milestone audit)
+- Sessions: ~3 (planning+execution, bug fixes+audit, docs+release)
+- Notable: Bug fix session was the most valuable — systematic debugging (Phase 1 root cause analysis) found the `addCluster()` issue in minutes
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -117,6 +173,7 @@
 |-----------|--------|-------|-------|-----------------|
 | v1.0 | 8 | 26 | 186 | First milestone; branch divergence issue resolved mid-session |
 | v2.0 | 4 | 15 | 256 | Clean engine→UI phase split; post-dispatch pattern reused perfectly; Nyquist not run |
+| v2.1 | 7 | 13 | 349 | Enabler→parallel→capstone pattern; addCluster UX bug caught post-ship |
 
 ### Recurring Patterns
 
@@ -128,8 +185,10 @@
 ### Persistent Issues
 
 - Nyquist VALIDATION.md not created during plan-phase: flagged in v1.0, repeated in v2.0 — needs to be in plan template
-- MILESTONES.md one-liner extraction fails for newer SUMMARY format — tool needs updating
+- MILESTONES.md one-liner extraction fails for newer SUMMARY format — tool needs updating (repeated in v2.1)
+- ROADMAP.md progress table not updated during execution — stale status at audit time (new in v2.1)
 
 ---
 *Created: 2026-04-01 after v1.0 milestone*
 *Updated: 2026-04-04 after v2.0 milestone*
+*Updated: 2026-04-06 after v2.1 milestone*

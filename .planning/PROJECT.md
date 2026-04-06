@@ -8,23 +8,13 @@ A web-based OpenShift sizing and architecture recommendation tool for pre-sales 
 
 From constraints to proposal-ready hardware BoM in minutes — covering every supported OpenShift topology.
 
-## Current Milestone: v2.1 Export
+## Current State (v2.1 shipped 2026-04-06)
 
-**Goal:** Improve export quality, add multi-cluster sizing and session portability, and fix the ODF-only live migration validation warning.
-
-**Target features:**
-- Live migration bug fix (WARN-02: any RWX storage valid, not ODF-only)
-- PPTX redesign (1 slide, charts, branding)
-- PDF redesign (graphs, better layout, branding)
-- Multi-cluster sizing (Hub+Spoke + side-by-side topology comparison, aggregate BoM)
-- Session portability (export/import JSON)
-
-## Previous State (v2.0 shipped 2026-04-04)
-
-- 12 phases, 41 plans, ~6,400 LOC TypeScript/Vue
-- 256 tests passing (engine formulas, add-ons, stores, wizard components, export composables)
-- v2.0 adds: OpenShift Virtualization (`calcVirt()`), GPU node pools (`calcGpuNodes()`), RHOAI add-on (`calcRHOAI()`), SNO-with-Virt profile, full i18n across 4 locales
+- 19 phases, 54 plans, ~9,079 LOC TypeScript/Vue
+- 349 tests passing (engine, stores, composables, components, exports)
+- v2.1 adds: multi-cluster sizing (hub/spoke/standalone), session portability, PPTX/PDF redesign with charts, aggregate exports, RWX validation fix
 - Deployed: GitHub Pages via GitHub Actions CI/CD
+- GitHub release: v2.1.0
 
 ## Requirements
 
@@ -48,14 +38,16 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 - ✓ SNO-with-Virt profile (SNO-01): 14 vCPU/32 GB/170 GB boosted minimums — v2.0
 - ✓ Validation warnings (WARN-01..03): passthrough blocks migration, virt requires ODF, MIG+KubeVirt unsupported — v2.0
 - ✓ 256 tests passing (70 new tests for v2.0 add-ons and UI components) — v2.0
+- ✓ WARN-02 fix: live migration requires any RWX storage (ODF/NFS/other), not ODF exclusively — v2.1
+- ✓ PPTX redesign: consolidated 1-slide layout with native bar charts and KPI summary — v2.1
+- ✓ PDF redesign: Chart.js images, Roboto Unicode font, KPI callout, inline warnings — v2.1
+- ✓ Multi-cluster sizing: up to 5 clusters with hub/spoke/standalone roles, comparison table, aggregate exports — v2.1
+- ✓ Session portability: export/import session as validated JSON file — v2.1
+- ✓ 349 tests passing (93 new tests for v2.1 features) — v2.1
 
-### Active (v2.1)
+### Active (v2.2)
 
-- [x] WARN-02 fix: live migration requires any RWX storage (ODF/NFS/other), not ODF exclusively — Validated in Phase 14: Warning Fix
-- [x] PPTX redesign: consolidated 1-slide layout, charts/graphs, branding improvements — Validated in Phase 16: PPTX Redesign
-- [x] PDF redesign: graphs, improved layout, branding — Validated in Phase 17: PDF Redesign
-- [x] Multi-cluster sizing: Hub+Spoke multi-site sizing + side-by-side topology comparison, aggregate BoM export — Validated in Phase 18: Multi-Cluster UI + Phase 19: Aggregate Exports
-- [x] Session portability: export/import session as JSON file (portable across browsers) — Validated in Phase 15: Session Portability
+(None yet — start next milestone with `/gsd-new-milestone`)
 
 ### Backlog (v2.2+)
 
@@ -96,6 +88,11 @@ From constraints to proposal-ready hardware BoM in minutes — covering every su
 | calcRHOAI void mutation pattern | Matches existing post-dispatch pattern; simpler than return | ✓ Consistent with codebase style |
 | rhoaiOverhead required (not optional) | null sentinel forces all topology paths to acknowledge field | ✓ Prevented silent omission in BoM/exports |
 | German locale umlauts only (no eszett) | Phase 05 decision — Web font compatibility | ✓ Reapplied in v2.0 i18n |
+| addCluster copies active config | Users expect new clusters to inherit current workload, not reset to defaults | ✓ Fixed — deep copy with unique id |
+| ClusterTabBar at App level | Clusters must be configurable from any wizard step, not just Results | ✓ Moved from ResultsPage to App.vue |
+| Roboto Regular for PDF Unicode | Apache 2.0 font from Google Fonts; classical look; ~40KB base64 embedded | ✓ FR/DE/IT accents render correctly |
+| pptxgenjs factory opts pattern | pptxgenjs mutates options objects in-place; shared objects cause corruption | ✓ Factory function per addChart() call |
+| clusters.length >= 2 guard | Multi-cluster code paths only activate when user has 2+ clusters | ✓ Preserves single-cluster baselines |
 
 ## Constraints
 
@@ -124,4 +121,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-06 — Phase 19 complete — v2.1 milestone all phases done (Phases 13–19)*
+*Last updated: 2026-04-06 after v2.1 milestone*

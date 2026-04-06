@@ -1,5 +1,22 @@
 # Milestones
 
+## v2.1 Export (Shipped: 2026-04-06)
+
+**Phases completed:** 7 phases, 13 plans | **Tests:** 349 passing | **LOC:** ~9,079 TypeScript/Vue
+**Timeline:** 2026-04-05 -> 2026-04-06 (2 days)
+
+**Key accomplishments:**
+
+1. Multi-cluster sizing with up to 5 independent clusters, hub/spoke/standalone roles, and side-by-side comparison table
+2. Session portability — save/load full sizing session as validated JSON file
+3. PPTX redesign — consolidated 1-slide layout with native pptxgenjs bar charts and KPI summary
+4. PDF redesign — Chart.js images, Roboto Unicode font, KPI callout box, inline validation warnings
+5. Aggregate exports — per-cluster sections + totals in PPTX/PDF/CSV behind `clusters.length >= 2` guard
+6. Validation fix — RWX storage warning now triggers on any absent RWX storage (not ODF-only)
+7. Foundation infrastructure — shared download utility, useChartData pure-TS module, aggregateTotals computed
+
+---
+
 ## v2.0 OpenShift Virtualization + AI Sizing (Shipped: 2026-04-04)
 
 **Phases completed:** 4 phases, 15 plans, 17 tasks
