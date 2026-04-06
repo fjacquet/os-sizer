@@ -40,6 +40,7 @@ export interface AddOnConfig {
 export interface ClusterConfig {
   id: string
   name: string
+  role?: 'hub' | 'spoke' | 'standalone'
   topology: TopologyType
   snoProfile: SnoProfile           // default 'standard'
   hcpHostedClusters: number        // default 1
