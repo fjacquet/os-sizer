@@ -58,6 +58,10 @@ export interface AddOnConfig {
 export interface ClusterConfig {
   id: string
   name: string
+  /** Sizing mode. Absent = 'container' (backward compatibility). */
+  mode?: SizingMode
+  /** Virtualization-mode config (used when mode === 'virtualization'). */
+  virt?: VirtConfig
   role?: 'hub' | 'spoke' | 'standalone'
   topology: TopologyType
   snoProfile: SnoProfile // default 'standard'
