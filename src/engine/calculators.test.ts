@@ -717,3 +717,23 @@ describe('calcCluster Phase 11: rhoaiEnabled post-dispatch', () => {
     expect(() => calcCluster(config)).not.toThrow()
   })
 })
+
+describe('calcCluster — virtualization mode', () => {
+  it("mode 'virtualization' routes to virt assembly", () => {
+    const config = makeConfig({
+      mode: 'virtualization',
+      virt: {
+        vmClasses: [{ id: 'm', name: 'Medium', vcpu: 4, ramGB: 16, diskGB: 100, count: 60 }],
+        cpuOvercommitRatio: 10,
+        redundancy: 'n+1',
+        nodeShape: { physicalCores: 64, threadsPerCore: 2, ramGB: 512 },
+        storageBackend: 'odf',
+      },
+    })
+    const { sizing } = calcCluster(config)
+    expect(sizing.virtWorkerNodes).not.toBeNull()
+    expect(sizing.workerNodes).toBeNull()
+    expect(sizing.masterNodes.count).toBe(3)
+    expect(sizing.totals.vcpu).toBeGreaterThan(0)
+  })
+})

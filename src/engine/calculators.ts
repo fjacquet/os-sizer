@@ -27,6 +27,8 @@ import {
   infraNodeSizing,
   allocatableRamGB,
 } from './formulas'
+import { assembleVirtCluster } from './virtualization/assembleVirtCluster'
+import { createDefaultVirtConfig } from './defaults'
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -465,6 +467,9 @@ export function calcCluster(config: ClusterConfig): {
   sizing: ClusterSizing
   warnings: ValidationWarning[]
 } {
+  if (config.mode === 'virtualization') {
+    return { sizing: assembleVirtCluster(config.virt ?? createDefaultVirtConfig()), warnings: [] }
+  }
   let result: { sizing: ClusterSizing; warnings: ValidationWarning[] }
   switch (config.topology) {
     case 'standard-ha':
