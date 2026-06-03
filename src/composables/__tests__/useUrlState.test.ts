@@ -272,7 +272,10 @@ describe('VirtConfigSchema — targetUtilization', () => {
     expect(parsed.virt.targetUtilization).toBe(0.8)
   })
   it('preserves an in-range value', () => {
-    const parsed = ClusterConfigSchema.parse({ mode: 'virtualization', virt: { targetUtilization: 0.7 } })
+    const parsed = ClusterConfigSchema.parse({
+      mode: 'virtualization',
+      virt: { targetUtilization: 0.7 },
+    })
     expect(parsed.virt.targetUtilization).toBe(0.7)
   })
 })

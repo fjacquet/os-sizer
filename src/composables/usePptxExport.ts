@@ -119,7 +119,10 @@ export function buildBomTableRows(sizing: ClusterSizing): TableRow[] {
       numCell(String(Math.round(gb))),
     ]
     if (plan.backend === 'odf') {
-      return [row('VM Storage (usable)', plan.usableGB), row('VM Storage (raw, replica-3 @ 85%)', plan.rawGB)]
+      return [
+        row('VM Storage (usable)', plan.usableGB),
+        row('VM Storage (raw, replica-3 @ 85%)', plan.rawGB),
+      ]
     }
     return [row('VM Storage (usable, provider-managed array)', plan.usableGB)]
   })()

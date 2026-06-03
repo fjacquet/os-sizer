@@ -20,9 +20,7 @@ function buildRows(s: ClusterSizing): { labelKey: string }[] {
 }
 
 // Replicates the BomTable `storageRows` computed logic (Task 8 — VM Storage rows)
-function buildStorageRows(
-  s: ClusterSizing,
-): { label: string; value: number }[] {
+function buildStorageRows(s: ClusterSizing): { label: string; value: number }[] {
   const p = s.virtStorage
   if (!p) return []
   if (p.backend === 'odf') {

@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { perVmMemoryOverheadMiB, systemReservedCpuCores, resolveTargetUtilization } from './reservations'
+import {
+  perVmMemoryOverheadMiB,
+  systemReservedCpuCores,
+  resolveTargetUtilization,
+} from './reservations'
 
 describe('perVmMemoryOverheadMiB', () => {
   // 218 + 8·vcpu + 0.002·(ramGB·1024)

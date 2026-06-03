@@ -117,11 +117,20 @@
           </td>
         </tr>
         <tr v-for="sr in storageRows" :key="sr.label" class="bg-amber-50 dark:bg-amber-900/20">
-          <td class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 italic">
+          <td
+            class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200 italic"
+          >
             {{ sr.label }}
           </td>
-          <td class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400" colspan="3">—</td>
-          <td class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200">
+          <td
+            class="px-3 py-2 border-b border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400"
+            colspan="3"
+          >
+            —
+          </td>
+          <td
+            class="px-3 py-2 font-mono border-b border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200"
+          >
             {{ sr.value }}
           </td>
         </tr>

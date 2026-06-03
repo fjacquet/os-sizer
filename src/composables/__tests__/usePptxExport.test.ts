@@ -560,9 +560,14 @@ describe('buildBomTableRows — VM Storage rows', () => {
   function sizingWith(virtStorage: ClusterSizing['virtStorage']): ClusterSizing {
     return {
       masterNodes: { count: 3, vcpu: 4, ramGB: 16, storageGB: 100 },
-      workerNodes: null, infraNodes: null, odfNodes: null, rhacmWorkers: null,
+      workerNodes: null,
+      infraNodes: null,
+      odfNodes: null,
+      rhacmWorkers: null,
       virtWorkerNodes: { count: 8, vcpu: 128, ramGB: 512, storageGB: 100 },
-      gpuNodes: null, virtStorageGB: 54000, rhoaiOverhead: null,
+      gpuNodes: null,
+      virtStorageGB: 54000,
+      rhoaiOverhead: null,
       virtStorage,
       totals: { vcpu: 1036, ramGB: 4112, storageGB: 55000 },
     }
@@ -577,7 +582,13 @@ describe('buildBomTableRows — VM Storage rows', () => {
   })
   it('external-rwx → single provider-managed row', () => {
     const flat = textRows(sizingWith({ usableGB: 15300, rawGB: 0, backend: 'external-rwx' }))
-    expect(flat).toContainEqual(['VM Storage (usable, provider-managed array)', '—', '—', '—', '15300'])
+    expect(flat).toContainEqual([
+      'VM Storage (usable, provider-managed array)',
+      '—',
+      '—',
+      '—',
+      '15300',
+    ])
     expect(flat.filter((r) => r[0]?.startsWith('VM Storage'))).toHaveLength(1)
   })
   it('no virtStorage → no storage rows', () => {

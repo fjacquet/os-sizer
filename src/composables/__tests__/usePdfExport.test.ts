@@ -233,7 +233,10 @@ describe('buildPdfTableData — VM Storage rows', () => {
     })
     expect(body).toContainEqual([
       'VM Storage (usable, provider-managed array)',
-      '—', '—', '—', '15300',
+      '—',
+      '—',
+      '—',
+      '15300',
     ])
     expect(body.filter((r) => r[0]?.startsWith('VM Storage'))).toHaveLength(1)
   })

@@ -29,7 +29,15 @@ function virtStorageRows(sizing: ClusterSizing): string[][] {
       ['VM Storage (raw, replica-3 @ 85%)', '—', '—', '—', String(Math.round(plan.rawGB))],
     ]
   }
-  return [['VM Storage (usable, provider-managed array)', '—', '—', '—', String(Math.round(plan.usableGB))]]
+  return [
+    [
+      'VM Storage (usable, provider-managed array)',
+      '—',
+      '—',
+      '—',
+      String(Math.round(plan.usableGB)),
+    ],
+  ]
 }
 
 // Pure function — testable without jsPDF
