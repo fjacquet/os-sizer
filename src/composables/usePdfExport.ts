@@ -20,6 +20,18 @@ function getNodeEntries(sizing: ClusterSizing): NodeEntry[] {
   ]
 }
 
+function virtStorageRows(sizing: ClusterSizing): string[][] {
+  const plan = sizing.virtStorage
+  if (!plan) return []
+  if (plan.backend === 'odf') {
+    return [
+      ['VM Storage (usable)', '—', '—', '—', String(Math.round(plan.usableGB))],
+      ['VM Storage (raw, replica-3 @ 85%)', '—', '—', '—', String(Math.round(plan.rawGB))],
+    ]
+  }
+  return [['VM Storage (usable, provider-managed array)', '—', '—', '—', String(Math.round(plan.usableGB))]]
+}
+
 // Pure function — testable without jsPDF
 export function buildPdfTableData(sizing: ClusterSizing): {
   head: string[][]
@@ -45,7 +57,7 @@ export function buildPdfTableData(sizing: ClusterSizing): {
     : []
   return {
     head: [['Node Type', 'Count', 'vCPU', 'RAM (GB)', 'Storage (GB)']],
-    body: [...nodeRows, ...rhoaiRows],
+    body: [...nodeRows, ...rhoaiRows, ...virtStorageRows(sizing)],
   }
 }
 

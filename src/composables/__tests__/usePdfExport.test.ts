@@ -203,6 +203,35 @@ describe('buildChartImageDataUrl', () => {
   })
 })
 
+describe('buildPdfTableData — VM Storage rows', () => {
+  function baseSizing(): ClusterSizing {
+    return {
+      masterNodes: { count: 3, vcpu: 4, ramGB: 16, storageGB: 100 },
+      workerNodes: null,
+      infraNodes: null,
+      odfNodes: null,
+      rhacmWorkers: null,
+      virtWorkerNodes: { count: 8, vcpu: 128, ramGB: 512, storageGB: 100 },
+      gpuNodes: null,
+      virtStorageGB: 54000,
+      rhoaiOverhead: null,
+      totals: { vcpu: 1036, ramGB: 4112, storageGB: 55000 },
+    }
+  }
+  it('ODF → two storage rows appended', () => {
+    const { body } = buildPdfTableData({
+      ...baseSizing(),
+      virtStorage: { usableGB: 15300, rawGB: 54000, backend: 'odf' },
+    })
+    expect(body).toContainEqual(['VM Storage (usable)', '—', '—', '—', '15300'])
+    expect(body).toContainEqual(['VM Storage (raw, replica-3 @ 85%)', '—', '—', '—', '54000'])
+  })
+  it('no virtStorage → no storage rows', () => {
+    const { body } = buildPdfTableData(baseSizing())
+    expect(body.some((r) => r[0]?.startsWith('VM Storage'))).toBe(false)
+  })
+})
+
 // ── buildAggregateRow ─────────────────────────────────────────────────────────
 
 describe('buildAggregateRow', () => {
