@@ -17,3 +17,10 @@ export {
 export { calcODF, calcInfraNodes, calcRHACM } from './addons'
 export { recommend } from './recommendation'
 export { validateInputs } from './validation'
+// Virtualization mode (Phase 1)
+export { perVmMemoryOverheadMiB, systemReservedCpuCores } from './shared/reservations'
+export { aggregateVmDemand } from './virtualization/aggregate'
+export { nodeVmCapacity } from './virtualization/capacity'
+export { sizeVirtWorkers } from './virtualization/sizeVirtWorkers'
+export { virtStorage } from './virtualization/storage'
+export type { VirtStorage } from './virtualization/storage'
