@@ -173,7 +173,9 @@
     "workerCpuBelowMin": "Worker-Knoten-vCPU liegt unter dem Minimum von 2 vCPU — Dimensionierung möglicherweise ungültig",
     "zeroPodsWithResources": "Pod-Anzahl ist null, aber CPU/RAM-Anforderungen sind gesetzt — prüfen Sie Ihr Arbeitslastprofil",
     "odfIncompatibleTopology": "ODF-Speicher ist nicht kompatibel mit SNO-, MicroShift- oder verwalteten Cloud-Topologien",
-    "rhacmNoClusters": "RHACM ist aktiviert, aber keine Anzahl verwalteter Cluster angegeben — geben Sie die erwartete Cluster-Anzahl ein"
+    "rhacmNoClusters": "RHACM ist aktiviert, aber keine Anzahl verwalteter Cluster angegeben — geben Sie die erwartete Cluster-Anzahl ein",
+    "virtNoVms": "Keine VMs definiert — fügen Sie mindestens eine VM-Klasse mit einer Anzahl größer null hinzu.",
+    "virtOvercommitRange": "Das CPU-Overcommit-Verhältnis sollte zwischen 1 und 10 liegen (KubeVirt-Maximum)."
   },
   "warnings": {
     "tna": {
@@ -187,7 +189,8 @@
       "noHardware": "Verwaltete Cloud-Topologien (ROSA/ARO) werden vom Anbieter dimensioniert — keine Hardware-Stückliste erforderlich"
     },
     "virt": {
-      "rwxStorageRequired": "OpenShift Virtualization benötigt RWX-fähigen Speicher für die Live-Migration. Konfigurieren Sie ODF oder eine andere RWX-Speicherklasse, um die Live-Migration zu aktivieren."
+      "rwxStorageRequired": "OpenShift Virtualization benötigt RWX-fähigen Speicher für die Live-Migration. Konfigurieren Sie ODF oder eine andere RWX-Speicherklasse, um die Live-Migration zu aktivieren.",
+      "odfNotInOve": "ODF ist nicht im OpenShift Virtualization Engine-Abonnement enthalten — separat lizenzieren und dimensionieren."
     },
     "sno": {
       "virtNoLiveMigration": "SNO-Topologie unterstützt keine Live-Migration — VM-HA ist nicht verfügbar."

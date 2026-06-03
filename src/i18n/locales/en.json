@@ -173,7 +173,9 @@
     "workerCpuBelowMin": "Worker node vCPU is below the 2 vCPU minimum — sizing may be invalid",
     "zeroPodsWithResources": "Pod count is zero but CPU/RAM requests are set — check your workload profile",
     "odfIncompatibleTopology": "ODF storage is not compatible with SNO, MicroShift, or Managed Cloud topologies",
-    "rhacmNoClusters": "RHACM is enabled but no managed cluster count is set — enter expected cluster count"
+    "rhacmNoClusters": "RHACM is enabled but no managed cluster count is set — enter expected cluster count",
+    "virtNoVms": "No VMs defined — add at least one VM class with a non-zero count.",
+    "virtOvercommitRange": "CPU overcommit ratio should be between 1 and 10 (KubeVirt maximum)."
   },
   "warnings": {
     "tna": {
@@ -187,7 +189,8 @@
       "noHardware": "Managed cloud topologies (ROSA/ARO) are sized by the provider — no hardware BoM is required"
     },
     "virt": {
-      "rwxStorageRequired": "OpenShift Virtualization requires RWX-capable storage for live migration. Configure ODF or another RWX storage class to enable live migration."
+      "rwxStorageRequired": "OpenShift Virtualization requires RWX-capable storage for live migration. Configure ODF or another RWX storage class to enable live migration.",
+      "odfNotInOve": "ODF is not included in the OpenShift Virtualization Engine subscription — license and size it separately."
     },
     "sno": {
       "virtNoLiveMigration": "SNO topology does not support live migration — VM HA is unavailable."

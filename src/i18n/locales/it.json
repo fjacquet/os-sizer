@@ -173,7 +173,9 @@
     "workerCpuBelowMin": "Il vCPU del nodo worker è inferiore al minimo di 2 vCPU — il dimensionamento potrebbe essere non valido",
     "zeroPodsWithResources": "Il numero di pod è zero ma le richieste CPU/RAM sono impostate — verificare il profilo del carico di lavoro",
     "odfIncompatibleTopology": "Lo storage ODF non è compatibile con le topologie SNO, MicroShift o Cloud gestito",
-    "rhacmNoClusters": "RHACM è abilitato ma non è impostato alcun numero di cluster gestiti — inserire il numero di cluster previsto"
+    "rhacmNoClusters": "RHACM è abilitato ma non è impostato alcun numero di cluster gestiti — inserire il numero di cluster previsto",
+    "virtNoVms": "Nessuna VM definita — aggiungi almeno una classe di VM con un conteggio diverso da zero.",
+    "virtOvercommitRange": "Il rapporto di overcommit della CPU deve essere compreso tra 1 e 10 (massimo KubeVirt)."
   },
   "warnings": {
     "tna": {
@@ -187,7 +189,8 @@
       "noHardware": "Le topologie cloud gestite (ROSA/ARO) sono dimensionate dal provider — nessuna distinta materiali hardware richiesta"
     },
     "virt": {
-      "rwxStorageRequired": "OpenShift Virtualization richiede storage compatibile RWX per la migrazione live. Configurare ODF o un'altra classe di storage RWX per abilitare la migrazione live."
+      "rwxStorageRequired": "OpenShift Virtualization richiede storage compatibile RWX per la migrazione live. Configurare ODF o un'altra classe di storage RWX per abilitare la migrazione live.",
+      "odfNotInOve": "ODF non è incluso nell'abbonamento OpenShift Virtualization Engine — da licenziare e dimensionare separatamente."
     },
     "sno": {
       "virtNoLiveMigration": "La topologia SNO non supporta la migrazione live — l'HA delle VM non è disponibile."
