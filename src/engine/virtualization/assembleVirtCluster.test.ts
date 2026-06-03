@@ -54,3 +54,14 @@ describe('assembleVirtCluster (external-rwx)', () => {
     expect(s.totals).toEqual({ vcpu: 908, ramGB: 3632, storageGB: 1000 })
   })
 })
+
+describe('assembleVirtCluster — virtStorage plan', () => {
+  it('ODF: usable = VM disk total, raw = replica-3 / 0.85', () => {
+    const s = assembleVirtCluster({ ...VIRT, targetUtilization: 1 })
+    expect(s.virtStorage).toEqual({ usableGB: 15300, rawGB: 54000, backend: 'odf' })
+  })
+  it('external-rwx: usable = VM disk total, raw = 0', () => {
+    const s = assembleVirtCluster({ ...VIRT, storageBackend: 'external-rwx', targetUtilization: 1 })
+    expect(s.virtStorage).toEqual({ usableGB: 15300, rawGB: 0, backend: 'external-rwx' })
+  })
+})
