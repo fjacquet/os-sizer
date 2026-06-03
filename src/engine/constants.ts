@@ -117,3 +117,29 @@ export const RHOAI_WORKER_MIN_RAM_GB = 32
 // MEDIUM confidence — re-validate against current RHOAI release notes when upgrading beyond RHOAI 3.x.
 export const RHOAI_INFRA_OVERHEAD_VCPU = 4
 export const RHOAI_INFRA_OVERHEAD_RAM_GB = 16
+
+// ── Virtualization-mode sizing constants (Phase 1) ───────────────────────────
+// Sources: spec "Best-practice grounding" (KubeVirt HCO vmiCPUAllocationRatio,
+// OCP system-reserved, ODF replica-3). See design spec dated 2026-06-03.
+
+/** KubeVirt CPU overcommit (vCPU : thread). HCO default 10; conservative production 4. */
+export const DEFAULT_CPU_OVERCOMMIT_RATIO = 10
+export const CONSERVATIVE_CPU_OVERCOMMIT_RATIO = 4
+
+/** Per-node RAM reserved for KubeVirt node infra (virt-handler, monitoring). Conservative estimate. */
+export const KUBEVIRT_INFRA_RAM_PER_NODE_GB = 2
+
+/** Practical VM-density cap per worker node (Red Hat publishes no fixed number). */
+export const MAX_VMS_PER_NODE = 250
+
+/** Minimum virt worker pool size (before spare nodes). */
+export const MIN_VIRT_WORKERS = 2
+
+/** OpenShift system-reserved CPU (OCP 4.17+): 60m first thread + 12m per additional, min 500m. In CORES. */
+export const SYSTEM_RESERVED_CPU_FIRST = 0.06
+export const SYSTEM_RESERVED_CPU_PER_THREAD = 0.012
+export const SYSTEM_RESERVED_CPU_MIN = 0.5
+
+/** ODF planning: replica-3 and keep Ceph below ~85% full → raw ≈ usable × 3 / 0.85. */
+export const ODF_REPLICA_FACTOR = 3
+export const ODF_FULLNESS_TARGET = 0.85
