@@ -35,6 +35,12 @@ Red Hat best practice (ADR-0007, ADR-0008):
 - **Storage** — ODF (replica-3, `raw ≈ usable × 3 / 0.85`) or external RWX; live migration requires RWX.
 - **Results** — node count, limiting resource (CPU/RAM/density), achieved overcommit, VMs/node, and
   CPU/RAM utilization; exports add a VM-class breakdown.
+- **Target utilization** — a configurable headroom control (default 80%, range 50–95%) divides
+  RAM and CPU capacity when sizing the virt-worker pool, so reported utilization reflects honest
+  steady-state rather than packing nodes to ~95%; spares (N+1/N+2) remain additive for failover.
+- **VM Storage line** — the VM disk requirement (usable + raw) is surfaced as a dedicated BOM
+  line in CSV, PDF, and PPTX exports: ODF shows usable + raw (replica-3 @ 85%); external-RWX
+  shows usable with a provider-managed note.
 
 OVE licensing boundaries are surfaced (ODF and container workloads are not included in OVE).
 
@@ -47,6 +53,8 @@ OVE licensing boundaries are surfaced (ODF and container workloads are not inclu
 | VMODE-04 | ODF/external-RWX storage planning + OVE licensing warning | ✅ |
 | VMODE-05 | Executive Navy exports with VM-class breakdown | ✅ |
 | VMODE-06 | Backward-compatible sessions/URLs (default mode = container) | ✅ |
+| VMODE-07 | Configurable target utilization (50–95%) with default 80% for virt-worker headroom | ✅ |
+| VMODE-08 | VM Storage line (usable + raw) in BOM, CSV, PDF, PPTX for both ODF and external-RWX | ✅ |
 
 ---
 

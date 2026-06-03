@@ -85,6 +85,8 @@ export interface ClusterSizing {
   virtWorkerNodes: NodeSpec | null // Phase 9: dedicated VM-hosting worker pool
   gpuNodes: NodeSpec | null // Phase 9: placeholder for Phase 10 GPU calculator
   virtStorageGB: number // Phase 9: estimated storage budget for VM PVCs
+  /** VM disk storage plan (virtualization mode); null/absent in container mode. */
+  virtStorage?: { usableGB: number; rawGB: number; backend: StorageBackend } | null
   rhoaiOverhead: { vcpu: number; ramGB: number } | null // Phase 12: RHOAI operator overhead addend (set by calcRHOAI, null otherwise)
   /** Virtualization-mode worker metrics (null for container mode). */
   virtMetrics?: VirtWorkerSizing | null
@@ -149,6 +151,8 @@ export interface VirtConfig {
   redundancy: 'none' | 'n+1' | 'n+2'
   nodeShape: NodeShape
   storageBackend: StorageBackend
+  /** Steady-state RAM/CPU utilization target (fraction). Optional for back-compat; engine falls back to DEFAULT_TARGET_VIRT_UTILIZATION. */
+  targetUtilization?: number
 }
 
 /** Aggregate VM demand across all classes. */

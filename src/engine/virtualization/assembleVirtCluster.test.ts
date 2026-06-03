@@ -12,6 +12,7 @@ const VIRT: VirtConfig = {
   redundancy: 'n+1',
   nodeShape: { physicalCores: 64, threadsPerCore: 2, ramGB: 512 },
   storageBackend: 'odf',
+  targetUtilization: 1,
 }
 
 describe('assembleVirtCluster (ODF)', () => {
@@ -51,5 +52,16 @@ describe('assembleVirtCluster (external-rwx)', () => {
     expect(s.odfNodes).toBeNull()
     expect(s.virtStorageGB).toBe(0)
     expect(s.totals).toEqual({ vcpu: 908, ramGB: 3632, storageGB: 1000 })
+  })
+})
+
+describe('assembleVirtCluster — virtStorage plan', () => {
+  it('ODF: usable = VM disk total, raw = replica-3 / 0.85', () => {
+    const s = assembleVirtCluster({ ...VIRT, targetUtilization: 1 })
+    expect(s.virtStorage).toEqual({ usableGB: 15300, rawGB: 54000, backend: 'odf' })
+  })
+  it('external-rwx: usable = VM disk total, raw = 0', () => {
+    const s = assembleVirtCluster({ ...VIRT, storageBackend: 'external-rwx', targetUtilization: 1 })
+    expect(s.virtStorage).toEqual({ usableGB: 15300, rawGB: 0, backend: 'external-rwx' })
   })
 })

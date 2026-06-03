@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { perVmMemoryOverheadMiB, systemReservedCpuCores } from './reservations'
+import {
+  perVmMemoryOverheadMiB,
+  systemReservedCpuCores,
+  resolveTargetUtilization,
+} from './reservations'
 
 describe('perVmMemoryOverheadMiB', () => {
   // 218 + 8·vcpu + 0.002·(ramGB·1024)
@@ -19,5 +23,27 @@ describe('systemReservedCpuCores', () => {
 
   it('16 threads → 0.5 cores (floor applies)', () => {
     expect(systemReservedCpuCores(16)).toBeCloseTo(0.5, 6)
+  })
+})
+
+describe('resolveTargetUtilization', () => {
+  it('falls back to 0.8 when undefined', () => {
+    expect(resolveTargetUtilization(undefined)).toBe(0.8)
+  })
+  it('passes through an in-range value', () => {
+    expect(resolveTargetUtilization(0.7)).toBe(0.7)
+  })
+  it('clamps below 0.5 up to 0.5', () => {
+    expect(resolveTargetUtilization(0.3)).toBe(0.5)
+  })
+  it('clamps above 1.0 down to 1.0', () => {
+    expect(resolveTargetUtilization(1.5)).toBe(1.0)
+  })
+  it('allows exactly 1.0 (full pack)', () => {
+    expect(resolveTargetUtilization(1)).toBe(1)
+  })
+  it('treats NaN/0 as fallback', () => {
+    expect(resolveTargetUtilization(0)).toBe(0.8)
+    expect(resolveTargetUtilization(Number.NaN)).toBe(0.8)
   })
 })

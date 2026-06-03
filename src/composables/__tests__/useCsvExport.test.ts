@@ -158,3 +158,23 @@ describe('buildVmClassCsv', () => {
     expect(csv).toContain('Small,120,240,480,4800')
   })
 })
+
+import { buildVirtStorageRows } from '../useCsvExport'
+
+describe('buildVirtStorageRows', () => {
+  it('ODF → usable + raw rows', () => {
+    const rows = buildVirtStorageRows({ usableGB: 15300, rawGB: 54000, backend: 'odf' })
+    expect(rows).toEqual([
+      'VM Storage (usable),—,—,—,15300',
+      'VM Storage (raw, replica-3 @ 85%),—,—,—,54000',
+    ])
+  })
+  it('external-rwx → single usable row, no raw', () => {
+    const rows = buildVirtStorageRows({ usableGB: 15300, rawGB: 0, backend: 'external-rwx' })
+    expect(rows).toEqual(['VM Storage (usable, provider-managed array),—,—,—,15300'])
+  })
+  it('null/undefined → no rows', () => {
+    expect(buildVirtStorageRows(null)).toEqual([])
+    expect(buildVirtStorageRows(undefined)).toEqual([])
+  })
+})

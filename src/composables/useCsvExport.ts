@@ -12,6 +12,19 @@ export function buildVmClassCsv(vmClasses: VmClass[]): string {
   return [header, ...rows].join('\n')
 }
 
+type VirtStoragePlan = NonNullable<ClusterSizing['virtStorage']>
+
+export function buildVirtStorageRows(plan: VirtStoragePlan | null | undefined): string[] {
+  if (!plan) return []
+  if (plan.backend === 'odf') {
+    return [
+      `VM Storage (usable),—,—,—,${Math.round(plan.usableGB)}`,
+      `VM Storage (raw, replica-3 @ 85%),—,—,—,${Math.round(plan.rawGB)}`,
+    ]
+  }
+  return [`VM Storage (usable, provider-managed array),—,—,—,${Math.round(plan.usableGB)}`]
+}
+
 type NodeEntry = { label: string; spec: NodeSpec }
 
 function getNodeEntries(sizing: ClusterSizing): NodeEntry[] {
@@ -36,7 +49,7 @@ export function buildCsvContent(sizing: ClusterSizing): string {
         `RHOAI Overhead (KServe / DS Pipelines / Model Registry),—,+${sizing.rhoaiOverhead.vcpu},+${sizing.rhoaiOverhead.ramGB},—`,
       ]
     : []
-  return [header, ...rows, ...rhoaiRow].join('\n')
+  return [header, ...rows, ...rhoaiRow, ...buildVirtStorageRows(sizing.virtStorage)].join('\n')
 }
 
 export function buildMultiClusterCsvContent(
@@ -72,6 +85,11 @@ export function buildMultiClusterCsvContent(
       sections.push(
         `RHOAI Overhead (KServe / DS Pipelines / Model Registry),—,+${sizing.rhoaiOverhead.vcpu},+${sizing.rhoaiOverhead.ramGB},—`,
       )
+    }
+
+    // VM Storage line(s) for virtualization-mode clusters
+    for (const row of buildVirtStorageRows(sizing.virtStorage)) {
+      sections.push(row)
     }
 
     // Blank row separator between clusters (D-11)

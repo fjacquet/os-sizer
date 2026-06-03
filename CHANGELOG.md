@@ -5,6 +5,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- Virtualization mode: configurable **target utilization** (default 80%, RAM + CPU) so virt-worker sizing leaves operational headroom instead of packing to ~95% RAM.
+- Virtualization mode: dedicated **VM Storage** line (usable + raw) in BOM, CSV, PDF, and PPTX exports — the VM disk requirement is no longer hidden behind the per-node OS disk.
+
+---
+
 ## [2.2.0] — 2026-06-03
 
 ### Added — Virtualization (OVE) sizing mode

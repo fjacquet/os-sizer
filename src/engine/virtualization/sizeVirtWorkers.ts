@@ -3,6 +3,7 @@ import type { VirtConfig, VirtWorkerSizing, LimitingResource } from '../types'
 import { aggregateVmDemand } from './aggregate'
 import { nodeVmCapacity } from './capacity'
 import { MAX_VMS_PER_NODE, MIN_VIRT_WORKERS } from '../constants'
+import { resolveTargetUtilization } from '../shared/reservations'
 
 const SPARE_NODES: Record<VirtConfig['redundancy'], number> = { none: 0, 'n+1': 1, 'n+2': 2 }
 
@@ -10,9 +11,10 @@ export function sizeVirtWorkers(config: VirtConfig): VirtWorkerSizing {
   const demand = aggregateVmDemand(config.vmClasses)
   const cap = nodeVmCapacity(config.nodeShape, config.cpuOvercommitRatio)
   const ramDemand = demand.totalGuestRamGB + demand.totalOverheadRamGB
+  const target = resolveTargetUtilization(config.targetUtilization)
 
-  const byCpu = cap.vcpuCapacity > 0 ? Math.ceil(demand.totalVcpu / cap.vcpuCapacity) : 0
-  const byRam = cap.ramCapacityGB > 0 ? Math.ceil(ramDemand / cap.ramCapacityGB) : 0
+  const byCpu = cap.vcpuCapacity > 0 ? Math.ceil(demand.totalVcpu / (cap.vcpuCapacity * target)) : 0
+  const byRam = cap.ramCapacityGB > 0 ? Math.ceil(ramDemand / (cap.ramCapacityGB * target)) : 0
   const byDensity = Math.ceil(demand.totalVms / MAX_VMS_PER_NODE)
 
   // Limiting resource = the constraint with the highest node demand (ties: cpu > ram > density).
