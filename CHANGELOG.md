@@ -5,6 +5,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.1.2] — 2026-06-03
+
+### Security — Dependency patches (`npm audit fix`, lockfile-only)
+
+- **vite** 8.0.3 → 8.0.16 (high): path traversal in optimized-deps `.map`, `server.fs.deny`
+  bypass, and dev-server WebSocket arbitrary file read.
+- **dompurify** → 3.4.7 (moderate, via jspdf): FORBID_TAGS/SAFE_FOR_TEMPLATES bypasses and
+  prototype-pollution XSS.
+- **postcss** → 8.5.15 (moderate): XSS via unescaped `</style>` in stringify output.
+- **brace-expansion** → 5.0.6 (moderate): ReDoS via large numeric range.
+
+All within existing semver ranges (no `package.json` changes); `npm audit` now reports 0
+vulnerabilities.
+
+---
+
 ## [2.1.1] — 2026-06-03
 
 ### Changed — Stack rules aligned with vatlas
