@@ -11,6 +11,10 @@ describe('createDefaultVirtConfig', () => {
     expect(v.storageBackend).toBe('odf')
   })
 
+  it('defaults targetUtilization to 0.8', () => {
+    expect(createDefaultVirtConfig().targetUtilization).toBe(0.8)
+  })
+
   it('gives each VM class a unique id', () => {
     const ids = createDefaultVirtConfig().vmClasses.map((c) => c.id)
     expect(new Set(ids).size).toBe(ids.length)

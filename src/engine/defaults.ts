@@ -1,7 +1,7 @@
 // Defaults factory functions — NOT exported constants (constants = shared refs = mutation bugs)
 // Zero Vue imports (CALC-01)
 import type { ClusterConfig, VirtConfig } from './types'
-import { DEFAULT_CPU_OVERCOMMIT_RATIO } from './constants'
+import { DEFAULT_CPU_OVERCOMMIT_RATIO, DEFAULT_TARGET_VIRT_UTILIZATION } from './constants'
 
 export function createDefaultVirtConfig(): VirtConfig {
   return {
@@ -14,6 +14,7 @@ export function createDefaultVirtConfig(): VirtConfig {
     redundancy: 'n+1',
     nodeShape: { physicalCores: 64, threadsPerCore: 2, ramGB: 512 },
     storageBackend: 'odf',
+    targetUtilization: DEFAULT_TARGET_VIRT_UTILIZATION,
   }
 }
 
