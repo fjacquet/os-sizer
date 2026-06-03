@@ -1,6 +1,6 @@
 # os-sizer — Product Requirements Document
 
-**Version:** 2.2.0 (unreleased)
+**Version:** 2.2.0
 **Last Updated:** 2026-06-03
 **Core Value:** From constraints to proposal-ready hardware BoM in minutes — for both containerized OpenShift and OpenShift Virtualization (OVE) estates.
 
