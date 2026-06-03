@@ -44,7 +44,7 @@ Both are design gaps in the new mode.
 **Type.** Add to `VirtConfig` (`src/engine/types.ts`):
 
 ```ts
-targetUtilization: number // fraction 0.5–0.95; steady-state RAM/CPU target, default 0.8
+targetUtilization?: number // fraction; UI 50–95%, engine clamps [0.5, 1.0]; steady-state RAM/CPU target, default 0.8
 ```
 
 **Constant** (`src/engine/constants.ts`):
@@ -53,7 +53,7 @@ targetUtilization: number // fraction 0.5–0.95; steady-state RAM/CPU target, d
 /** Steady-state RAM/CPU utilization target for virt workers. Headroom for drains/maintenance/growth. */
 export const DEFAULT_TARGET_VIRT_UTILIZATION = 0.8
 export const MIN_TARGET_VIRT_UTILIZATION = 0.5
-export const MAX_TARGET_VIRT_UTILIZATION = 0.95
+export const MAX_TARGET_VIRT_UTILIZATION = 1.0 // 1.0 = explicit full-pack; UI restricts to 0.95
 ```
 
 **Sizing** (`src/engine/virtualization/sizeVirtWorkers.ts`). Apply the target when counting nodes; leave `nodeVmCapacity` returning **true** allocatable capacity so the utilization metrics stay honest:
@@ -133,7 +133,7 @@ Each unit keeps a single purpose: `sizeVirtWorkers` decides node count + metrics
 
 ## Error handling / edge cases
 
-- `targetUtilization` clamped to `[0.5, 0.95]` on read in the engine (defensive) so a malformed session file cannot produce `Infinity`/negative node counts.
+- `targetUtilization` clamped to `[0.5, 1.0]` on read in the engine (defensive) so a malformed session file cannot produce `Infinity`/negative node counts.
 - `target = 0` guard: division already gated by `cap.* > 0`; clamp prevents `target = 0`.
 - Backward compatibility: sessions saved before this change lack `targetUtilization`; `createDefaultVirtConfig()` merge and an engine-side fallback to `DEFAULT_TARGET_VIRT_UTILIZATION` cover loaded sessions.
 - `external-rwx`: `rawGB = 0`; render raw as `—`, never `0 GB`.
