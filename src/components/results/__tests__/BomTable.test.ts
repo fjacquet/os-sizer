@@ -19,6 +19,21 @@ function buildRows(s: ClusterSizing): { labelKey: string }[] {
   return entries
 }
 
+// Replicates the BomTable `storageRows` computed logic (Task 8 — VM Storage rows)
+function buildStorageRows(
+  s: ClusterSizing,
+): { label: string; value: number }[] {
+  const p = s.virtStorage
+  if (!p) return []
+  if (p.backend === 'odf') {
+    return [
+      { label: 'VM Storage (usable)', value: Math.round(p.usableGB) },
+      { label: 'VM Storage (raw, replica-3 @ 85%)', value: Math.round(p.rawGB) },
+    ]
+  }
+  return [{ label: 'VM Storage (usable, provider-managed array)', value: Math.round(p.usableGB) }]
+}
+
 function makeBaseSizing(overrides: Partial<ClusterSizing> = {}): ClusterSizing {
   return {
     masterNodes: { count: 3, vcpu: 8, ramGB: 32, storageGB: 120 },
@@ -127,5 +142,29 @@ describe('BomTable', () => {
     expect(s.rhoaiOverhead).not.toBeNull()
     expect(s.rhoaiOverhead?.vcpu).toBe(16)
     expect(s.rhoaiOverhead?.ramGB).toBe(64)
+  })
+
+  // Task 8 — VM Storage rows
+  it('VM Storage ODF: storageRows contains usable label, usableGB, and rawGB values', () => {
+    const s = makeBaseSizing({
+      virtWorkerNodes: { count: 4, vcpu: 32, ramGB: 128, storageGB: 500 },
+      virtStorage: { usableGB: 15300, rawGB: 54000, backend: 'odf' },
+    })
+    const storageRows = buildStorageRows(s)
+    const text = storageRows.map((r) => `${r.label} ${r.value}`).join(' ')
+    expect(text).toContain('VM Storage (usable)')
+    expect(text).toContain('15300')
+    expect(text).toContain('54000')
+  })
+
+  it('VM Storage external-rwx: storageRows contains provider-managed label and not replica-3', () => {
+    const s = makeBaseSizing({
+      virtWorkerNodes: { count: 4, vcpu: 32, ramGB: 128, storageGB: 500 },
+      virtStorage: { usableGB: 15300, rawGB: 0, backend: 'external-rwx' },
+    })
+    const storageRows = buildStorageRows(s)
+    const text = storageRows.map((r) => `${r.label} ${r.value}`).join(' ')
+    expect(text).toContain('provider-managed')
+    expect(text).not.toContain('replica-3')
   })
 })
