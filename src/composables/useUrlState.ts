@@ -72,6 +72,7 @@ const VirtConfigSchema = z
     redundancy: z.enum(['none', 'n+1', 'n+2']).default('n+1'),
     nodeShape: NodeShapeSchema.default(() => NodeShapeSchema.parse({})),
     storageBackend: z.enum(['odf', 'external-rwx']).default('odf'),
+    targetUtilization: z.number().min(0.5).max(1).default(0.8),
   })
   .strip()
 
