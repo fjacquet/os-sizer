@@ -37,6 +37,12 @@ describe('assembleVirtCluster (ODF)', () => {
   it('totals include node specs + VM disk raw', () => {
     expect(s.totals).toEqual({ vcpu: 956, ramGB: 3824, storageGB: 55000 })
   })
+
+  it('exposes virt metrics (limiting resource + base nodes)', () => {
+    expect(s.virtMetrics?.limitingResource).toBe('ram')
+    expect(s.virtMetrics?.baseNodes).toBe(6)
+    expect(s.virtMetrics?.totalNodes).toBe(7)
+  })
 })
 
 describe('assembleVirtCluster (external-rwx)', () => {

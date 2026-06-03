@@ -86,6 +86,8 @@ export interface ClusterSizing {
   gpuNodes: NodeSpec | null // Phase 9: placeholder for Phase 10 GPU calculator
   virtStorageGB: number // Phase 9: estimated storage budget for VM PVCs
   rhoaiOverhead: { vcpu: number; ramGB: number } | null // Phase 12: RHOAI operator overhead addend (set by calcRHOAI, null otherwise)
+  /** Virtualization-mode worker metrics (null for container mode). */
+  virtMetrics?: VirtWorkerSizing | null
   totals: { vcpu: number; ramGB: number; storageGB: number }
 }
 

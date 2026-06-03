@@ -55,6 +55,7 @@ export function assembleVirtCluster(virt: VirtConfig): ClusterSizing {
     gpuNodes: null,
     virtStorageGB,
     rhoaiOverhead: null,
+    virtMetrics: worker,
     totals,
   }
 }
