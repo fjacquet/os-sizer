@@ -4,7 +4,13 @@
 
 import { useInputStore } from '@/stores/inputStore'
 import { useCalculationStore } from '@/stores/calculationStore'
-import type { ClusterConfig, ClusterSizing, NodeSpec } from '@/engine/types'
+import type {
+  ClusterConfig,
+  ClusterSizing,
+  NodeSpec,
+  VmClass,
+  VirtWorkerSizing,
+} from '@/engine/types'
 import { PPTX_COLORS, PPTX_FONT } from './pptx/theme'
 
 // Local types — avoid importing pptxgenjs types directly (dynamic import pattern)
@@ -197,6 +203,54 @@ export function buildAggregateSlideData(
     numCell(String(aggregateTotals[key])),
   ])
   return { headerRow, dataRows }
+}
+
+// ── Virtualization deck builders (pure, testable) ─────────────────────────────
+
+export function buildVmClassBreakdownRows(vmClasses: VmClass[]): TableRow[] {
+  const header: TableRow = [
+    hdrCell('VM Class'),
+    hdrCell('Count'),
+    hdrCell('Total vCPU'),
+    hdrCell('Total RAM (GB)'),
+    hdrCell('Total Disk (GB)'),
+  ]
+  const rows: TableRow[] = vmClasses.map((c) => [
+    cell(c.name),
+    numCell(String(c.count)),
+    numCell(String(c.count * c.vcpu)),
+    numCell(String(c.count * c.ramGB)),
+    numCell(String(c.count * c.diskGB)),
+  ])
+  const tot = vmClasses.reduce(
+    (a, c) => ({
+      count: a.count + c.count,
+      vcpu: a.vcpu + c.count * c.vcpu,
+      ram: a.ram + c.count * c.ramGB,
+      disk: a.disk + c.count * c.diskGB,
+    }),
+    { count: 0, vcpu: 0, ram: 0, disk: 0 },
+  )
+  const totalRow: TableRow = [
+    hdrCell('Total'),
+    hdrCell(String(tot.count)),
+    hdrCell(String(tot.vcpu)),
+    hdrCell(String(tot.ram)),
+    hdrCell(String(tot.disk)),
+  ]
+  return [header, ...rows, totalRow]
+}
+
+export function buildVirtMetricsData(m: VirtWorkerSizing): { label: string; value: string }[] {
+  return [
+    { label: 'Achieved overcommit', value: `${m.achievedOvercommit.toFixed(2)}:1` },
+    { label: 'VMs / node', value: m.vmsPerNode.toFixed(1) },
+    { label: 'Limiting resource', value: m.limitingResource.toUpperCase() },
+    {
+      label: 'CPU / RAM util',
+      value: `${m.cpuUtilizationPct.toFixed(0)}% / ${m.ramUtilizationPct.toFixed(0)}%`,
+    },
+  ]
 }
 
 // ── Private helper: render one cluster slide ──────────────────────────────────
