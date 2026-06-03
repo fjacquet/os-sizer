@@ -77,7 +77,10 @@ describe('BomTable', () => {
   it('skips null NodeSpec entries', () => {
     const mockResultSno: SizingResult = {
       id: 'sno-cluster',
-      sizing: makeBaseSizing({ masterNodes: { count: 1, vcpu: 8, ramGB: 32, storageGB: 120 }, totals: { vcpu: 8, ramGB: 32, storageGB: 120 } }),
+      sizing: makeBaseSizing({
+        masterNodes: { count: 1, vcpu: 8, ramGB: 32, storageGB: 120 },
+        totals: { vcpu: 8, ramGB: 32, storageGB: 120 },
+      }),
       recommendations: [],
       validationErrors: [],
     }

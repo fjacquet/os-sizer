@@ -78,7 +78,10 @@ export const ClusterConfigSchema = z
 
 export const InputStateSchema = z
   .object({
-    clusters: z.array(ClusterConfigSchema).min(1).default(() => [ClusterConfigSchema.parse({})]),
+    clusters: z
+      .array(ClusterConfigSchema)
+      .min(1)
+      .default(() => [ClusterConfigSchema.parse({})]),
   })
   .strip()
 

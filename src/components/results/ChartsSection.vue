@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import VcpuChart from './charts/VcpuChart.vue'
-import RamChart from './charts/RamChart.vue'
-import StorageChart from './charts/StorageChart.vue'
+  import VcpuChart from './charts/VcpuChart.vue'
+  import RamChart from './charts/RamChart.vue'
+  import StorageChart from './charts/StorageChart.vue'
 </script>
 
 <template>

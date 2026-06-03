@@ -1,86 +1,93 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useInputStore } from '@/stores/inputStore'
-import { useUiStore } from '@/stores/uiStore'
-import { useCalculationStore } from '@/stores/calculationStore'
-import { createDefaultClusterConfig } from '@/engine/defaults'
-import RecommendationCard from './RecommendationCard.vue'
-import NumberSliderInput from '@/components/shared/NumberSliderInput.vue'
-import type { TopologyType, SnoProfile, ClusterConfig } from '@/engine/types'
+  import { computed, ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import { useInputStore } from '@/stores/inputStore'
+  import { useUiStore } from '@/stores/uiStore'
+  import { useCalculationStore } from '@/stores/calculationStore'
+  import { createDefaultClusterConfig } from '@/engine/defaults'
+  import RecommendationCard from './RecommendationCard.vue'
+  import NumberSliderInput from '@/components/shared/NumberSliderInput.vue'
+  import type { TopologyType, SnoProfile, ClusterConfig } from '@/engine/types'
 
-const { t } = useI18n()
-const input = useInputStore()
-const ui = useUiStore()
-const calc = useCalculationStore()
+  const { t } = useI18n()
+  const input = useInputStore()
+  const ui = useUiStore()
+  const calc = useCalculationStore()
 
-const activeCluster = computed(() =>
-  input.clusters[input.activeClusterIndex] ?? createDefaultClusterConfig(0)
-)
+  const activeCluster = computed(
+    () => input.clusters[input.activeClusterIndex] ?? createDefaultClusterConfig(0),
+  )
 
-const recommendations = computed(() => calc.recommendations)
+  const recommendations = computed(() => calc.recommendations)
 
-const topologyLabelMap: Record<TopologyType, string> = {
-  'standard-ha':      'topology.standardHa',
-  'compact-3node':    'topology.compact3node',
-  'sno':              'topology.sno',
-  'two-node-arbiter': 'topology.twoNodeArbiter',
-  'two-node-fencing': 'topology.twoNodeFencing',
-  'hcp':              'topology.hcp',
-  'microshift':       'topology.microshift',
-  'managed-cloud':    'topology.managedCloud',
-}
+  const topologyLabelMap: Record<TopologyType, string> = {
+    'standard-ha': 'topology.standardHa',
+    'compact-3node': 'topology.compact3node',
+    sno: 'topology.sno',
+    'two-node-arbiter': 'topology.twoNodeArbiter',
+    'two-node-fencing': 'topology.twoNodeFencing',
+    hcp: 'topology.hcp',
+    microshift: 'topology.microshift',
+    'managed-cloud': 'topology.managedCloud',
+  }
 
-const allTopologies: TopologyType[] = [
-  'standard-ha', 'compact-3node', 'sno',
-  'two-node-arbiter', 'two-node-fencing',
-  'hcp', 'microshift', 'managed-cloud',
-]
+  const allTopologies: TopologyType[] = [
+    'standard-ha',
+    'compact-3node',
+    'sno',
+    'two-node-arbiter',
+    'two-node-fencing',
+    'hcp',
+    'microshift',
+    'managed-cloud',
+  ]
 
-const showOverride = ref(false)
+  const showOverride = ref(false)
 
-function clusterField<K extends keyof ClusterConfig>(key: K) {
-  return computed({
-    get: () => activeCluster.value[key],
-    set: (val: ClusterConfig[K]) => {
-      const c = input.clusters[input.activeClusterIndex]
-      if (c) input.updateCluster(c.id, { [key]: val } as Partial<ClusterConfig>)
-    },
-  })
-}
+  function clusterField<K extends keyof ClusterConfig>(key: K) {
+    return computed({
+      get: () => activeCluster.value[key],
+      set: (val: ClusterConfig[K]) => {
+        const c = input.clusters[input.activeClusterIndex]
+        if (c) input.updateCluster(c.id, { [key]: val } as Partial<ClusterConfig>)
+      },
+    })
+  }
 
-function addOnField(key: keyof typeof activeCluster.value.addOns) {
-  return computed({
-    get: () => activeCluster.value.addOns[key],
-    set: (val: boolean | number) => {
-      const c = input.clusters[input.activeClusterIndex]
-      if (c) input.updateCluster(c.id, { addOns: { ...c.addOns, [key]: val } })
-    },
-  })
-}
+  function addOnField(key: keyof typeof activeCluster.value.addOns) {
+    return computed({
+      get: () => activeCluster.value.addOns[key],
+      set: (val: boolean | number) => {
+        const c = input.clusters[input.activeClusterIndex]
+        if (c) input.updateCluster(c.id, { addOns: { ...c.addOns, [key]: val } })
+      },
+    })
+  }
 
-const topology = clusterField('topology')
-const snoProfile = clusterField('snoProfile')
-const hcpHostedClusters = clusterField('hcpHostedClusters')
-const hcpQpsPerCluster = clusterField('hcpQpsPerCluster')
-const virtEnabled = addOnField('virtEnabled')
-const vmCount = addOnField('vmCount')
-const vmsPerWorker = addOnField('vmsPerWorker')
-const virtAvgVmVcpu = addOnField('virtAvgVmVcpu')
-const virtAvgVmRamGB = addOnField('virtAvgVmRamGB')
-const snoVirtMode = addOnField('snoVirtMode')
+  const topology = clusterField('topology')
+  const snoProfile = clusterField('snoProfile')
+  const hcpHostedClusters = clusterField('hcpHostedClusters')
+  const hcpQpsPerCluster = clusterField('hcpQpsPerCluster')
+  const virtEnabled = addOnField('virtEnabled')
+  const vmCount = addOnField('vmCount')
+  const vmsPerWorker = addOnField('vmsPerWorker')
+  const virtAvgVmVcpu = addOnField('virtAvgVmVcpu')
+  const virtAvgVmRamGB = addOnField('virtAvgVmRamGB')
+  const snoVirtMode = addOnField('snoVirtMode')
 
-function selectTopology(topo: TopologyType) {
-  topology.value = topo
-  ui.confirmTopology()
-  showOverride.value = false
-}
+  function selectTopology(topo: TopologyType) {
+    topology.value = topo
+    ui.confirmTopology()
+    showOverride.value = false
+  }
 </script>
 
 <template>
   <section class="space-y-6">
     <div>
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ t('wizard.step3.title') }}</h2>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        {{ t('wizard.step3.title') }}
+      </h2>
     </div>
 
     <!-- Recommendation cards -->
@@ -105,7 +112,11 @@ function selectTopology(topo: TopologyType) {
         {{ showOverride ? t('wizard.step3.hideOverride') : t('wizard.step3.showOverride') }}
       </button>
       <div v-if="showOverride" class="mt-3 space-y-1">
-        <label class="text-sm font-medium text-gray-700 dark:text-gray-300" for="topology-override-select">{{ t('topology.label') }}</label>
+        <label
+          class="text-sm font-medium text-gray-700 dark:text-gray-300"
+          for="topology-override-select"
+          >{{ t('topology.label') }}</label
+        >
         <select
           id="topology-override-select"
           :value="topology"
@@ -122,11 +133,17 @@ function selectTopology(topo: TopologyType) {
     </div>
 
     <!-- Topology-specific sub-inputs -->
-    <div v-if="ui.topologyConfirmed" class="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-4">
-
+    <div
+      v-if="ui.topologyConfirmed"
+      class="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-4"
+    >
       <!-- SNO profile selector -->
       <div v-if="topology === 'sno'" class="space-y-2">
-        <label id="sno-profile-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('sno.profile') }}</label>
+        <label
+          id="sno-profile-label"
+          class="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >{{ t('sno.profile') }}</label
+        >
         <div
           class="flex flex-wrap gap-2"
           role="radiogroup"
@@ -134,17 +151,31 @@ function selectTopology(topo: TopologyType) {
           aria-required="true"
         >
           <button
-            v-for="p in (['standard', 'edge', 'telecom-vdu'] as SnoProfile[])"
+            v-for="p in ['standard', 'edge', 'telecom-vdu'] as SnoProfile[]"
             :key="p"
-            :aria-label="p === 'standard' ? t('sno.standard') : p === 'edge' ? t('sno.edge') : t('sno.telecomVdu')"
+            :aria-label="
+              p === 'standard'
+                ? t('sno.standard')
+                : p === 'edge'
+                  ? t('sno.edge')
+                  : t('sno.telecomVdu')
+            "
             :aria-pressed="snoProfile === p"
-            :class="['px-3 py-1.5 text-sm rounded border font-medium transition-colors',
+            :class="[
+              'px-3 py-1.5 text-sm rounded border font-medium transition-colors',
               snoProfile === p
                 ? 'bg-blue-600 text-white border-blue-600'
-                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400']"
+                : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:border-blue-400',
+            ]"
             @click="snoProfile = p"
           >
-            {{ p === 'standard' ? t('sno.standard') : p === 'edge' ? t('sno.edge') : t('sno.telecomVdu') }}
+            {{
+              p === 'standard'
+                ? t('sno.standard')
+                : p === 'edge'
+                  ? t('sno.edge')
+                  : t('sno.telecomVdu')
+            }}
           </button>
         </div>
         <!-- SNO-with-Virt mode toggle (SNO-01 engine already complete) -->
@@ -184,8 +215,13 @@ function selectTopology(topo: TopologyType) {
       </div>
 
       <!-- Virt VM sizing inputs (VIRT-01, VIRT-03) — shown when virt add-on enabled on standard-ha or compact-3node -->
-      <div v-if="virtEnabled && (topology === 'standard-ha' || topology === 'compact-3node')" class="space-y-3">
-        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('workload.virtAddon') }}</p>
+      <div
+        v-if="virtEnabled && (topology === 'standard-ha' || topology === 'compact-3node')"
+        class="space-y-3"
+      >
+        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {{ t('workload.virtAddon') }}
+        </p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <NumberSliderInput
             :model-value="vmCount as number"
@@ -194,7 +230,11 @@ function selectTopology(topo: TopologyType) {
             :max="5000"
             :step="10"
             aria-required="true"
-            @update:model-value="(val: number) => { vmCount = val }"
+            @update:model-value="
+              (val: number) => {
+                vmCount = val
+              }
+            "
           />
           <NumberSliderInput
             :model-value="vmsPerWorker as number"
@@ -203,7 +243,11 @@ function selectTopology(topo: TopologyType) {
             :max="50"
             :step="1"
             aria-required="true"
-            @update:model-value="(val: number) => { vmsPerWorker = val }"
+            @update:model-value="
+              (val: number) => {
+                vmsPerWorker = val
+              }
+            "
           />
           <NumberSliderInput
             :model-value="virtAvgVmVcpu as number"
@@ -213,7 +257,11 @@ function selectTopology(topo: TopologyType) {
             :max="32"
             :step="1"
             aria-required="true"
-            @update:model-value="(val: number) => { virtAvgVmVcpu = val }"
+            @update:model-value="
+              (val: number) => {
+                virtAvgVmVcpu = val
+              }
+            "
           />
           <NumberSliderInput
             :model-value="virtAvgVmRamGB as number"
@@ -223,7 +271,11 @@ function selectTopology(topo: TopologyType) {
             :max="256"
             :step="1"
             aria-required="true"
-            @update:model-value="(val: number) => { virtAvgVmRamGB = val }"
+            @update:model-value="
+              (val: number) => {
+                virtAvgVmRamGB = val
+              }
+            "
           />
         </div>
       </div>
@@ -239,10 +291,16 @@ function selectTopology(topo: TopologyType) {
 
       <!-- TNF notices -->
       <div v-if="topology === 'two-node-fencing'" class="space-y-2">
-        <div class="p-3 rounded border text-sm bg-amber-50 border-amber-400 text-amber-800" role="alert">
+        <div
+          class="p-3 rounded border text-sm bg-amber-50 border-amber-400 text-amber-800"
+          role="alert"
+        >
           {{ t('warnings.tnf.techPreview') }}
         </div>
-        <div class="p-3 rounded border text-sm bg-amber-50 border-amber-400 text-amber-800" role="alert">
+        <div
+          class="p-3 rounded border text-sm bg-amber-50 border-amber-400 text-amber-800"
+          role="alert"
+        >
           {{ t('warnings.tnf.redfishRequired') }}
         </div>
       </div>
@@ -255,7 +313,6 @@ function selectTopology(topo: TopologyType) {
       >
         {{ t('warnings.managedCloud.noHardware') }}
       </div>
-
     </div>
   </section>
 </template>

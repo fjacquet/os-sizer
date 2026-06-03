@@ -21,7 +21,12 @@ import {
   MICROSHIFT_SYS_MIN,
   GPU_NODE_MIN_STORAGE_GB,
 } from './constants'
-import { cpSizing, workerCount as calcWorkerCount, infraNodeSizing, allocatableRamGB } from './formulas'
+import {
+  cpSizing,
+  workerCount as calcWorkerCount,
+  infraNodeSizing,
+  allocatableRamGB,
+} from './formulas'
 
 // ---------------------------------------------------------------------------
 // Internal helpers
@@ -31,7 +36,11 @@ import { cpSizing, workerCount as calcWorkerCount, infraNodeSizing, allocatableR
  * Sum totals across a list of NodeSpec (or null). Multiplies each spec's per-node
  * figures by its count.
  */
-function sumTotals(nodes: Array<NodeSpec | null>): { vcpu: number; ramGB: number; storageGB: number } {
+function sumTotals(nodes: Array<NodeSpec | null>): {
+  vcpu: number
+  ramGB: number
+  storageGB: number
+} {
   return nodes.reduce<{ vcpu: number; ramGB: number; storageGB: number }>(
     (acc, n) => {
       if (!n) return acc
@@ -71,7 +80,10 @@ function emptySizing(masterNodes: NodeSpec): ClusterSizing {
  * Workers are sized by workload formula, minimum 2 per HA requirement.
  * Infra nodes are added when addOns.infraNodesEnabled is true.
  */
-export function calcStandardHA(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcStandardHA(config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   const { workload, addOns } = config
 
   const wCount = calcWorkerCount(
@@ -133,7 +145,10 @@ export function calcStandardHA(config: ClusterConfig): { sizing: ClusterSizing; 
  * Compact 3-node: masters double as workers — no separate worker pool.
  * Returns CP_MIN as masterNodes with workerNodes null.
  */
-export function calcCompact3Node(_config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcCompact3Node(_config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   const masterNodes: NodeSpec = { ...CP_MIN }
 
   const sizing: ClusterSizing = {
@@ -160,10 +175,13 @@ export function calcCompact3Node(_config: ClusterConfig): { sizing: ClusterSizin
  * SNO: single-node topology; profile determines minimum hardware.
  * workerNodes is always null — the one node acts as both CP and worker.
  */
-export function calcSNO(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcSNO(config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   const profileMap: Record<string, Readonly<NodeSpec>> = {
-    'standard': SNO_STD_MIN,
-    'edge': SNO_EDGE_MIN,
+    standard: SNO_STD_MIN,
+    edge: SNO_EDGE_MIN,
     'telecom-vdu': SNO_TELECOM_MIN,
   }
 
@@ -203,7 +221,10 @@ export function calcSNO(config: ClusterConfig): { sizing: ClusterSizing; warning
  *
  * Returns a Tech Preview warning.
  */
-export function calcTNA(_config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcTNA(_config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   // Two CP nodes
   const cpNodes: NodeSpec = { ...TNA_CP_MIN }
 
@@ -245,7 +266,10 @@ export function calcTNA(_config: ClusterConfig): { sizing: ClusterSizing; warnin
  * TNF: 2 control-plane nodes; bare-metal only (Redfish BMC required).
  * Returns both a Tech Preview warning and a Redfish BMC error.
  */
-export function calcTNF(_config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcTNF(_config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   const masterNodes: NodeSpec = { ...TNF_CP_MIN }
 
   const sizing: ClusterSizing = {
@@ -298,7 +322,10 @@ export function calcTNF(_config: ClusterConfig): { sizing: ClusterSizing; warnin
  *   workersByRAM = ceil(totalRAM / (allocatableRamGB(WORKER_RAM_GB) * 0.70))
  *   workers = max(workersByCPU, workersByRAM, 3)
  */
-export function calcHCP(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcHCP(config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   const { hcpHostedClusters, hcpQpsPerCluster, addOns } = config
   const qpsFactor = hcpQpsPerCluster / 1000
 
@@ -310,7 +337,7 @@ export function calcHCP(config: ClusterConfig): { sizing: ClusterSizing; warning
 
   const WORKER_VCPU = 16
   const WORKER_RAM_GB = 32
-  const UTIL = 0.70
+  const UTIL = 0.7
 
   const workersByCPU = Math.ceil(totalCPU / (WORKER_VCPU * UTIL))
   const workersByRAM = Math.ceil(totalRAM / (allocatableRamGB(WORKER_RAM_GB) * UTIL))
@@ -363,16 +390,15 @@ export function calcHCP(config: ClusterConfig): { sizing: ClusterSizing; warning
  *   ramGB  = max(2, ceil(pods * podMemMiB / 1024 / 0.70) + 2)   -- +2 GB system overhead
  *   storage = max(10, 100)  → always 100 GB practical minimum
  */
-export function calcMicroShift(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcMicroShift(config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   const { workload } = config
 
-  const computedVcpu = Math.ceil(
-    (workload.totalPods * workload.podCpuMillicores) / 1000 / 0.70
-  ) + 2
+  const computedVcpu = Math.ceil((workload.totalPods * workload.podCpuMillicores) / 1000 / 0.7) + 2
 
-  const computedRamGB = Math.ceil(
-    (workload.totalPods * workload.podMemMiB) / 1024 / 0.70
-  ) + 2
+  const computedRamGB = Math.ceil((workload.totalPods * workload.podMemMiB) / 1024 / 0.7) + 2
 
   const masterNodes: NodeSpec = {
     count: 1,
@@ -394,7 +420,10 @@ export function calcMicroShift(config: ClusterConfig): { sizing: ClusterSizing; 
  * Managed cloud topologies (ROSA, ARO) are provisioned by the cloud provider.
  * No on-premises hardware is required; returns zero-count NodeSpecs.
  */
-export function calcManagedCloud(_config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcManagedCloud(_config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   const zero: NodeSpec = { count: 0, vcpu: 0, ramGB: 0, storageGB: 0 }
 
   const sizing: ClusterSizing = {
@@ -432,17 +461,36 @@ export function calcManagedCloud(_config: ClusterConfig): { sizing: ClusterSizin
  * - rhacmEnabled: populate rhacmWorkers via calcRHACM()
  * - Recalculate totals to include any add-on nodes
  */
-export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; warnings: ValidationWarning[] } {
+export function calcCluster(config: ClusterConfig): {
+  sizing: ClusterSizing
+  warnings: ValidationWarning[]
+} {
   let result: { sizing: ClusterSizing; warnings: ValidationWarning[] }
   switch (config.topology) {
-    case 'standard-ha':      result = calcStandardHA(config); break
-    case 'compact-3node':    result = calcCompact3Node(config); break
-    case 'sno':              result = calcSNO(config); break
-    case 'two-node-arbiter': result = calcTNA(config); break
-    case 'two-node-fencing': result = calcTNF(config); break
-    case 'hcp':              result = calcHCP(config); break
-    case 'microshift':       result = calcMicroShift(config); break
-    case 'managed-cloud':    result = calcManagedCloud(config); break
+    case 'standard-ha':
+      result = calcStandardHA(config)
+      break
+    case 'compact-3node':
+      result = calcCompact3Node(config)
+      break
+    case 'sno':
+      result = calcSNO(config)
+      break
+    case 'two-node-arbiter':
+      result = calcTNA(config)
+      break
+    case 'two-node-fencing':
+      result = calcTNF(config)
+      break
+    case 'hcp':
+      result = calcHCP(config)
+      break
+    case 'microshift':
+      result = calcMicroShift(config)
+      break
+    case 'managed-cloud':
+      result = calcManagedCloud(config)
+      break
   }
 
   // Post-dispatch add-on augmentation (ENG-07, ENG-08)
@@ -465,7 +513,7 @@ export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; war
       config.workload.nodeRamGB,
     )
     sizing.virtStorageGB =
-      (sizing.virtWorkerNodes.count) * config.addOns.vmsPerWorker * config.addOns.virtAvgVmRamGB
+      sizing.virtWorkerNodes.count * config.addOns.vmsPerWorker * config.addOns.virtAvgVmRamGB
   }
 
   // Phase 10: GPU node pool
@@ -484,7 +532,13 @@ export function calcCluster(config: ClusterConfig): { sizing: ClusterSizing; war
   }
 
   // Recalculate totals to include add-on nodes
-  if (config.addOns.odfEnabled || config.addOns.rhacmEnabled || config.addOns.virtEnabled || config.addOns.gpuEnabled || config.addOns.rhoaiEnabled) {
+  if (
+    config.addOns.odfEnabled ||
+    config.addOns.rhacmEnabled ||
+    config.addOns.virtEnabled ||
+    config.addOns.gpuEnabled ||
+    config.addOns.rhoaiEnabled
+  ) {
     sizing.totals = sumTotals([
       sizing.masterNodes,
       sizing.workerNodes,

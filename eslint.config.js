@@ -28,6 +28,9 @@ export default typescriptEslint.config(
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
+      // Parity with vatlas Biome rules (noNonNullAssertion, noConsole)
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      'no-console': ['error', { allow: ['warn', 'error'] }],
 
       // Vue
       'vue/multi-word-component-names': 'off',
@@ -36,10 +39,12 @@ export default typescriptEslint.config(
   },
   eslintConfigPrettier,
   // Test files: relax unused-vars (stores are often initialized for side-effects only)
+  // and console (test scaffolding / debugging) — mirrors vatlas's test override.
   {
     files: ['**/*.test.ts'],
     rules: {
       '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
     },
   },
 )

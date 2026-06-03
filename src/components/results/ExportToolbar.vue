@@ -1,107 +1,107 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { generateShareUrl } from '@/composables/useUrlState'
-import { generatePptxReport } from '@/composables/usePptxExport'
-import { generateCsvReport } from '@/composables/useCsvExport'
-import { generatePdfReport } from '@/composables/usePdfExport'
-import { exportSession, importSession } from '@/composables/useSessionExport'
-import { useCalculationStore } from '@/stores/calculationStore'
-import { useInputStore } from '@/stores/inputStore'
+  import { ref } from 'vue'
+  import { useI18n } from 'vue-i18n'
+  import { generateShareUrl } from '@/composables/useUrlState'
+  import { generatePptxReport } from '@/composables/usePptxExport'
+  import { generateCsvReport } from '@/composables/useCsvExport'
+  import { generatePdfReport } from '@/composables/usePdfExport'
+  import { exportSession, importSession } from '@/composables/useSessionExport'
+  import { useCalculationStore } from '@/stores/calculationStore'
+  import { useInputStore } from '@/stores/inputStore'
 
-const { t } = useI18n()
-const copied = ref(false)
-const calc = useCalculationStore()
-const inputStore = useInputStore()
+  const { t } = useI18n()
+  const copied = ref(false)
+  const calc = useCalculationStore()
+  const inputStore = useInputStore()
 
-async function handleShare() {
-  const url = generateShareUrl()
-  window.history.replaceState({}, '', url)
-  try {
-    await navigator.clipboard.writeText(url)
-  } catch {
-    // URL is already in address bar as fallback
+  async function handleShare() {
+    const url = generateShareUrl()
+    window.history.replaceState({}, '', url)
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      // URL is already in address bar as fallback
+    }
+    copied.value = true
+    setTimeout(() => {
+      copied.value = false
+    }, 1500)
   }
-  copied.value = true
-  setTimeout(() => {
-    copied.value = false
-  }, 1500)
-}
 
-const pdfLoading = ref(false)
-const pptxLoading = ref(false)
+  const pdfLoading = ref(false)
+  const pptxLoading = ref(false)
 
-function handleExportCsv() {
-  generateCsvReport()
-}
+  function handleExportCsv() {
+    generateCsvReport()
+  }
 
-async function handleExportPdf() {
-  pdfLoading.value = true
-  try {
-    const clusters = inputStore.clusters
-    if (clusters.length >= 2) {
-      // Multi-cluster: build warnings per cluster
-      const allResolvedWarnings = calc.clusterResults.map((result) =>
-        (result?.validationErrors ?? []).map((w) => ({
+  async function handleExportPdf() {
+    pdfLoading.value = true
+    try {
+      const clusters = inputStore.clusters
+      if (clusters.length >= 2) {
+        // Multi-cluster: build warnings per cluster
+        const allResolvedWarnings = calc.clusterResults.map((result) =>
+          (result?.validationErrors ?? []).map((w) => ({
+            text: t(w.messageKey),
+            severity: w.severity as 'error' | 'warning',
+          })),
+        )
+        await generatePdfReport([], allResolvedWarnings)
+      } else {
+        // Single-cluster: existing behavior
+        const clusterIdx = inputStore.activeClusterIndex
+        const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+        const resolvedWarnings = (result?.validationErrors ?? []).map((w) => ({
           text: t(w.messageKey),
           severity: w.severity as 'error' | 'warning',
-        })),
-      )
-      await generatePdfReport([], allResolvedWarnings)
-    } else {
-      // Single-cluster: existing behavior
-      const clusterIdx = inputStore.activeClusterIndex
-      const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
-      const resolvedWarnings = (result?.validationErrors ?? []).map((w) => ({
-        text: t(w.messageKey),
-        severity: w.severity as 'error' | 'warning',
-      }))
-      await generatePdfReport(resolvedWarnings)
+        }))
+        await generatePdfReport(resolvedWarnings)
+      }
+    } finally {
+      pdfLoading.value = false
     }
-  } finally {
-    pdfLoading.value = false
   }
-}
 
-async function handleExportPptx() {
-  pptxLoading.value = true
-  try {
-    await generatePptxReport()
-  } finally {
-    pptxLoading.value = false
+  async function handleExportPptx() {
+    pptxLoading.value = true
+    try {
+      await generatePptxReport()
+    } finally {
+      pptxLoading.value = false
+    }
   }
-}
 
-const fileInputKey = ref(0)
-const sessionImportError = ref<string | null>(null)
-const sessionImportSuccess = ref(false)
-const fileInputRef = ref<HTMLInputElement | null>(null)
+  const fileInputKey = ref(0)
+  const sessionImportError = ref<string | null>(null)
+  const sessionImportSuccess = ref(false)
+  const fileInputRef = ref<HTMLInputElement | null>(null)
 
-function handleSaveSession() {
-  exportSession()
-}
-
-function handleLoadSessionClick() {
-  fileInputRef.value?.click()
-}
-
-async function handleLoadSession(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  sessionImportError.value = null
-  sessionImportSuccess.value = false
-  try {
-    await importSession(file)
-    sessionImportSuccess.value = true
-    setTimeout(() => {
-      sessionImportSuccess.value = false
-    }, 1500)
-  } catch {
-    sessionImportError.value = t('results.toolbar.sessionImportError')
-  } finally {
-    fileInputKey.value++
+  function handleSaveSession() {
+    exportSession()
   }
-}
+
+  function handleLoadSessionClick() {
+    fileInputRef.value?.click()
+  }
+
+  async function handleLoadSession(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (!file) return
+    sessionImportError.value = null
+    sessionImportSuccess.value = false
+    try {
+      await importSession(file)
+      sessionImportSuccess.value = true
+      setTimeout(() => {
+        sessionImportSuccess.value = false
+      }, 1500)
+    } catch {
+      sessionImportError.value = t('results.toolbar.sessionImportError')
+    } finally {
+      fileInputKey.value++
+    }
+  }
 </script>
 
 <template>

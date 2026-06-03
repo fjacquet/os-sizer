@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import LZString from 'lz-string'
-import { generateShareUrl, hydrateFromUrl, InputStateSchema, ClusterConfigSchema } from '../useUrlState'
+import {
+  generateShareUrl,
+  hydrateFromUrl,
+  InputStateSchema,
+  ClusterConfigSchema,
+} from '../useUrlState'
 
 // ── Mock window for Node environment ─────────────────────────────────────────
 // The composable uses window.location.search and window.history.replaceState.

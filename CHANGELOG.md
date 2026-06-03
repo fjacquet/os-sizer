@@ -5,6 +5,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.1.1] — 2026-06-03
+
+### Changed — Stack rules aligned with vatlas
+
+- **PPTX fonts**: presentation now uses **Arial** for all prose (titles, KPI labels,
+  table labels, chart titles/axes/legend) and **Consolas** for numeric/metric values
+  (KPI numbers, table data cells, chart value-axis & data-labels), matching the vatlas
+  deck idiom. PPTX styling tokens centralized in `src/composables/pptx/theme.ts`.
+- **Formatter**: adopted **Biome** as the formatter for `.ts`/`.json`/`.css`
+  (Prettier retained for `.vue` templates, which Biome cannot format). Added
+  `format`/`format:check` scripts and a CI format-check gate.
+- **Lint**: added `no-console` (allow `warn`/`error`) and `no-non-null-assertion`
+  (warn) rules.
+- **TypeScript**: bumped target to **ES2022** and enabled
+  **`noUncheckedIndexedAccess`**; hardened indexed-access call sites across export
+  composables, stores, and engine with explicit guards/invariants.
+
+---
+
 ## [2.1.0] — 2026-04-06
 
 ### Added — Multi-Cluster, Session Portability & Export Redesign

@@ -130,9 +130,11 @@ export function buildKpiStripData(sizing: ClusterSizing): KpiStripData {
 
 // ── Aggregate row helper (pure, testable) ─────────────────────────────────────
 
-export function buildAggregateRow(
-  aggregateTotals: { vcpu: number; ramGB: number; storageGB: number },
-): string[] {
+export function buildAggregateRow(aggregateTotals: {
+  vcpu: number
+  ramGB: number
+  storageGB: number
+}): string[] {
   return [
     'AGGREGATE TOTAL',
     '',
@@ -171,6 +173,7 @@ export async function generatePdfReport(
     for (let i = 0; i < input.clusters.length; i++) {
       const cluster = input.clusters[i]
       const result = calc.clusterResults[i]
+      if (!cluster || !result) continue
       const sizing = result.sizing
 
       // Page overflow check
@@ -254,7 +257,7 @@ export async function generatePdfReport(
     const aggRow = buildAggregateRow(calc.aggregateTotals)
     autoTable(doc, {
       head: [['AGGREGATE TOTAL', '', 'vCPU', 'RAM (GB)', 'Storage (GB)']],
-      body: [[aggRow[0], aggRow[1], aggRow[2], aggRow[3], aggRow[4]]],
+      body: [aggRow],
       startY: currentY,
       headStyles: { fillColor: [238, 0, 0], textColor: 255, fontStyle: 'bold' },
       styles: { fontSize: 11 },
@@ -267,6 +270,7 @@ export async function generatePdfReport(
     const clusterIdx = input.activeClusterIndex
     const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
     const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+    if (!cluster || !result) return
     const { head, body } = buildPdfTableData(result.sizing)
 
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' })

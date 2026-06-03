@@ -8,8 +8,13 @@ export const useCalculationStore = defineStore('calculation', () => {
   // CRITICAL: call useInputStore() at TOP LEVEL — never inside a computed() callback
   const input = useInputStore()
 
-  // ZERO ref() — only computed() — enforces CALC-02
-  const activeCluster = computed(() => input.clusters[input.activeClusterIndex] ?? input.clusters[0])
+  // ZERO ref() — only computed() — enforces CALC-02.
+  // Invariant: clusters is never empty (default cluster on init; removeCluster guards length===1).
+  const activeCluster = computed(() => {
+    const cluster = input.clusters[input.activeClusterIndex] ?? input.clusters[0]
+    if (!cluster) throw new Error('inputStore.clusters must never be empty')
+    return cluster
+  })
 
   const clusterResults = computed<SizingResult[]>(() =>
     input.clusters.map((cluster) => ({

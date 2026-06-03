@@ -5,6 +5,7 @@
 import { useInputStore } from '@/stores/inputStore'
 import { useCalculationStore } from '@/stores/calculationStore'
 import type { ClusterConfig, ClusterSizing, NodeSpec } from '@/engine/types'
+import { PPTX_COLORS, PPTX_FONT } from './pptx/theme'
 
 // Local types — avoid importing pptxgenjs types directly (dynamic import pattern)
 interface TableCell {
@@ -15,14 +16,15 @@ interface TableCell {
     color?: string
     align?: 'left' | 'center' | 'right'
     fontSize?: number
+    fontFace?: string
   }
 }
 type TableRow = TableCell[]
 
-// ── Color constants (bare hex, NO # prefix) ──────────────────────────────────
-const RH_RED = 'EE0000'
-const HEADER_BG = 'E8E8E8'
-const WHITE = 'FFFFFF'
+// ── Color constants (sourced from the shared PPTX theme) ─────────────────────
+const RH_RED = PPTX_COLORS.rhRed
+const HEADER_BG = PPTX_COLORS.headerBg
+const WHITE = PPTX_COLORS.white
 
 // ── Pure data-mapping helpers (testable without pptxgenjs) ───────────────────
 
@@ -43,11 +45,25 @@ export function buildArchSummaryData(
 }
 
 function hdrCell(text: string): TableCell {
-  return { text, options: { bold: true, fill: { color: HEADER_BG }, color: '000000' } }
+  return {
+    text,
+    options: {
+      bold: true,
+      fill: { color: HEADER_BG },
+      color: PPTX_COLORS.black,
+      fontFace: PPTX_FONT.body,
+    },
+  }
 }
 
+// Label/prose cell — Arial.
 function cell(text: string): TableCell {
-  return { text }
+  return { text, options: { fontFace: PPTX_FONT.body } }
+}
+
+// Numeric/metric cell — Consolas (tabular, mirrors the on-screen idiom).
+function numCell(text: string): TableCell {
+  return { text, options: { fontFace: PPTX_FONT.metric } }
 }
 
 export function buildBomTableRows(sizing: ClusterSizing): TableRow[] {
@@ -70,19 +86,19 @@ export function buildBomTableRows(sizing: ClusterSizing): TableRow[] {
   ]
   const dataRows: TableRow[] = entries.map((e) => [
     cell(e.label),
-    cell(String(e.spec.count)),
-    cell(String(e.spec.vcpu)),
-    cell(String(e.spec.ramGB)),
-    cell(String(e.spec.storageGB)),
+    numCell(String(e.spec.count)),
+    numCell(String(e.spec.vcpu)),
+    numCell(String(e.spec.ramGB)),
+    numCell(String(e.spec.storageGB)),
   ])
   const rhoaiRows: TableRow[] = sizing.rhoaiOverhead
     ? [
         [
           cell('RHOAI Overhead (KServe / DS Pipelines / Model Registry)'),
-          cell('—'),
-          cell(`+${sizing.rhoaiOverhead.vcpu}`),
-          cell(`+${sizing.rhoaiOverhead.ramGB}`),
-          cell('—'),
+          numCell('—'),
+          numCell(`+${sizing.rhoaiOverhead.vcpu}`),
+          numCell(`+${sizing.rhoaiOverhead.ramGB}`),
+          numCell('—'),
         ],
       ]
     : []
@@ -177,8 +193,8 @@ export function buildAggregateSlideData(
   ]
   const dataRows: TableRow[] = metrics.map(({ label, key }) => [
     cell(label),
-    ...clusterTotals.map((t) => cell(String(t[key]))),
-    cell(String(aggregateTotals[key])),
+    ...clusterTotals.map((t) => numCell(String(t[key]))),
+    numCell(String(aggregateTotals[key])),
   ])
   return { headerRow, dataRows }
 }
@@ -233,6 +249,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
       color: WHITE,
       align: 'center',
       valign: 'middle',
+      fontFace: PPTX_FONT.body,
     })
     slide.addText(kpi.value, {
       x: kx,
@@ -245,6 +262,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
       align: 'center',
       valign: 'middle',
       fit: 'shrink',
+      fontFace: PPTX_FONT.metric,
     })
   })
 
@@ -270,9 +288,13 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
     barDir: 'col' as const,
     showTitle: true,
     title: 'Node Count by Pool',
+    titleFontFace: PPTX_FONT.body,
+    catAxisLabelFontFace: PPTX_FONT.body,
+    valAxisLabelFontFace: PPTX_FONT.metric,
     showLegend: false,
     showValue: true,
     dataLabelPosition: 'outEnd' as const,
+    dataLabelFontFace: PPTX_FONT.metric,
     chartColors: [RH_RED],
   })
   slide.addChart('bar', nodeCountData, makeNodeChartOpts())
@@ -294,10 +316,14 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
         barGrouping: 'stacked' as const,
         showTitle: true,
         title: 'vCPU Distribution',
+        titleFontFace: PPTX_FONT.body,
+        catAxisLabelFontFace: PPTX_FONT.body,
+        valAxisLabelFontFace: PPTX_FONT.metric,
         showLegend: true,
         legendPos: 'b' as const,
+        legendFontFace: PPTX_FONT.body,
         showValue: false,
-        chartColors: ['EE0000', 'CC0000', 'AA0000', '880000', '660000', '440000', '220000'],
+        chartColors: [...PPTX_COLORS.vcpuSeries],
       })
       slide.addChart('bar', vcpuData, makeVcpuChartOpts())
     }
@@ -310,7 +336,8 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
     y: contentY,
     w: tableW,
     colW: [2.0, 0.8, 0.9, 0.9, 1.03],
-    border: { type: 'solid', color: 'CCCCCC', pt: 0.5 },
+    border: { type: 'solid', color: PPTX_COLORS.border, pt: 0.5 },
+    fontFace: PPTX_FONT.body,
     fontSize: 9,
     rowH: 0.28,
   })
@@ -326,6 +353,9 @@ export async function generatePptxReport(): Promise<void> {
   const { default: PptxGenJS } = await import('pptxgenjs')
   const pptx = new PptxGenJS()
 
+  // Presentation-wide default font (Arial) — overridden per-element for metric values.
+  pptx.theme = { headFontFace: PPTX_FONT.body, bodyFontFace: PPTX_FONT.body }
+
   pptx.layout = 'LAYOUT_WIDE'
   pptx.author = 'OpenShift Sizer'
   pptx.subject = 'OpenShift Sizing Report'
@@ -339,6 +369,7 @@ export async function generatePptxReport(): Promise<void> {
     for (let i = 0; i < input.clusters.length; i++) {
       const cluster = input.clusters[i]
       const result = calc.clusterResults[i]
+      if (!cluster || !result) continue
       const sizing = result.sizing
       clusterTotals.push(sizing.totals)
       addClusterSlide(pptx, cluster, sizing)
@@ -358,6 +389,7 @@ export async function generatePptxReport(): Promise<void> {
       bold: true,
       color: WHITE,
       valign: 'middle',
+      fontFace: PPTX_FONT.body,
     })
 
     // Side-by-side totals table
@@ -376,7 +408,8 @@ export async function generatePptxReport(): Promise<void> {
       y: 1.2,
       w: 11.33,
       colW,
-      border: { type: 'solid', color: 'CCCCCC', pt: 0.5 },
+      border: { type: 'solid', color: PPTX_COLORS.border, pt: 0.5 },
+      fontFace: PPTX_FONT.body,
       fontSize: 12,
       rowH: 0.45,
     })
@@ -388,6 +421,7 @@ export async function generatePptxReport(): Promise<void> {
     const clusterIdx = input.activeClusterIndex
     const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
     const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+    if (!cluster || !result) return
     const sizing = result.sizing
 
     pptx.title = 'OpenShift Architecture — ' + cluster.name
@@ -405,6 +439,7 @@ export async function generatePptxReport(): Promise<void> {
       bold: true,
       color: WHITE,
       valign: 'middle',
+      fontFace: PPTX_FONT.body,
     })
 
     // ── KPI callout boxes strip ──────────────────────────────────────────────

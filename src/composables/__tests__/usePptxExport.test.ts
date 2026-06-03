@@ -198,6 +198,42 @@ describe('buildBomTableRows', () => {
   })
 })
 
+// ── Font convention: Arial for prose/labels, Consolas for numeric values ──────
+
+describe('PPTX font convention', () => {
+  it('BoM header cells use Arial', () => {
+    const header = buildBomTableRows(makeSizing())[0]
+    for (const c of header) {
+      expect(c.options?.fontFace).toBe('Arial')
+    }
+  })
+
+  it('BoM label column uses Arial, numeric columns use Consolas', () => {
+    const masterRow = buildBomTableRows(makeSizing({ masterNodes: makeNodeSpec({ count: 3 }) }))[1]
+    expect(masterRow[0].options?.fontFace).toBe('Arial') // Node Type label
+    expect(masterRow[1].options?.fontFace).toBe('Consolas') // Count
+    expect(masterRow[2].options?.fontFace).toBe('Consolas') // vCPU
+    expect(masterRow[3].options?.fontFace).toBe('Consolas') // RAM
+    expect(masterRow[4].options?.fontFace).toBe('Consolas') // Storage
+  })
+
+  it('aggregate metric label uses Arial, totals use Consolas', () => {
+    const { headerRow, dataRows } = buildAggregateSlideData(
+      [{ name: 'A' }, { name: 'B' }],
+      [
+        { vcpu: 8, ramGB: 32, storageGB: 120 },
+        { vcpu: 16, ramGB: 64, storageGB: 240 },
+      ],
+      { vcpu: 24, ramGB: 96, storageGB: 360 },
+    )
+    expect(headerRow[0].options?.fontFace).toBe('Arial')
+    const vcpuRow = dataRows[0]
+    expect(vcpuRow[0].options?.fontFace).toBe('Arial') // metric name
+    expect(vcpuRow[1].options?.fontFace).toBe('Consolas') // cluster A total
+    expect(vcpuRow[vcpuRow.length - 1].options?.fontFace).toBe('Consolas') // TOTAL
+  })
+})
+
 // ── buildBomTableRows v2.0 rows ───────────────────────────────────────────────
 
 describe('buildBomTableRows v2.0 rows', () => {
@@ -205,7 +241,10 @@ describe('buildBomTableRows v2.0 rows', () => {
     const rows = buildBomTableRows(
       makeSizing({ virtWorkerNodes: { count: 4, vcpu: 16, ramGB: 64, storageGB: 200 } }),
     )
-    const allText = rows.flat().map((c) => c.text).join('|')
+    const allText = rows
+      .flat()
+      .map((c) => c.text)
+      .join('|')
     expect(allText).toContain('Virt Workers')
   })
 
@@ -213,20 +252,29 @@ describe('buildBomTableRows v2.0 rows', () => {
     const rows = buildBomTableRows(
       makeSizing({ gpuNodes: { count: 2, vcpu: 48, ramGB: 192, storageGB: 500 } }),
     )
-    const allText = rows.flat().map((c) => c.text).join('|')
+    const allText = rows
+      .flat()
+      .map((c) => c.text)
+      .join('|')
     expect(allText).toContain('GPU Nodes')
   })
 
   it('appends RHOAI annotation row when rhoaiOverhead non-null', () => {
     const rows = buildBomTableRows(makeSizing({ rhoaiOverhead: { vcpu: 4, ramGB: 16 } }))
-    const allText = rows.flat().map((c) => c.text).join('|')
+    const allText = rows
+      .flat()
+      .map((c) => c.text)
+      .join('|')
     expect(allText).toContain('RHOAI Overhead')
     expect(allText).toContain('+4')
   })
 
   it('omits GPU and Virt rows when null', () => {
     const rows = buildBomTableRows(makeSizing())
-    const allText = rows.flat().map((c) => c.text).join('|')
+    const allText = rows
+      .flat()
+      .map((c) => c.text)
+      .join('|')
     expect(allText).not.toContain('GPU Nodes')
     expect(allText).not.toContain('Virt Workers')
     expect(allText).not.toContain('RHOAI Overhead')
@@ -444,8 +492,8 @@ describe('buildAggregateSlideData', () => {
       aggregateTotals2,
     )
     // TOTAL is the last cell in each data row (index 3 for 2 clusters)
-    expect(dataRows[0][3].text).toBe('72')   // vcpu
-    expect(dataRows[1][3].text).toBe('288')  // ramGB
+    expect(dataRows[0][3].text).toBe('72') // vcpu
+    expect(dataRows[1][3].text).toBe('288') // ramGB
     expect(dataRows[2][3].text).toBe('1080') // storageGB
   })
 
@@ -456,9 +504,9 @@ describe('buildAggregateSlideData', () => {
       aggregateTotals2,
     )
     // Cluster A (index 1), Cluster B (index 2)
-    expect(dataRows[0][1].text).toBe('24')  // A vcpu
-    expect(dataRows[0][2].text).toBe('48')  // B vcpu
-    expect(dataRows[1][1].text).toBe('96')  // A ramGB
+    expect(dataRows[0][1].text).toBe('24') // A vcpu
+    expect(dataRows[0][2].text).toBe('48') // B vcpu
+    expect(dataRows[1][1].text).toBe('96') // A ramGB
     expect(dataRows[1][2].text).toBe('192') // B ramGB
     expect(dataRows[2][1].text).toBe('360') // A storageGB
     expect(dataRows[2][2].text).toBe('720') // B storageGB

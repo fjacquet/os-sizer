@@ -21,7 +21,10 @@ beforeEach(() => {
 
   // Polyfill globals not available in node environment
   globalThis.Blob = class MockBlob {
-    constructor(public parts: unknown[], public options: unknown) {}
+    constructor(
+      public parts: unknown[],
+      public options: unknown,
+    ) {}
   } as unknown as typeof Blob
 
   globalThis.URL = {

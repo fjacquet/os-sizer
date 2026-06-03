@@ -11,7 +11,7 @@ export const i18n = createI18n({
   // Explicit Swiss locale numberFormats — do NOT inherit from parent locale (fr, de, it)
   // Inherited formats use locale-specific thousand separators that break Swiss user expectations
   numberFormats: {
-    'en': {
+    en: {
       decimal: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 },
       integer: { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 },
       percent: { style: 'percent', minimumFractionDigits: 1 },
@@ -36,7 +36,7 @@ export const i18n = createI18n({
 
 // Lazy-load non-EN locale files on demand (called from uiStore.setLocale)
 export async function loadLocale(locale: 'fr' | 'de' | 'it'): Promise<void> {
-  const localeMap: Record<string, string> = { fr: 'fr-CH', de: 'de-CH', it: 'it-CH' }
+  const localeMap: Record<'fr' | 'de' | 'it', string> = { fr: 'fr-CH', de: 'de-CH', it: 'it-CH' }
   // Explicit if/else branches — NOT a template literal — so bundler can tree-shake
   // Template literal: await import(`./locales/${locale}.json`) causes INEFFECTIVE_DYNAMIC_IMPORT warning
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
