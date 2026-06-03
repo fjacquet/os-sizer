@@ -21,7 +21,9 @@ describe('Step2WorkloadForm', () => {
     it('updateCluster sets workload.podCpuMillicores to 2000', () => {
       const store = useInputStore()
       const id = store.clusters[0].id
-      store.updateCluster(id, { workload: { ...store.clusters[0].workload, podCpuMillicores: 2000 } })
+      store.updateCluster(id, {
+        workload: { ...store.clusters[0].workload, podCpuMillicores: 2000 },
+      })
       expect(store.clusters[0].workload.podCpuMillicores).toBe(2000)
     })
 

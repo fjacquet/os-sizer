@@ -26,11 +26,17 @@ function roleBadgeClass(role: 'hub' | 'spoke' | 'standalone' | undefined): strin
   }
 }
 
-function roleLabel(role: 'hub' | 'spoke' | 'standalone' | undefined, t: (key: string) => string): string {
+function roleLabel(
+  role: 'hub' | 'spoke' | 'standalone' | undefined,
+  t: (key: string) => string,
+): string {
   switch (role) {
-    case 'hub':   return t('results.clusters.roleHub')
-    case 'spoke': return t('results.clusters.roleSpoke')
-    default:      return t('results.clusters.roleStandalone')
+    case 'hub':
+      return t('results.clusters.roleHub')
+    case 'spoke':
+      return t('results.clusters.roleSpoke')
+    default:
+      return t('results.clusters.roleStandalone')
   }
 }
 
@@ -50,7 +56,7 @@ function startRename(id: string, currentName: string): { renamingId: string; ren
 function commitRename(
   id: string,
   value: string,
-  updateFn: (id: string, patch: { name: string }) => void
+  updateFn: (id: string, patch: { name: string }) => void,
 ): { renamingId: null } {
   const trimmed = value.trim()
   if (trimmed) updateFn(id, { name: trimmed })
@@ -65,7 +71,7 @@ function cancelRename(): { renamingId: null } {
 function selectRole(
   id: string,
   role: 'hub' | 'spoke' | 'standalone',
-  updateFn: (id: string, patch: { role: 'hub' | 'spoke' | 'standalone' }) => void
+  updateFn: (id: string, patch: { role: 'hub' | 'spoke' | 'standalone' }) => void,
 ): { openDropdownId: null } {
   updateFn(id, { role })
   return { openDropdownId: null }
@@ -84,7 +90,7 @@ function buildTabs(clusters: ClusterStub[], activeIdx: number) {
 
 // ── Test suite ────────────────────────────────────────────────────────────────
 
-const t = (key: string) => key  // identity stub (same pattern as BomTable.test.ts)
+const t = (key: string) => key // identity stub (same pattern as BomTable.test.ts)
 
 function makeCluster(id: string, name: string, role?: 'hub' | 'spoke' | 'standalone'): ClusterStub {
   return { id, name, role }
@@ -112,7 +118,9 @@ describe('ClusterTabBar', () => {
   // Test 3: clicking inactive tab sets activeClusterIndex
   it('switching cluster sets the correct activeClusterIndex', () => {
     let activeIndex = 0
-    const setActive = (idx: number) => { activeIndex = idx }
+    const setActive = (idx: number) => {
+      activeIndex = idx
+    }
     setActive(2)
     expect(activeIndex).toBe(2)
   })
@@ -120,7 +128,9 @@ describe('ClusterTabBar', () => {
   // Test 4: add button calls addCluster
   it('add cluster triggers addCluster callback', () => {
     let called = false
-    const addCluster = () => { called = true }
+    const addCluster = () => {
+      called = true
+    }
     addCluster()
     expect(called).toBe(true)
   })
@@ -134,7 +144,9 @@ describe('ClusterTabBar', () => {
   // Test 6: clicking remove calls removeCluster with correct id
   it('remove cluster triggers removeCluster callback with cluster id', () => {
     let removedId = ''
-    const removeCluster = (id: string) => { removedId = id }
+    const removeCluster = (id: string) => {
+      removedId = id
+    }
     removeCluster('target-id')
     expect(removedId).toBe('target-id')
   })
@@ -154,7 +166,9 @@ describe('ClusterTabBar', () => {
   // Test 8: rename on Enter — commits name via updateCluster
   it('commitRename calls updateCluster with trimmed name and clears renamingId', () => {
     let updated: { id: string; patch: { name: string } } | null = null
-    const updateFn = (id: string, patch: { name: string }) => { updated = { id, patch } }
+    const updateFn = (id: string, patch: { name: string }) => {
+      updated = { id, patch }
+    }
     const result = commitRename('cluster-1', '  New Name  ', updateFn)
     expect(updated).toEqual({ id: 'cluster-1', patch: { name: 'New Name' } })
     expect(result.renamingId).toBeNull()
@@ -163,7 +177,9 @@ describe('ClusterTabBar', () => {
   // Test 9: rename cancel — Escape does NOT commit
   it('cancelRename does not call updateCluster and clears renamingId', () => {
     let called = false
-    const updateFn = (_id: string, _patch: { name: string }) => { called = true }
+    const updateFn = (_id: string, _patch: { name: string }) => {
+      called = true
+    }
     // cancelRename does not call updateFn — test that directly
     const result = cancelRename()
     expect(called).toBe(false)
@@ -207,7 +223,9 @@ describe('ClusterTabBar', () => {
   // Test 13: commitRename with empty/whitespace-only string does NOT update
   it('commitRename with blank name does not call updateCluster (T-18-01 guard)', () => {
     let called = false
-    const updateFn = (_id: string, _patch: { name: string }) => { called = true }
+    const updateFn = (_id: string, _patch: { name: string }) => {
+      called = true
+    }
     commitRename('cluster-1', '   ', updateFn)
     expect(called).toBe(false)
   })

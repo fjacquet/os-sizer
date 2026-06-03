@@ -10,6 +10,7 @@ export const useInputStore = defineStore('input', () => {
 
   function addCluster() {
     const source = clusters.value[activeClusterIndex.value]
+    if (!source) return
     const newCluster = {
       ...source,
       workload: { ...source.workload },
@@ -30,7 +31,7 @@ export const useInputStore = defineStore('input', () => {
 
   function updateCluster(id: string, patch: Partial<ClusterConfig>) {
     const cluster = clusters.value.find((c) => c.id === id)
-    if (cluster) Object.assign(cluster, patch)  // direct assignment — NOT $patch()
+    if (cluster) Object.assign(cluster, patch) // direct assignment — NOT $patch()
   }
 
   return { clusters, activeClusterIndex, addCluster, removeCluster, updateCluster }

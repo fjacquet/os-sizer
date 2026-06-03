@@ -11,27 +11,57 @@ export function validateInputs(config: ClusterConfig): ValidationWarning[] {
   const warnings: ValidationWarning[] = []
 
   if (config.workload.totalPods < 0) {
-    warnings.push({ code: 'NEGATIVE_PODS', severity: 'error', messageKey: 'validation.negativePods' })
+    warnings.push({
+      code: 'NEGATIVE_PODS',
+      severity: 'error',
+      messageKey: 'validation.negativePods',
+    })
   }
 
   if (config.workload.nodeRamGB < WORKER_MIN.ramGB) {
-    warnings.push({ code: 'WORKER_RAM_BELOW_MIN', severity: 'warning', messageKey: 'validation.workerRamBelowMin' })
+    warnings.push({
+      code: 'WORKER_RAM_BELOW_MIN',
+      severity: 'warning',
+      messageKey: 'validation.workerRamBelowMin',
+    })
   }
 
   if (config.workload.nodeVcpu < WORKER_MIN.vcpu) {
-    warnings.push({ code: 'WORKER_CPU_BELOW_MIN', severity: 'warning', messageKey: 'validation.workerCpuBelowMin' })
+    warnings.push({
+      code: 'WORKER_CPU_BELOW_MIN',
+      severity: 'warning',
+      messageKey: 'validation.workerCpuBelowMin',
+    })
   }
 
-  if (config.workload.totalPods === 0 && (config.workload.podCpuMillicores > 0 || config.workload.podMemMiB > 0)) {
-    warnings.push({ code: 'ZERO_PODS_WITH_RESOURCES', severity: 'warning', messageKey: 'validation.zeroPodsWithResources' })
+  if (
+    config.workload.totalPods === 0 &&
+    (config.workload.podCpuMillicores > 0 || config.workload.podMemMiB > 0)
+  ) {
+    warnings.push({
+      code: 'ZERO_PODS_WITH_RESOURCES',
+      severity: 'warning',
+      messageKey: 'validation.zeroPodsWithResources',
+    })
   }
 
-  if (config.addOns.odfEnabled && ['sno', 'microshift', 'managed-cloud'].includes(config.topology)) {
-    warnings.push({ code: 'ODF_INCOMPATIBLE_TOPOLOGY', severity: 'error', messageKey: 'validation.odfIncompatibleTopology' })
+  if (
+    config.addOns.odfEnabled &&
+    ['sno', 'microshift', 'managed-cloud'].includes(config.topology)
+  ) {
+    warnings.push({
+      code: 'ODF_INCOMPATIBLE_TOPOLOGY',
+      severity: 'error',
+      messageKey: 'validation.odfIncompatibleTopology',
+    })
   }
 
   if (config.addOns.rhacmEnabled && config.addOns.rhacmManagedClusters <= 0) {
-    warnings.push({ code: 'RHACM_NO_CLUSTERS', severity: 'warning', messageKey: 'validation.rhacmNoClusters' })
+    warnings.push({
+      code: 'RHACM_NO_CLUSTERS',
+      severity: 'warning',
+      messageKey: 'validation.rhacmNoClusters',
+    })
   }
 
   // WARN-04: RWX storage required for live migration

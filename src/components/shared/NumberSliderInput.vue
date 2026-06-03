@@ -1,18 +1,18 @@
 <script setup lang="ts">
-const props = defineProps<{
-  modelValue: number
-  label: string
-  min: number
-  max: number
-  step?: number
-  unit?: string
-}>()
-const emit = defineEmits<{ 'update:modelValue': [value: number] }>()
+  const props = defineProps<{
+    modelValue: number
+    label: string
+    min: number
+    max: number
+    step?: number
+    unit?: string
+  }>()
+  const emit = defineEmits<{ 'update:modelValue': [value: number] }>()
 
-function onInput(e: Event) {
-  const val = Number((e.target as HTMLInputElement).value)
-  if (!isNaN(val)) emit('update:modelValue', val)
-}
+  function onInput(e: Event) {
+    const val = Number((e.target as HTMLInputElement).value)
+    if (!isNaN(val)) emit('update:modelValue', val)
+  }
 </script>
 
 <template>

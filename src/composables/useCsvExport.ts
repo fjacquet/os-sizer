@@ -40,8 +40,10 @@ export function buildMultiClusterCsvContent(
   const sections: string[] = []
 
   for (let i = 0; i < clusters.length; i++) {
-    const clusterName = clusters[i].name
+    const cluster = clusters[i]
     const sizing = clusterSizings[i]
+    if (!cluster || !sizing) continue
+    const clusterName = cluster.name
 
     // Cluster name grouping row (D-09): name in col A, rest empty
     // Escape cluster names containing commas (Pitfall 4 from RESEARCH.md)
@@ -54,9 +56,7 @@ export function buildMultiClusterCsvContent(
     // Data rows (reuse getNodeEntries pattern)
     const entries = getNodeEntries(sizing)
     for (const e of entries) {
-      sections.push(
-        `${e.label},${e.spec.count},${e.spec.vcpu},${e.spec.ramGB},${e.spec.storageGB}`,
-      )
+      sections.push(`${e.label},${e.spec.count},${e.spec.vcpu},${e.spec.ramGB},${e.spec.storageGB}`)
     }
 
     // RHOAI overhead row if present
@@ -90,11 +90,7 @@ export function generateCsvReport(): void {
   if (input.clusters.length >= 2) {
     // Multi-cluster path
     const clusterSizings = calc.clusterResults.map((r) => r.sizing)
-    const csv = buildMultiClusterCsvContent(
-      input.clusters,
-      clusterSizings,
-      calc.aggregateTotals,
-    )
+    const csv = buildMultiClusterCsvContent(input.clusters, clusterSizings, calc.aggregateTotals)
     const filename = `os-sizer-all-clusters-${new Date().toISOString().split('T')[0]}.csv`
     downloadBlob(csv, filename, 'text/csv; charset=utf-8')
   } else {
@@ -102,6 +98,7 @@ export function generateCsvReport(): void {
     const clusterIdx = input.activeClusterIndex
     const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
     const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
+    if (!cluster || !result) return
     const csv = buildCsvContent(result.sizing)
     const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`
     downloadBlob(csv, filename, 'text/csv; charset=utf-8')

@@ -27,7 +27,9 @@ describe('validateInputs', () => {
   it('returns error for negative pod count', () => {
     const config = createDefaultClusterConfig(0)
     config.workload.totalPods = -1
-    expect(validateInputs(config).some((w) => w.code === 'NEGATIVE_PODS' && w.severity === 'error')).toBe(true)
+    expect(
+      validateInputs(config).some((w) => w.code === 'NEGATIVE_PODS' && w.severity === 'error'),
+    ).toBe(true)
   })
 
   it('returns warning for worker RAM below minimum', () => {
@@ -61,7 +63,9 @@ describe('WARN-04/05: VIRT_RWX_STORAGE_REQUIRED', () => {
     config.addOns.odfEnabled = false
     config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED' && w.severity === 'warning')).toBe(true)
+    expect(
+      warnings.some((w) => w.code === 'VIRT_RWX_STORAGE_REQUIRED' && w.severity === 'warning'),
+    ).toBe(true)
   })
 
   it('no warning when virtEnabled=true and odfEnabled=true', () => {
@@ -70,7 +74,7 @@ describe('WARN-04/05: VIRT_RWX_STORAGE_REQUIRED', () => {
     config.addOns.odfEnabled = true
     config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
+    expect(warnings.some((w) => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
   })
 
   it('no warning when virtEnabled=false', () => {
@@ -79,7 +83,7 @@ describe('WARN-04/05: VIRT_RWX_STORAGE_REQUIRED', () => {
     config.addOns.odfEnabled = false
     config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
+    expect(warnings.some((w) => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
   })
 
   it('suppresses VIRT_RWX_STORAGE_REQUIRED for SNO topology and emits SNO_VIRT_NO_LIVE_MIGRATION instead', () => {
@@ -90,9 +94,11 @@ describe('WARN-04/05: VIRT_RWX_STORAGE_REQUIRED', () => {
     config.addOns.rwxStorageAvailable = false
     const warnings = validateInputs(config)
     // VIRT_RWX_STORAGE_REQUIRED is suppressed on SNO
-    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
+    expect(warnings.some((w) => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
     // SNO_VIRT_NO_LIVE_MIGRATION is emitted because virtEnabled=true on SNO topology
-    expect(warnings.some(w => w.code === 'SNO_VIRT_NO_LIVE_MIGRATION' && w.severity === 'warning')).toBe(true)
+    expect(
+      warnings.some((w) => w.code === 'SNO_VIRT_NO_LIVE_MIGRATION' && w.severity === 'warning'),
+    ).toBe(true)
   })
 
   it('no warning when virtEnabled=true, odfEnabled=false, but rwxStorageAvailable=true (WARN-04 core)', () => {
@@ -102,7 +108,7 @@ describe('WARN-04/05: VIRT_RWX_STORAGE_REQUIRED', () => {
     config.addOns.odfEnabled = false
     config.addOns.rwxStorageAvailable = true
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
+    expect(warnings.some((w) => w.code === 'VIRT_RWX_STORAGE_REQUIRED')).toBe(false)
   })
 })
 
@@ -112,7 +118,11 @@ describe('WARN-01: GPU passthrough blocks live migration', () => {
     config.addOns.gpuEnabled = true
     config.addOns.gpuMode = 'passthrough'
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION' && w.severity === 'warning')).toBe(true)
+    expect(
+      warnings.some(
+        (w) => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION' && w.severity === 'warning',
+      ),
+    ).toBe(true)
   })
 
   it('no warning when gpuMode=container', () => {
@@ -120,7 +130,7 @@ describe('WARN-01: GPU passthrough blocks live migration', () => {
     config.addOns.gpuEnabled = true
     config.addOns.gpuMode = 'container'
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION')).toBe(false)
+    expect(warnings.some((w) => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION')).toBe(false)
   })
 
   it('no warning when gpuMode=vgpu', () => {
@@ -128,7 +138,7 @@ describe('WARN-01: GPU passthrough blocks live migration', () => {
     config.addOns.gpuEnabled = true
     config.addOns.gpuMode = 'vgpu'
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION')).toBe(false)
+    expect(warnings.some((w) => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION')).toBe(false)
   })
 
   it('no warning when gpuEnabled=false even if gpuMode=passthrough', () => {
@@ -136,7 +146,7 @@ describe('WARN-01: GPU passthrough blocks live migration', () => {
     config.addOns.gpuEnabled = false
     config.addOns.gpuMode = 'passthrough'
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION')).toBe(false)
+    expect(warnings.some((w) => w.code === 'GPU_PASSTHROUGH_BLOCKS_LIVE_MIGRATION')).toBe(false)
   })
 })
 
@@ -147,7 +157,11 @@ describe('WARN-03: MIG profile with KubeVirt VMs unsupported', () => {
     config.addOns.migProfile = '1g.5gb'
     config.addOns.virtEnabled = true
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED' && w.severity === 'warning')).toBe(true)
+    expect(
+      warnings.some(
+        (w) => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED' && w.severity === 'warning',
+      ),
+    ).toBe(true)
   })
 
   it('no warning when migProfile is empty string (no MIG configured)', () => {
@@ -156,7 +170,7 @@ describe('WARN-03: MIG profile with KubeVirt VMs unsupported', () => {
     config.addOns.migProfile = ''
     config.addOns.virtEnabled = true
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED')).toBe(false)
+    expect(warnings.some((w) => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED')).toBe(false)
   })
 
   it('no warning when virtEnabled=false (no KubeVirt VMs)', () => {
@@ -165,7 +179,7 @@ describe('WARN-03: MIG profile with KubeVirt VMs unsupported', () => {
     config.addOns.migProfile = '1g.5gb'
     config.addOns.virtEnabled = false
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED')).toBe(false)
+    expect(warnings.some((w) => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED')).toBe(false)
   })
 
   it('no warning when gpuEnabled=false', () => {
@@ -174,6 +188,6 @@ describe('WARN-03: MIG profile with KubeVirt VMs unsupported', () => {
     config.addOns.migProfile = '1g.5gb'
     config.addOns.virtEnabled = true
     const warnings = validateInputs(config)
-    expect(warnings.some(w => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED')).toBe(false)
+    expect(warnings.some((w) => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED')).toBe(false)
   })
 })

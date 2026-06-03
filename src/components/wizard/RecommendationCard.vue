@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n'
-import type { TopologyRecommendation, TopologyType } from '@/engine/types'
+  import { useI18n } from 'vue-i18n'
+  import type { TopologyRecommendation, TopologyType } from '@/engine/types'
 
-defineProps<{
-  recommendation: TopologyRecommendation
-  selected: boolean
-  topologyLabelKey: string
-}>()
+  defineProps<{
+    recommendation: TopologyRecommendation
+    selected: boolean
+    topologyLabelKey: string
+  }>()
 
-const emit = defineEmits<{ select: [topology: TopologyType] }>()
-const { t } = useI18n()
+  const emit = defineEmits<{ select: [topology: TopologyType] }>()
+  const { t } = useI18n()
 
-function fitScoreColor(score: number): string {
-  if (score >= 70) return 'text-green-600'
-  if (score >= 40) return 'text-amber-600'
-  return 'text-red-600'
-}
+  function fitScoreColor(score: number): string {
+    if (score >= 70) return 'text-green-600'
+    if (score >= 40) return 'text-amber-600'
+    return 'text-red-600'
+  }
 </script>
 
 <template>
@@ -24,7 +24,7 @@ function fitScoreColor(score: number): string {
       'w-full text-left p-4 rounded-lg border-2 transition-colors space-y-2',
       selected
         ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/30'
-        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-gray-700',
     ]"
     @click="emit('select', recommendation.topology)"
   >
@@ -32,7 +32,9 @@ function fitScoreColor(score: number): string {
       <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">
         {{ t(topologyLabelKey) }}
       </span>
-      <span :class="['text-xs font-bold px-2 py-0.5 rounded', fitScoreColor(recommendation.fitScore)]">
+      <span
+        :class="['text-xs font-bold px-2 py-0.5 rounded', fitScoreColor(recommendation.fitScore)]"
+      >
         {{ recommendation.fitScore }}%
       </span>
     </div>

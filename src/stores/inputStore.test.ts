@@ -34,7 +34,7 @@ describe('inputStore', () => {
     const store = useInputStore()
     const id = store.clusters[0].id
     store.removeCluster(id)
-    expect(store.clusters).toHaveLength(1)  // unchanged
+    expect(store.clusters).toHaveLength(1) // unchanged
   })
 
   it('updateCluster mutates the target cluster field', () => {
@@ -51,7 +51,13 @@ describe('inputStore', () => {
       topology: 'compact-3node',
       environment: 'edge',
       haRequired: false,
-      workload: { totalPods: 500, podCpuMillicores: 2000, podMemMiB: 4096, nodeVcpu: 32, nodeRamGB: 128 },
+      workload: {
+        totalPods: 500,
+        podCpuMillicores: 2000,
+        podMemMiB: 4096,
+        nodeVcpu: 32,
+        nodeRamGB: 128,
+      },
       addOns: { ...store.clusters[0].addOns, odfEnabled: true, odfExtraOsdCount: 3 },
     })
     store.addCluster()

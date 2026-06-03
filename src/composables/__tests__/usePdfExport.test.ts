@@ -1,5 +1,10 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { buildPdfTableData, buildChartImageDataUrl, buildKpiStripData, buildAggregateRow } from '../usePdfExport'
+import {
+  buildPdfTableData,
+  buildChartImageDataUrl,
+  buildKpiStripData,
+  buildAggregateRow,
+} from '../usePdfExport'
 import type { ClusterSizing } from '@/engine/types'
 
 // Hoist mocks so they are available before vi.mock factory runs

@@ -3,7 +3,12 @@
 // Source: .planning/research/hardware-sizing.md
 
 import Decimal from 'decimal.js'
-import { CP_SIZING_TABLE, INFRA_SIZING_TABLE, TARGET_UTILIZATION, MAX_PODS_PER_NODE } from './constants'
+import {
+  CP_SIZING_TABLE,
+  INFRA_SIZING_TABLE,
+  TARGET_UTILIZATION,
+  MAX_PODS_PER_NODE,
+} from './constants'
 
 /**
  * Control plane node sizing based on worker count.
@@ -21,6 +26,7 @@ export function cpSizing(workerCount: number, useOvnK = false): { vcpu: number; 
   }
   // Above max table entry: use last tier
   const last = CP_SIZING_TABLE[CP_SIZING_TABLE.length - 1]
+  if (!last) throw new Error('CP_SIZING_TABLE must not be empty')
   return useOvnK
     ? { vcpu: last.vcpuOvnK, ramGB: last.ramGBOvnK }
     : { vcpu: last.vcpu, ramGB: last.ramGB }
@@ -37,9 +43,10 @@ export function cpSizing(workerCount: number, useOvnK = false): { vcpu: number; 
  *    6% of remainder   (above 16 GiB)
  */
 export function allocatableRamGB(totalGB: number): number {
-  const reserved = new Decimal(0.25).times(Math.min(totalGB, 4))
-    .plus(new Decimal(0.20).times(Math.min(Math.max(totalGB - 4, 0), 4)))
-    .plus(new Decimal(0.10).times(Math.min(Math.max(totalGB - 8, 0), 8)))
+  const reserved = new Decimal(0.25)
+    .times(Math.min(totalGB, 4))
+    .plus(new Decimal(0.2).times(Math.min(Math.max(totalGB - 4, 0), 4)))
+    .plus(new Decimal(0.1).times(Math.min(Math.max(totalGB - 8, 0), 8)))
     .plus(new Decimal(0.06).times(Math.max(totalGB - 16, 0)))
   return new Decimal(totalGB).minus(reserved).toNumber()
 }
@@ -73,13 +80,13 @@ export function workerCount(
     new Decimal(totalPodCpuMillicores)
       .dividedBy(1000)
       .dividedBy(new Decimal(nodeVcpu).times(targetUtilization))
-      .toNumber()
+      .toNumber(),
   )
   const byRam = Math.ceil(
     new Decimal(totalPodMemMiB)
       .dividedBy(1024)
       .dividedBy(new Decimal(allocRam).times(targetUtilization))
-      .toNumber()
+      .toNumber(),
   )
   const byPods = Math.ceil(totalPods / maxPodsPerNode)
 
@@ -99,5 +106,6 @@ export function infraNodeSizing(workerCount: number): { vcpu: number; ramGB: num
   }
   // Above max table entry: use last tier
   const last = INFRA_SIZING_TABLE[INFRA_SIZING_TABLE.length - 1]
+  if (!last) throw new Error('INFRA_SIZING_TABLE must not be empty')
   return { vcpu: last.vcpu, ramGB: last.ramGB }
 }

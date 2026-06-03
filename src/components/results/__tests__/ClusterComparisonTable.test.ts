@@ -69,23 +69,33 @@ function buildMetricRows(): MetricRow[] {
     { labelKey: 'node.gpu', getValue: (s) => fmt(s.gpuNodes?.count) },
     { labelKey: 'results.totalCpu', getValue: (s) => fmt(s.totals.vcpu) + ' vCPU', bold: true },
     { labelKey: 'results.totalRam', getValue: (s) => fmt(s.totals.ramGB) + ' GB', bold: true },
-    { labelKey: 'results.totalStorage', getValue: (s) => fmt(s.totals.storageGB) + ' GB', bold: true },
+    {
+      labelKey: 'results.totalStorage',
+      getValue: (s) => fmt(s.totals.storageGB) + ' GB',
+      bold: true,
+    },
   ]
 }
 
 function roleLabelShort(role: 'hub' | 'spoke' | 'standalone' | undefined): string {
   switch (role) {
-    case 'hub': return t('results.clusters.roleHub')
-    case 'spoke': return t('results.clusters.roleSpoke')
-    default: return t('results.clusters.roleStandalone')
+    case 'hub':
+      return t('results.clusters.roleHub')
+    case 'spoke':
+      return t('results.clusters.roleSpoke')
+    default:
+      return t('results.clusters.roleStandalone')
   }
 }
 
 function roleBadgeClass(role: 'hub' | 'spoke' | 'standalone' | undefined): string {
   switch (role) {
-    case 'hub': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
-    case 'spoke': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+    case 'hub':
+      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+    case 'spoke':
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+    default:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
   }
 }
 
@@ -113,14 +123,10 @@ const MAX_COMPARISON_CLUSTERS = 5
 
 // ── Test suite ────────────────────────────────────────────────────────────────
 describe('ClusterComparisonTable', () => {
-
   // Test 1: table renders with correct number of columns
   it('given 2 clusters with results, renders 2 data columns', () => {
     const clusters = [makeCluster('a', 'Cluster-1', 'hub'), makeCluster('b', 'Cluster-2', 'spoke')]
-    const results = [
-      makeResult('a', makeSizing()),
-      makeResult('b', makeSizing()),
-    ]
+    const results = [makeResult('a', makeSizing()), makeResult('b', makeSizing())]
     const headers = buildColumnHeaders(clusters)
     const rows = buildTableRows(results, buildMetricRows())
 
@@ -150,9 +156,7 @@ describe('ClusterComparisonTable', () => {
 
   // Test 3: null pool cells render '—' (not '0' or empty string)
   it('when workerNodes is null, the worker count cell contains "—"', () => {
-    const results = [
-      makeResult('a', makeSizing({ workerNodes: null })),
-    ]
+    const results = [makeResult('a', makeSizing({ workerNodes: null }))]
     const rows = buildTableRows(results, buildMetricRows())
     // workerNodes row is index 3 (node.workers)
     const workerRow = rows.find((r) => r.labelKey === 'node.workers')
@@ -182,7 +186,7 @@ describe('ClusterComparisonTable', () => {
   // Test 6: max 5 columns — given 5 clusters, table has 5 data columns
   it('given 5 clusters, renders exactly 5 data columns (does not overflow)', () => {
     const clusters = Array.from({ length: MAX_COMPARISON_CLUSTERS }, (_, i) =>
-      makeCluster(`id${i}`, `Cluster-${i}`, 'standalone')
+      makeCluster(`id${i}`, `Cluster-${i}`, 'standalone'),
     )
     const results = clusters.map((c) => makeResult(c.id, makeSizing()))
     const headers = buildColumnHeaders(clusters)
@@ -197,16 +201,25 @@ describe('ClusterComparisonTable', () => {
   // Test 7: null infraNodes, odfNodes, rhacmWorkers, virtWorkerNodes, gpuNodes all render '—'
   it('null optional node pool cells all render "—"', () => {
     const results = [
-      makeResult('a', makeSizing({
-        infraNodes: null,
-        odfNodes: null,
-        rhacmWorkers: null,
-        virtWorkerNodes: null,
-        gpuNodes: null,
-      })),
+      makeResult(
+        'a',
+        makeSizing({
+          infraNodes: null,
+          odfNodes: null,
+          rhacmWorkers: null,
+          virtWorkerNodes: null,
+          gpuNodes: null,
+        }),
+      ),
     ]
     const rows = buildTableRows(results, buildMetricRows())
-    const nullableKeys = ['node.infra', 'node.storage', 'results.bom.rhacmWorkers', 'node.virtWorkers', 'node.gpu']
+    const nullableKeys = [
+      'node.infra',
+      'node.storage',
+      'results.bom.rhacmWorkers',
+      'node.virtWorkers',
+      'node.gpu',
+    ]
     for (const key of nullableKeys) {
       const row = rows.find((r) => r.labelKey === key)
       expect(row).toBeDefined()
@@ -247,9 +260,7 @@ describe('ClusterComparisonTable', () => {
 
   // Test 11: non-null worker node cells include the count (not '—')
   it('when workerNodes is present, the worker count cell shows the count', () => {
-    const results = [
-      makeResult('a', makeSizing({ workerNodes: makeNodeSpec(5, 16, 32) })),
-    ]
+    const results = [makeResult('a', makeSizing({ workerNodes: makeNodeSpec(5, 16, 32) }))]
     const rows = buildTableRows(results, buildMetricRows())
     const workerRow = rows.find((r) => r.labelKey === 'node.workers')
     expect(workerRow!.cells[0]).toBe('5')
@@ -257,9 +268,7 @@ describe('ClusterComparisonTable', () => {
 
   // Test 12: master node rows always have values (masterNodes is never null)
   it('masterNodes count, vCPU, and RAM rows always render numeric values', () => {
-    const results = [
-      makeResult('a', makeSizing({ masterNodes: makeNodeSpec(3, 16, 64) })),
-    ]
+    const results = [makeResult('a', makeSizing({ masterNodes: makeNodeSpec(3, 16, 64) }))]
     const rows = buildTableRows(results, buildMetricRows())
 
     const mastersRow = rows.find((r) => r.labelKey === 'node.masters')

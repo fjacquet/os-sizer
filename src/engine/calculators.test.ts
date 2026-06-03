@@ -174,13 +174,43 @@ describe('calcSNO', () => {
 
   // SNO-01: snoVirtMode overrides hardware minimums
   it('snoVirtMode=true: 14 vCPU / 32 GB / 170 GB (SNO_VIRT_MIN)', () => {
-    const config = makeConfig({ topology: 'sno', addOns: { odfEnabled: false, odfExtraOsdCount: 0, infraNodesEnabled: false, rhacmEnabled: false, rhacmManagedClusters: 0, virtEnabled: false, vmCount: 0, vmsPerWorker: 10, virtAvgVmVcpu: 4, virtAvgVmRamGB: 8, snoVirtMode: true } })
+    const config = makeConfig({
+      topology: 'sno',
+      addOns: {
+        odfEnabled: false,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: false,
+        rhacmEnabled: false,
+        rhacmManagedClusters: 0,
+        virtEnabled: false,
+        vmCount: 0,
+        vmsPerWorker: 10,
+        virtAvgVmVcpu: 4,
+        virtAvgVmRamGB: 8,
+        snoVirtMode: true,
+      },
+    })
     const { sizing } = calcSNO(config)
     expect(sizing.masterNodes).toMatchObject({ count: 1, vcpu: 14, ramGB: 32, storageGB: 170 })
   })
 
   it('snoVirtMode=true: emits SNO_VIRT_NO_HA warning', () => {
-    const config = makeConfig({ topology: 'sno', addOns: { odfEnabled: false, odfExtraOsdCount: 0, infraNodesEnabled: false, rhacmEnabled: false, rhacmManagedClusters: 0, virtEnabled: false, vmCount: 0, vmsPerWorker: 10, virtAvgVmVcpu: 4, virtAvgVmRamGB: 8, snoVirtMode: true } })
+    const config = makeConfig({
+      topology: 'sno',
+      addOns: {
+        odfEnabled: false,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: false,
+        rhacmEnabled: false,
+        rhacmManagedClusters: 0,
+        virtEnabled: false,
+        vmCount: 0,
+        vmsPerWorker: 10,
+        virtAvgVmVcpu: 4,
+        virtAvgVmRamGB: 8,
+        snoVirtMode: true,
+      },
+    })
     const { warnings } = calcSNO(config)
     expect(warnings.some((w) => w.code === 'SNO_VIRT_NO_HA')).toBe(true)
   })
@@ -222,9 +252,9 @@ describe('calcTNA', () => {
   it('includes Tech Preview warning', () => {
     const config = makeConfig({ topology: 'two-node-arbiter' })
     const { warnings } = calcTNA(config)
-    const codes = warnings.map(w => w.code)
+    const codes = warnings.map((w) => w.code)
     expect(codes).toContain('TNA_TECH_PREVIEW')
-    const tnaWarn = warnings.find(w => w.code === 'TNA_TECH_PREVIEW')!
+    const tnaWarn = warnings.find((w) => w.code === 'TNA_TECH_PREVIEW')!
     expect(tnaWarn.severity).toBe('warning')
     expect(tnaWarn.messageKey).toBe('warnings.tna.techPreview')
   })
@@ -246,14 +276,14 @@ describe('calcTNF', () => {
   it('includes Tech Preview warning and Redfish BMC warning', () => {
     const config = makeConfig({ topology: 'two-node-fencing' })
     const { warnings } = calcTNF(config)
-    const codes = warnings.map(w => w.code)
+    const codes = warnings.map((w) => w.code)
     expect(codes).toContain('TNF_TECH_PREVIEW')
     expect(codes).toContain('TNF_REDFISH_REQUIRED')
 
-    const techPreview = warnings.find(w => w.code === 'TNF_TECH_PREVIEW')!
+    const techPreview = warnings.find((w) => w.code === 'TNF_TECH_PREVIEW')!
     expect(techPreview.severity).toBe('warning')
 
-    const redfish = warnings.find(w => w.code === 'TNF_REDFISH_REQUIRED')!
+    const redfish = warnings.find((w) => w.code === 'TNF_REDFISH_REQUIRED')!
     expect(redfish.severity).toBe('error')
     expect(redfish.messageKey).toBe('warnings.tnf.redfishRequired')
   })
@@ -363,7 +393,13 @@ describe('calcHCP — tech debt gaps (ENG-04, ENG-06, RES-04)', () => {
     const configOff = makeConfig({ topology: 'hcp' })
     const configOn = makeConfig({
       topology: 'hcp',
-      addOns: { odfEnabled: false, odfExtraOsdCount: 0, infraNodesEnabled: true, rhacmEnabled: false, rhacmManagedClusters: 0 },
+      addOns: {
+        odfEnabled: false,
+        odfExtraOsdCount: 0,
+        infraNodesEnabled: true,
+        rhacmEnabled: false,
+        rhacmManagedClusters: 0,
+      },
     })
     const { sizing: off } = calcHCP(configOff)
     const { sizing: on } = calcHCP(configOn)
@@ -441,9 +477,9 @@ describe('calcManagedCloud', () => {
   it('includes managedCloudNoHardware warning', () => {
     const config = makeConfig({ topology: 'managed-cloud' })
     const { warnings } = calcManagedCloud(config)
-    const codes = warnings.map(w => w.code)
+    const codes = warnings.map((w) => w.code)
     expect(codes).toContain('MANAGED_CLOUD_NO_HARDWARE')
-    const warn = warnings.find(w => w.code === 'MANAGED_CLOUD_NO_HARDWARE')!
+    const warn = warnings.find((w) => w.code === 'MANAGED_CLOUD_NO_HARDWARE')!
     expect(warn.severity).toBe('warning')
     expect(warn.messageKey).toBe('warnings.managedCloud.noHardware')
   })
@@ -476,13 +512,13 @@ describe('calcCluster dispatcher', () => {
   it('routes two-node-arbiter', () => {
     const config = makeConfig({ topology: 'two-node-arbiter' })
     const { warnings } = calcCluster(config)
-    expect(warnings.some(w => w.code === 'TNA_TECH_PREVIEW')).toBe(true)
+    expect(warnings.some((w) => w.code === 'TNA_TECH_PREVIEW')).toBe(true)
   })
 
   it('routes two-node-fencing', () => {
     const config = makeConfig({ topology: 'two-node-fencing' })
     const { warnings } = calcCluster(config)
-    expect(warnings.some(w => w.code === 'TNF_REDFISH_REQUIRED')).toBe(true)
+    expect(warnings.some((w) => w.code === 'TNF_REDFISH_REQUIRED')).toBe(true)
   })
 
   it('routes hcp', () => {
@@ -501,7 +537,7 @@ describe('calcCluster dispatcher', () => {
   it('routes managed-cloud', () => {
     const config = makeConfig({ topology: 'managed-cloud' })
     const { warnings } = calcCluster(config)
-    expect(warnings.some(w => w.code === 'MANAGED_CLOUD_NO_HARDWARE')).toBe(true)
+    expect(warnings.some((w) => w.code === 'MANAGED_CLOUD_NO_HARDWARE')).toBe(true)
   })
 })
 

@@ -116,9 +116,7 @@ describe('buildMultiClusterCsvContent', () => {
     // There should be at least one blank line in the output
     expect(lines).toContain('')
     // The blank line should appear between the two cluster sections
-    const firstClusterDataEnd = lines.findIndex(
-      (l, i) => i > 2 && l === '',
-    )
+    const firstClusterDataEnd = lines.findIndex((l, i) => i > 2 && l === '')
     expect(firstClusterDataEnd).toBeGreaterThan(0)
   })
 

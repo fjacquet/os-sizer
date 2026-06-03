@@ -124,7 +124,9 @@ export function calcVirt(
     VIRT_VM_OVERHEAD_PER_VCPU_MIB * avgVmVcpu +
     VIRT_VM_OVERHEAD_GUEST_RAM_RATIO * (avgVmRamGB * 1024)
   const totalRamDemandGB = vmCount * (avgVmRamGB + vmOverheadMiB / 1024)
-  const workersByRam = Math.ceil(totalRamDemandGB / (allocatableRamGB(nodeRamGB) * TARGET_UTILIZATION))
+  const workersByRam = Math.ceil(
+    totalRamDemandGB / (allocatableRamGB(nodeRamGB) * TARGET_UTILIZATION),
+  )
 
   // Constraint 3: CPU demand
   const totalVcpuDemand = vmCount * avgVmVcpu
@@ -135,7 +137,7 @@ export function calcVirt(
 
   return {
     count: workerCount,
-    vcpu: nodeVcpu + VIRT_OVERHEAD_CPU_PER_NODE,   // per-node KubeVirt CPU overhead baked in
+    vcpu: nodeVcpu + VIRT_OVERHEAD_CPU_PER_NODE, // per-node KubeVirt CPU overhead baked in
     ramGB: Math.max(nodeRamGB, WORKER_MIN.ramGB),
     storageGB: WORKER_MIN.storageGB,
   }
@@ -187,7 +189,7 @@ export function calcRHOAI(sizing: ClusterSizing, infraNodesEnabled: boolean): vo
   if (sizing.workerNodes) {
     sizing.workerNodes = {
       ...sizing.workerNodes,
-      vcpu:  Math.max(sizing.workerNodes.vcpu,  RHOAI_WORKER_MIN_VCPU),
+      vcpu: Math.max(sizing.workerNodes.vcpu, RHOAI_WORKER_MIN_VCPU),
       ramGB: Math.max(sizing.workerNodes.ramGB, RHOAI_WORKER_MIN_RAM_GB),
     }
   }
@@ -198,7 +200,7 @@ export function calcRHOAI(sizing: ClusterSizing, infraNodesEnabled: boolean): vo
   if (infraNodesEnabled && sizing.infraNodes) {
     sizing.infraNodes = {
       ...sizing.infraNodes,
-      vcpu:  sizing.infraNodes.vcpu  + RHOAI_INFRA_OVERHEAD_VCPU,
+      vcpu: sizing.infraNodes.vcpu + RHOAI_INFRA_OVERHEAD_VCPU,
       ramGB: sizing.infraNodes.ramGB + RHOAI_INFRA_OVERHEAD_RAM_GB,
     }
   }
