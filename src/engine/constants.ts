@@ -143,3 +143,13 @@ export const SYSTEM_RESERVED_CPU_MIN = 0.5
 /** ODF planning: replica-3 and keep Ceph below ~85% full → raw ≈ usable × 3 / 0.85. */
 export const ODF_REPLICA_FACTOR = 3
 export const ODF_FULLNESS_TARGET = 0.85
+
+// ── Virt worker target utilization (headroom) ────────────────────────────────
+// Steady-state RAM/CPU target so reported utilization leaves room for live-migration
+// drains, node maintenance, and growth. Spares (n+1/n+2) remain on top for failover.
+/** Default steady-state utilization target for virt workers. */
+export const DEFAULT_TARGET_VIRT_UTILIZATION = 0.8
+/** Lower clamp: below this, over-provisioning is absurd. */
+export const MIN_TARGET_VIRT_UTILIZATION = 0.5
+/** Upper clamp: 1.0 = full pack, no headroom (UI restricts to 0.95). */
+export const MAX_TARGET_VIRT_UTILIZATION = 1.0
