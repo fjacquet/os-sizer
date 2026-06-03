@@ -108,7 +108,22 @@ export function buildBomTableRows(sizing: ClusterSizing): TableRow[] {
         ],
       ]
     : []
-  return [header, ...dataRows, ...rhoaiRows]
+  const virtStorageRows: TableRow[] = (() => {
+    const plan = sizing.virtStorage
+    if (!plan) return []
+    const row = (label: string, gb: number): TableRow => [
+      cell(label),
+      numCell('—'),
+      numCell('—'),
+      numCell('—'),
+      numCell(String(Math.round(gb))),
+    ]
+    if (plan.backend === 'odf') {
+      return [row('VM Storage (usable)', plan.usableGB), row('VM Storage (raw, replica-3 @ 85%)', plan.rawGB)]
+    }
+    return [row('VM Storage (usable, provider-managed array)', plan.usableGB)]
+  })()
+  return [header, ...dataRows, ...rhoaiRows, ...virtStorageRows]
 }
 
 // ── Chart data helpers (pure, testable, no pptxgenjs import) ─────────────────
