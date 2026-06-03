@@ -1,7 +1,7 @@
 // Barrel re-exports for public engine API — zero Vue imports (CALC-01)
 export * from './types'
 export * from './constants'
-export { createDefaultClusterConfig } from './defaults'
+export { createDefaultClusterConfig, createDefaultVirtConfig } from './defaults'
 export { cpSizing, allocatableRamGB, workerCount, infraNodeSizing } from './formulas'
 export {
   calcCluster,
@@ -24,3 +24,4 @@ export { nodeVmCapacity } from './virtualization/capacity'
 export { sizeVirtWorkers } from './virtualization/sizeVirtWorkers'
 export { virtStorage } from './virtualization/storage'
 export type { VirtStorage } from './virtualization/storage'
+export { assembleVirtCluster } from './virtualization/assembleVirtCluster'
