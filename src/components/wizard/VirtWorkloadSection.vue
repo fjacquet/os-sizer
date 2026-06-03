@@ -105,9 +105,6 @@
     </div>
 
     <div class="space-y-2">
-      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-        {{ t('virt.targetUtilization') }}
-      </p>
       <NumberSliderInput
         :model-value="targetPct"
         :label="t('virt.targetUtilization')"
