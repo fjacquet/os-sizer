@@ -6,8 +6,49 @@ import {
   shouldShowVcpuChart,
   buildVcpuStackedChartData,
   buildAggregateSlideData,
+  buildVmClassBreakdownRows,
+  buildVirtMetricsData,
 } from '../usePptxExport'
-import type { ClusterConfig, ClusterSizing, NodeSpec } from '@/engine/types'
+import type {
+  ClusterConfig,
+  ClusterSizing,
+  NodeSpec,
+  VmClass,
+  VirtWorkerSizing,
+} from '@/engine/types'
+
+const VMCLASSES: VmClass[] = [
+  { id: 's', name: 'Small', vcpu: 2, ramGB: 4, diskGB: 40, count: 120 },
+  { id: 'm', name: 'Medium', vcpu: 4, ramGB: 16, diskGB: 100, count: 60 },
+]
+
+describe('buildVmClassBreakdownRows', () => {
+  it('header + one row per class + totals row', () => {
+    const rows = buildVmClassBreakdownRows(VMCLASSES)
+    expect(rows).toHaveLength(4) // header + 2 classes + total
+    expect(rows[1]?.[0]?.text).toBe('Small')
+    expect(rows[1]?.[1]?.text).toBe('120')
+    expect(rows[3]?.[2]?.text).toBe('480') // total vCPU = 120*2 + 60*4
+  })
+})
+
+describe('buildVirtMetricsData', () => {
+  it('formats the headline metrics', () => {
+    const m: VirtWorkerSizing = {
+      baseNodes: 6,
+      spareNodes: 1,
+      totalNodes: 7,
+      limitingResource: 'ram',
+      achievedOvercommit: 0.8,
+      vmsPerNode: 32.5,
+      cpuUtilizationPct: 8,
+      ramUtilizationPct: 85.5,
+    }
+    const d = buildVirtMetricsData(m)
+    expect(d.find((x) => x.label.includes('overcommit'))?.value).toBe('0.80:1')
+    expect(d.find((x) => x.label.includes('VMs'))?.value).toBe('32.5')
+  })
+})
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -152,7 +193,7 @@ describe('buildBomTableRows', () => {
     const sizing = makeSizing()
     const rows = buildBomTableRows(sizing)
     const header = rows[0]
-    expect(header[0].options?.fill?.color).toBe('E8E8E8')
+    expect(header[0].options?.fill?.color).toBe('E8ECF7')
   })
 
   it('returns 6 rows (header + 5 node types) when all NodeSpecs are non-null', () => {

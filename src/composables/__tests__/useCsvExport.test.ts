@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildCsvContent, buildMultiClusterCsvContent } from '../useCsvExport'
+import { buildCsvContent, buildMultiClusterCsvContent, buildVmClassCsv } from '../useCsvExport'
 import type { ClusterSizing } from '@/engine/types'
 
 const sizing: ClusterSizing = {
@@ -146,5 +146,15 @@ describe('buildMultiClusterCsvContent', () => {
     const lines = csv.split('\n')
     expect(lines[0]).toBe('Hub,,,,')
     expect(lines[0]).not.toMatch(/^"/)
+  })
+})
+
+describe('buildVmClassCsv', () => {
+  it('emits header + per-class totals', () => {
+    const csv = buildVmClassCsv([
+      { id: 's', name: 'Small', vcpu: 2, ramGB: 4, diskGB: 40, count: 120 },
+    ])
+    expect(csv.split('\n')[0]).toContain('VM Class')
+    expect(csv).toContain('Small,120,240,480,4800')
   })
 })

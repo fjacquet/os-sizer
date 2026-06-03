@@ -113,5 +113,31 @@ export function validateInputs(config: ClusterConfig): ValidationWarning[] {
     })
   }
 
+  // Virtualization-mode checks (Phase 2)
+  if (config.mode === 'virtualization' && config.virt) {
+    const v = config.virt
+    if (v.vmClasses.length === 0 || v.vmClasses.every((c) => c.count === 0)) {
+      warnings.push({
+        code: 'VIRT_NO_VMS',
+        severity: 'warning',
+        messageKey: 'validation.virtNoVms',
+      })
+    }
+    if (v.cpuOvercommitRatio < 1 || v.cpuOvercommitRatio > 10) {
+      warnings.push({
+        code: 'VIRT_OVERCOMMIT_OUT_OF_RANGE',
+        severity: 'warning',
+        messageKey: 'validation.virtOvercommitRange',
+      })
+    }
+    if (v.storageBackend === 'odf') {
+      warnings.push({
+        code: 'VIRT_ODF_NOT_IN_OVE',
+        severity: 'warning',
+        messageKey: 'warnings.virt.odfNotInOve',
+      })
+    }
+  }
+
   return warnings
 }

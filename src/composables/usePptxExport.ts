@@ -4,7 +4,13 @@
 
 import { useInputStore } from '@/stores/inputStore'
 import { useCalculationStore } from '@/stores/calculationStore'
-import type { ClusterConfig, ClusterSizing, NodeSpec } from '@/engine/types'
+import type {
+  ClusterConfig,
+  ClusterSizing,
+  NodeSpec,
+  VmClass,
+  VirtWorkerSizing,
+} from '@/engine/types'
 import { PPTX_COLORS, PPTX_FONT } from './pptx/theme'
 
 // Local types — avoid importing pptxgenjs types directly (dynamic import pattern)
@@ -22,7 +28,7 @@ interface TableCell {
 type TableRow = TableCell[]
 
 // ── Color constants (sourced from the shared PPTX theme) ─────────────────────
-const RH_RED = PPTX_COLORS.rhRed
+const NAVY = PPTX_COLORS.navy
 const HEADER_BG = PPTX_COLORS.headerBg
 const WHITE = PPTX_COLORS.white
 
@@ -199,14 +205,117 @@ export function buildAggregateSlideData(
   return { headerRow, dataRows }
 }
 
+// ── Virtualization deck builders (pure, testable) ─────────────────────────────
+
+export function buildVmClassBreakdownRows(vmClasses: VmClass[]): TableRow[] {
+  const header: TableRow = [
+    hdrCell('VM Class'),
+    hdrCell('Count'),
+    hdrCell('Total vCPU'),
+    hdrCell('Total RAM (GB)'),
+    hdrCell('Total Disk (GB)'),
+  ]
+  const rows: TableRow[] = vmClasses.map((c) => [
+    cell(c.name),
+    numCell(String(c.count)),
+    numCell(String(c.count * c.vcpu)),
+    numCell(String(c.count * c.ramGB)),
+    numCell(String(c.count * c.diskGB)),
+  ])
+  const tot = vmClasses.reduce(
+    (a, c) => ({
+      count: a.count + c.count,
+      vcpu: a.vcpu + c.count * c.vcpu,
+      ram: a.ram + c.count * c.ramGB,
+      disk: a.disk + c.count * c.diskGB,
+    }),
+    { count: 0, vcpu: 0, ram: 0, disk: 0 },
+  )
+  const totalRow: TableRow = [
+    hdrCell('Total'),
+    hdrCell(String(tot.count)),
+    hdrCell(String(tot.vcpu)),
+    hdrCell(String(tot.ram)),
+    hdrCell(String(tot.disk)),
+  ]
+  return [header, ...rows, totalRow]
+}
+
+export function buildVirtMetricsData(m: VirtWorkerSizing): { label: string; value: string }[] {
+  return [
+    { label: 'Achieved overcommit', value: `${m.achievedOvercommit.toFixed(2)}:1` },
+    { label: 'VMs / node', value: m.vmsPerNode.toFixed(1) },
+    { label: 'Limiting resource', value: m.limitingResource.toUpperCase() },
+    {
+      label: 'CPU / RAM util',
+      value: `${m.cpuUtilizationPct.toFixed(0)}% / ${m.ramUtilizationPct.toFixed(0)}%`,
+    },
+  ]
+}
+
 // ── Private helper: render one cluster slide ──────────────────────────────────
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function addVmClassSlide(
+  pptx: any,
+  name: string,
+  vmClasses: VmClass[],
+  metrics: VirtWorkerSizing | null,
+): void {
+  const slide = pptx.addSlide()
+  slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
+  slide.addText('VM Class Breakdown — ' + name, {
+    x: 0.3,
+    y: 0,
+    w: 13.0,
+    h: 0.6,
+    fontSize: 20,
+    bold: true,
+    color: WHITE,
+    valign: 'middle',
+    fontFace: PPTX_FONT.body,
+  })
+  slide.addTable(buildVmClassBreakdownRows(vmClasses), {
+    x: 0.5,
+    y: 1.0,
+    w: 8.0,
+    border: { type: 'solid', color: PPTX_COLORS.border, pt: 0.5 },
+    fontFace: PPTX_FONT.body,
+    fontSize: 11,
+    rowH: 0.35,
+  })
+  if (metrics) {
+    buildVirtMetricsData(metrics).forEach((it, i) => {
+      const y = 1.0 + i * 1.0
+      slide.addText(it.label, {
+        x: 9.0,
+        y,
+        w: 3.8,
+        h: 0.3,
+        fontSize: 10,
+        color: PPTX_COLORS.black,
+        fontFace: PPTX_FONT.body,
+      })
+      slide.addText(it.value, {
+        x: 9.0,
+        y: y + 0.3,
+        w: 3.8,
+        h: 0.5,
+        fontSize: 18,
+        bold: true,
+        color: NAVY,
+        fontFace: PPTX_FONT.metric,
+      })
+    })
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSizing): void {
   const slide = pptx.addSlide()
 
   // ── Title band ──────────────────────────────────────────────────────────
-  slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+  slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
   slide.addText('OpenShift Sizing Report — ' + cluster.name, {
     x: 0.3,
     y: 0,
@@ -236,8 +345,8 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
       y: kpiY,
       w: kpiBoxW,
       h: kpiBoxH,
-      fill: { color: RH_RED },
-      line: { color: RH_RED },
+      fill: { color: NAVY },
+      line: { color: NAVY },
     })
     slide.addText(kpi.label, {
       x: kx,
@@ -295,7 +404,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
     showValue: true,
     dataLabelPosition: 'outEnd' as const,
     dataLabelFontFace: PPTX_FONT.metric,
-    chartColors: [RH_RED],
+    chartColors: [NAVY],
   })
   slide.addChart('bar', nodeCountData, makeNodeChartOpts())
 
@@ -323,7 +432,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
         legendPos: 'b' as const,
         legendFontFace: PPTX_FONT.body,
         showValue: false,
-        chartColors: [...PPTX_COLORS.vcpuSeries],
+        chartColors: [...PPTX_COLORS.series],
       })
       slide.addChart('bar', vcpuData, makeVcpuChartOpts())
     }
@@ -373,13 +482,16 @@ export async function generatePptxReport(): Promise<void> {
       const sizing = result.sizing
       clusterTotals.push(sizing.totals)
       addClusterSlide(pptx, cluster, sizing)
+      if (cluster.mode === 'virtualization' && cluster.virt) {
+        addVmClassSlide(pptx, cluster.name, cluster.virt.vmClasses, sizing.virtMetrics ?? null)
+      }
     }
 
     // ── Aggregate summary slide ─────────────────────────────────────────────
     const aggSlide = pptx.addSlide()
 
     // Title band
-    aggSlide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+    aggSlide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
     aggSlide.addText('Aggregate Summary', {
       x: 0.3,
       y: 0,
@@ -429,7 +541,7 @@ export async function generatePptxReport(): Promise<void> {
     const slide = pptx.addSlide()
 
     // ── Title band ──────────────────────────────────────────────────────────
-    slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+    slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
     slide.addText('OpenShift Sizing Report — ' + cluster.name, {
       x: 0.3,
       y: 0,
@@ -460,8 +572,8 @@ export async function generatePptxReport(): Promise<void> {
         y: kpiY,
         w: kpiBoxW,
         h: kpiBoxH,
-        fill: { color: RH_RED },
-        line: { color: RH_RED },
+        fill: { color: NAVY },
+        line: { color: NAVY },
       })
       slide.addText(kpi.label, {
         x: kx,
@@ -511,7 +623,7 @@ export async function generatePptxReport(): Promise<void> {
       showLegend: false,
       showValue: true,
       dataLabelPosition: 'outEnd' as const,
-      chartColors: [RH_RED],
+      chartColors: [NAVY],
     })
     slide.addChart('bar', nodeCountData, makeNodeChartOpts())
 
@@ -545,10 +657,14 @@ export async function generatePptxReport(): Promise<void> {
       y: contentY,
       w: tableW,
       colW: [2.0, 0.8, 0.9, 0.9, 1.03],
-      border: { type: 'solid', color: 'CCCCCC', pt: 0.5 },
+      border: { type: 'solid', color: PPTX_COLORS.border, pt: 0.5 },
       fontSize: 9,
       rowH: 0.28,
     })
+
+    if (cluster.mode === 'virtualization' && cluster.virt) {
+      addVmClassSlide(pptx, cluster.name, cluster.virt.vmClasses, sizing.virtMetrics ?? null)
+    }
 
     const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pptx`
     await pptx.writeFile({ fileName: filename })

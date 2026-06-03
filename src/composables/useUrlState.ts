@@ -46,9 +46,40 @@ const AddOnConfigSchema = z
   })
   .strip()
 
+const VmClassSchema = z
+  .object({
+    id: z.string().default(() => crypto.randomUUID()),
+    name: z.string().default('VM'),
+    vcpu: z.number().int().min(1).default(2),
+    ramGB: z.number().int().min(1).default(4),
+    diskGB: z.number().int().min(0).default(40),
+    count: z.number().int().min(0).default(0),
+  })
+  .strip()
+
+const NodeShapeSchema = z
+  .object({
+    physicalCores: z.number().int().min(1).default(64),
+    threadsPerCore: z.number().int().min(1).max(2).default(2),
+    ramGB: z.number().int().min(8).default(512),
+  })
+  .strip()
+
+const VirtConfigSchema = z
+  .object({
+    vmClasses: z.array(VmClassSchema).default(() => []),
+    cpuOvercommitRatio: z.number().min(1).max(10).default(10),
+    redundancy: z.enum(['none', 'n+1', 'n+2']).default('n+1'),
+    nodeShape: NodeShapeSchema.default(() => NodeShapeSchema.parse({})),
+    storageBackend: z.enum(['odf', 'external-rwx']).default('odf'),
+  })
+  .strip()
+
 export const ClusterConfigSchema = z
   .object({
     name: z.string().default('Cluster 1'),
+    mode: z.enum(['container', 'virtualization']).optional().default('container'),
+    virt: VirtConfigSchema.optional().default(() => VirtConfigSchema.parse({})),
     topology: z
       .enum([
         'standard-ha',

@@ -7,6 +7,7 @@
   import { useUiStore } from '@/stores/uiStore'
   import BomTable from './BomTable.vue'
   import TotalsSummaryCard from './TotalsSummaryCard.vue'
+  import VirtMetricsCard from './VirtMetricsCard.vue'
   import ArchOverviewCard from './ArchOverviewCard.vue'
   import WarningBanner from '@/components/shared/WarningBanner.vue'
   import ChartsSection from './ChartsSection.vue'
@@ -90,6 +91,12 @@
 
     <!-- Totals summary -->
     <TotalsSummaryCard v-if="activeResult" :totals="activeResult.sizing.totals" />
+
+    <!-- Virtualization metrics (virt mode only) -->
+    <VirtMetricsCard
+      v-if="activeResult?.sizing.virtMetrics"
+      :metrics="activeResult.sizing.virtMetrics"
+    />
 
     <!-- Export toolbar: Share URL, CSV, PDF, PPTX -->
     <ExportToolbar />

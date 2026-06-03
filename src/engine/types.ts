@@ -58,6 +58,10 @@ export interface AddOnConfig {
 export interface ClusterConfig {
   id: string
   name: string
+  /** Sizing mode. Absent = 'container' (backward compatibility). */
+  mode?: SizingMode
+  /** Virtualization-mode config (used when mode === 'virtualization'). */
+  virt?: VirtConfig
   role?: 'hub' | 'spoke' | 'standalone'
   topology: TopologyType
   snoProfile: SnoProfile // default 'standard'
@@ -82,6 +86,8 @@ export interface ClusterSizing {
   gpuNodes: NodeSpec | null // Phase 9: placeholder for Phase 10 GPU calculator
   virtStorageGB: number // Phase 9: estimated storage budget for VM PVCs
   rhoaiOverhead: { vcpu: number; ramGB: number } | null // Phase 12: RHOAI operator overhead addend (set by calcRHOAI, null otherwise)
+  /** Virtualization-mode worker metrics (null for container mode). */
+  virtMetrics?: VirtWorkerSizing | null
   totals: { vcpu: number; ramGB: number; storageGB: number }
 }
 
@@ -112,4 +118,64 @@ export interface TopologyRecommendation {
   fitScore: number // 0-100
   justificationKey: string // i18n key, no spaces
   warningKeys: string[] // i18n keys for caveats
+}
+
+// ── Virtualization mode (Phase 1) ────────────────────────────────────────────
+
+export type SizingMode = 'container' | 'virtualization'
+
+/** One row in the VM size-classes table (e.g. Small/Medium/Large). */
+export interface VmClass {
+  id: string
+  name: string
+  vcpu: number // vCPUs per VM
+  ramGB: number // guest RAM per VM
+  diskGB: number // primary disk per VM
+  count: number // number of VMs in this class
+}
+
+/** Physical bare-metal worker node shape (OVE favours dense dual-socket). */
+export interface NodeShape {
+  physicalCores: number // sockets × cores/socket
+  threadsPerCore: number // 2 = hyperthreading on, 1 = off
+  ramGB: number // installed RAM per node
+}
+
+export type StorageBackend = 'odf' | 'external-rwx'
+
+export interface VirtConfig {
+  vmClasses: VmClass[]
+  cpuOvercommitRatio: number // vCPU per thread; 10 default, 4 conservative, 1 = dedicated
+  redundancy: 'none' | 'n+1' | 'n+2'
+  nodeShape: NodeShape
+  storageBackend: StorageBackend
+}
+
+/** Aggregate VM demand across all classes. */
+export interface VmDemand {
+  totalVms: number
+  totalVcpu: number
+  totalGuestRamGB: number
+  totalOverheadRamGB: number
+  totalDiskGB: number
+}
+
+/** Per-node capacity available to VMs after reservations. */
+export interface NodeVmCapacity {
+  allocThreads: number // schedulable CPU threads after system-reserved + KubeVirt infra
+  vcpuCapacity: number // allocThreads × overcommit ratio
+  ramCapacityGB: number // allocatable RAM after reservations
+}
+
+export type LimitingResource = 'cpu' | 'ram' | 'density'
+
+export interface VirtWorkerSizing {
+  baseNodes: number
+  spareNodes: number
+  totalNodes: number
+  limitingResource: LimitingResource
+  achievedOvercommit: number // realised vCPU : thread ratio
+  vmsPerNode: number
+  cpuUtilizationPct: number
+  ramUtilizationPct: number
 }

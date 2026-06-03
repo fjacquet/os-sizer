@@ -161,7 +161,7 @@ export async function generatePdfReport(
 
     // Title page header
     doc.setFontSize(18)
-    doc.setTextColor(238, 0, 0)
+    doc.setTextColor(30, 39, 97)
     doc.text('OpenShift Sizing Report', 40, 30)
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0)
@@ -183,7 +183,7 @@ export async function generatePdfReport(
       }
 
       // Cluster name header row (D-06): red background, white text
-      doc.setFillColor(238, 0, 0)
+      doc.setFillColor(30, 39, 97)
       doc.rect(40, currentY, 760, 20, 'F')
       doc.setFontSize(12)
       doc.setTextColor(255, 255, 255)
@@ -213,7 +213,7 @@ export async function generatePdfReport(
         body,
         startY: currentY,
         styles: { fontSize: 10 },
-        headStyles: { fillColor: [238, 0, 0], textColor: 255 },
+        headStyles: { fillColor: [30, 39, 97], textColor: 255 },
         alternateRowStyles: { fillColor: [248, 248, 248] },
         theme: 'striped',
         columnStyles: {
@@ -234,7 +234,7 @@ export async function generatePdfReport(
         doc.setFontSize(10)
         for (const w of clusterWarnings) {
           if (w.severity === 'error') {
-            doc.setTextColor(238, 0, 0)
+            doc.setTextColor(30, 39, 97)
           } else {
             doc.setTextColor(249, 115, 22)
           }
@@ -259,7 +259,7 @@ export async function generatePdfReport(
       head: [['AGGREGATE TOTAL', '', 'vCPU', 'RAM (GB)', 'Storage (GB)']],
       body: [aggRow],
       startY: currentY,
-      headStyles: { fillColor: [238, 0, 0], textColor: 255, fontStyle: 'bold' },
+      headStyles: { fillColor: [30, 39, 97], textColor: 255, fontStyle: 'bold' },
       styles: { fontSize: 11 },
     })
 
@@ -277,7 +277,7 @@ export async function generatePdfReport(
 
     // Title
     doc.setFontSize(18)
-    doc.setTextColor(238, 0, 0)
+    doc.setTextColor(30, 39, 97)
     doc.text('OpenShift Sizing Report', 40, 30)
     doc.setFontSize(12)
     doc.setTextColor(0, 0, 0)
@@ -308,7 +308,7 @@ export async function generatePdfReport(
       body,
       startY: tableStartY,
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [238, 0, 0], textColor: 255 },
+      headStyles: { fillColor: [30, 39, 97], textColor: 255 },
       alternateRowStyles: { fillColor: [248, 248, 248] },
       theme: 'striped',
       columnStyles: {
@@ -338,7 +338,7 @@ export async function generatePdfReport(
       doc.setFontSize(10)
       for (const w of resolvedWarnings) {
         if (w.severity === 'error') {
-          doc.setTextColor(238, 0, 0)
+          doc.setTextColor(30, 39, 97)
         } else {
           doc.setTextColor(249, 115, 22)
         }

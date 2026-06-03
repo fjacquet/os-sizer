@@ -4,6 +4,7 @@
   import { useInputStore } from '@/stores/inputStore'
   import { createDefaultClusterConfig } from '@/engine/defaults'
   import { EnvironmentSchema } from '@/schemas/environmentSchema'
+  import ModeSelector from './ModeSelector.vue'
   import type { ClusterConfig, EnvironmentType } from '@/engine/types'
 
   const { t } = useI18n()
@@ -67,6 +68,9 @@
         {{ t('wizard.step1.title') }}
       </h2>
     </div>
+
+    <!-- Deployment mode -->
+    <ModeSelector />
 
     <!-- Environment type -->
     <div class="space-y-2">

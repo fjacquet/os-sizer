@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { validateInputs } from './validation'
-import { createDefaultClusterConfig } from './defaults'
+import { createDefaultClusterConfig, createDefaultVirtConfig } from './defaults'
 
 describe('engine zero-Vue-import constraint (ENG-09)', () => {
   it('no engine .ts file imports from vue, pinia, or vue-i18n', () => {
@@ -189,5 +189,37 @@ describe('WARN-03: MIG profile with KubeVirt VMs unsupported', () => {
     config.addOns.virtEnabled = true
     const warnings = validateInputs(config)
     expect(warnings.some((w) => w.code === 'MIG_PROFILE_WITH_KUBEVIRT_UNSUPPORTED')).toBe(false)
+  })
+})
+
+describe('validateInputs — virtualization mode', () => {
+  function virtConfig(over: Record<string, unknown> = {}) {
+    return {
+      ...createDefaultClusterConfig(0),
+      mode: 'virtualization' as const,
+      virt: { ...createDefaultVirtConfig(), ...over },
+    }
+  }
+
+  it('warns VIRT_ODF_NOT_IN_OVE when storageBackend is odf', () => {
+    const codes = validateInputs(virtConfig({ storageBackend: 'odf' })).map((w) => w.code)
+    expect(codes).toContain('VIRT_ODF_NOT_IN_OVE')
+  })
+
+  it('warns VIRT_NO_VMS when all class counts are zero', () => {
+    const codes = validateInputs(
+      virtConfig({ vmClasses: [{ id: 'x', name: 'X', vcpu: 2, ramGB: 4, diskGB: 10, count: 0 }] }),
+    ).map((w) => w.code)
+    expect(codes).toContain('VIRT_NO_VMS')
+  })
+
+  it('warns VIRT_OVERCOMMIT_OUT_OF_RANGE when ratio > 10', () => {
+    const codes = validateInputs(virtConfig({ cpuOvercommitRatio: 12 })).map((w) => w.code)
+    expect(codes).toContain('VIRT_OVERCOMMIT_OUT_OF_RANGE')
+  })
+
+  it('external-rwx with valid VMs → no VIRT_ODF_NOT_IN_OVE', () => {
+    const codes = validateInputs(virtConfig({ storageBackend: 'external-rwx' })).map((w) => w.code)
+    expect(codes).not.toContain('VIRT_ODF_NOT_IN_OVE')
   })
 })

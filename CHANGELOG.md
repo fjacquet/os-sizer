@@ -5,6 +5,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.2.0] — 2026-06-03
+
+### Added — Virtualization (OVE) sizing mode
+
+A first-class **Virtualization (OpenShift Virtualization Engine)** sizing path alongside the existing
+container flow. Grounded in current Red Hat best practice (see ADR-0007, ADR-0008).
+
+- **Mode selector** on Step 1 — Container platform vs Virtualization (OVE).
+- **VM-centric engine** (`src/engine/virtualization/`): VM size classes → aggregate demand →
+  per-node VM capacity (CPU overcommit per thread, system-reserved + KubeVirt infra reservations,
+  per-VM memory overhead) → worker count with limiting-resource + achieved metrics → full
+  `ClusterSizing` assembly (control plane + virt workers + ODF).
+- **Wizard**: VM size-classes table, bare-metal node shape, CPU overcommit (1/4/10) and N+1/N+2
+  redundancy selectors, ODF/external-RWX storage choice; results page shows a virtualization
+  metrics card (achieved overcommit, VMs/node, limiting resource, CPU/RAM utilization).
+- **Exports**: retired Red Hat red in favour of an **Executive Navy** palette (PPTX + PDF), shared
+  with the vatlas tool; virt decks add a VM-class breakdown slide + metrics strip; CSV adds a
+  VM-class section.
+- **Validation**: empty-VMs, overcommit-out-of-range, and "ODF not included in OVE" warnings.
+- **Backward compatible**: `mode`/`virt` are optional; existing sessions and shared URLs load
+  unchanged (default `mode: container`).
+
+---
+
 ## [2.1.2] — 2026-06-03
 
 ### Security — Dependency patches (`npm audit fix`, lockfile-only)

@@ -1,8 +1,16 @@
 // CSV export composable — plain TypeScript, no external libraries
 import { useInputStore } from '@/stores/inputStore'
 import { useCalculationStore } from '@/stores/calculationStore'
-import type { ClusterSizing, NodeSpec } from '@/engine/types'
+import type { ClusterSizing, NodeSpec, VmClass } from '@/engine/types'
 import { downloadBlob } from './utils/download'
+
+export function buildVmClassCsv(vmClasses: VmClass[]): string {
+  const header = 'VM Class,Count,Total vCPU,Total RAM (GB),Total Disk (GB)'
+  const rows = vmClasses.map(
+    (c) => `${c.name},${c.count},${c.count * c.vcpu},${c.count * c.ramGB},${c.count * c.diskGB}`,
+  )
+  return [header, ...rows].join('\n')
+}
 
 type NodeEntry = { label: string; spec: NodeSpec }
 
@@ -99,7 +107,10 @@ export function generateCsvReport(): void {
     const cluster = input.clusters[clusterIdx] ?? input.clusters[0]
     const result = calc.clusterResults[clusterIdx] ?? calc.clusterResults[0]
     if (!cluster || !result) return
-    const csv = buildCsvContent(result.sizing)
+    const csv =
+      cluster.mode === 'virtualization' && cluster.virt
+        ? `${buildVmClassCsv(cluster.virt.vmClasses)}\n\n${buildCsvContent(result.sizing)}`
+        : buildCsvContent(result.sizing)
     const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`
     downloadBlob(csv, filename, 'text/csv; charset=utf-8')
   }

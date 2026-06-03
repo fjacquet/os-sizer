@@ -106,6 +106,47 @@
     "virtAddon": "OpenShift Virtualization",
     "rwxStorageAvailable": "Classe de stockage RWX disponible (non-ODF)"
   },
+  "mode": {
+    "label": "Mode de déploiement",
+    "container": "Plateforme de conteneurs",
+    "virtualization": "Virtualisation (OVE)",
+    "containerHint": "Dimensionner pour des charges conteneurisées (pods).",
+    "virtualizationHint": "Dimensionner pour des machines virtuelles sur OpenShift Virtualization Engine."
+  },
+  "virt": {
+    "vmClasses": "Classes de VM",
+    "className": "Classe",
+    "vcpuPerVm": "vCPU / VM",
+    "ramPerVm": "RAM Go / VM",
+    "diskPerVm": "Disque Go / VM",
+    "vmCount": "# VM",
+    "addClass": "Ajouter une classe",
+    "removeClass": "Supprimer",
+    "nodeShape": "Nœud worker bare-metal",
+    "physicalCores": "Cœurs physiques / nœud",
+    "nodeRamGB": "RAM Go / nœud",
+    "hyperthreading": "Hyperthreading",
+    "htOn": "Activé (×2)",
+    "htOff": "Désactivé",
+    "overcommit": "Surallocation CPU (vCPU : thread)",
+    "overcommitDedicated": "Dédié (1:1)",
+    "redundancy": "Redondance",
+    "redNone": "Aucune",
+    "redN1": "N+1",
+    "redN2": "N+2",
+    "storage": "Backend de stockage",
+    "storageOdf": "OpenShift Data Foundation (ODF)",
+    "storageExternal": "Stockage RWX externe",
+    "metricsTitle": "Métriques de virtualisation",
+    "achievedOvercommit": "Surallocation atteinte",
+    "vmsPerNode": "VM / nœud",
+    "limitingResource": "Ressource limitante",
+    "cpuUtil": "Utilisation CPU",
+    "ramUtil": "Utilisation RAM",
+    "limCpu": "CPU",
+    "limRam": "RAM",
+    "limDensity": "Densité"
+  },
   "sno": {
     "profile": "Profil SNO",
     "standard": "Standard",
@@ -173,7 +214,9 @@
     "workerCpuBelowMin": "Le vCPU du nœud worker est inférieur au minimum de 2 vCPU — le dimensionnement peut être invalide",
     "zeroPodsWithResources": "Le nombre de pods est zéro mais des demandes CPU/RAM sont définies — vérifiez votre profil de charge",
     "odfIncompatibleTopology": "Le stockage ODF n'est pas compatible avec les topologies SNO, MicroShift ou Cloud géré",
-    "rhacmNoClusters": "RHACM est activé mais aucun nombre de clusters gérés n'est défini — saisissez le nombre de clusters attendu"
+    "rhacmNoClusters": "RHACM est activé mais aucun nombre de clusters gérés n'est défini — saisissez le nombre de clusters attendu",
+    "virtNoVms": "Aucune VM définie — ajoutez au moins une classe de VM avec un nombre non nul.",
+    "virtOvercommitRange": "Le ratio de surallocation CPU doit être compris entre 1 et 10 (maximum KubeVirt)."
   },
   "warnings": {
     "tna": {
@@ -187,7 +230,8 @@
       "noHardware": "Les topologies cloud gérées (ROSA/ARO) sont dimensionnées par le fournisseur — aucune nomenclature matérielle requise"
     },
     "virt": {
-      "rwxStorageRequired": "OpenShift Virtualization nécessite un stockage compatible RWX pour la migration en direct. Configurez ODF ou une autre classe de stockage RWX pour activer la migration en direct."
+      "rwxStorageRequired": "OpenShift Virtualization nécessite un stockage compatible RWX pour la migration en direct. Configurez ODF ou une autre classe de stockage RWX pour activer la migration en direct.",
+      "odfNotInOve": "ODF n'est pas inclus dans l'abonnement OpenShift Virtualization Engine — à licencier et dimensionner séparément."
     },
     "sno": {
       "virtNoLiveMigration": "La topologie SNO ne prend pas en charge la migration en direct — la haute disponibilité des VM est indisponible."
