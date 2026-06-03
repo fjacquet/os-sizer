@@ -1,8 +1,8 @@
 # os-sizer — Product Requirements Document
 
-**Version:** 2.1.0
-**Last Updated:** 2026-04-06
-**Core Value:** From constraints to proposal-ready hardware BoM in minutes — covering every supported OpenShift topology.
+**Version:** 2.2.0 (unreleased)
+**Last Updated:** 2026-06-03
+**Core Value:** From constraints to proposal-ready hardware BoM in minutes — for both containerized OpenShift and OpenShift Virtualization (OVE) estates.
 
 ---
 
@@ -11,6 +11,42 @@
 **os-sizer** is a browser-based OpenShift cluster sizing tool that guides users through a 3-step wizard (Environment → Workload → Architecture) and produces a Bill of Materials (BoM) exportable as CSV, PPTX, or PDF. It supports all major OpenShift deployment topologies and optional platform add-ons.
 
 **Target users:** Pre-sales architects, field engineers, and infrastructure leads who need accurate hardware sizing proposals without manual spreadsheet work.
+
+---
+
+## Sizing Modes
+
+The wizard opens with a **mode** choice that branches the flow:
+
+| Mode | For | Primary inputs |
+|------|-----|----------------|
+| **Container platform** | Containerized OpenShift workloads (pods) | pods, pod CPU/RAM, worker node size, add-ons (ODF/RHACM/infra/GPU/RHOAI) |
+| **Virtualization (OVE)** | Virtual machines on OpenShift Virtualization Engine | VM size classes, bare-metal node shape, CPU overcommit, redundancy, storage backend |
+
+**Virtualization mode** sizes a bare-metal OpenShift cluster to host VMs (KubeVirt), grounded in
+Red Hat best practice (ADR-0007, ADR-0008):
+
+- **VM size classes** — Small/Medium/Large × counts, each with vCPU / RAM / disk.
+- **CPU overcommit** — vCPU:thread ratio (default 10, conservative 4, 1 = dedicated), per
+  KubeVirt `vmiCPUAllocationRatio` (hyperthreading counted).
+- **Per-VM memory overhead** — `218 MiB + 8 MiB/vCPU + 0.2% guest RAM`, auto-applied.
+- **Node reservations** — OpenShift `system-reserved` + ~2 cores/node KubeVirt infra, auto-applied.
+- **Redundancy** — N+1 (default) / N+2 spare nodes covering full restart load.
+- **Storage** — ODF (replica-3, `raw ≈ usable × 3 / 0.85`) or external RWX; live migration requires RWX.
+- **Results** — node count, limiting resource (CPU/RAM/density), achieved overcommit, VMs/node, and
+  CPU/RAM utilization; exports add a VM-class breakdown.
+
+OVE licensing boundaries are surfaced (ODF and container workloads are not included in OVE).
+
+| Requirement | Description | Status |
+|-------------|-------------|--------|
+| MODE-01 | Mode selector on Step 1 (container vs virtualization) | ✅ |
+| VMODE-01 | VM size-classes table + bare-metal node shape inputs | ✅ |
+| VMODE-02 | CPU overcommit + N+1/N+2 redundancy inputs | ✅ |
+| VMODE-03 | VM-centric worker sizing with limiting-resource + metrics | ✅ |
+| VMODE-04 | ODF/external-RWX storage planning + OVE licensing warning | ✅ |
+| VMODE-05 | Executive Navy exports with VM-class breakdown | ✅ |
+| VMODE-06 | Backward-compatible sessions/URLs (default mode = container) | ✅ |
 
 ---
 
