@@ -12,6 +12,7 @@ const VIRT: VirtConfig = {
   redundancy: 'n+1',
   nodeShape: { physicalCores: 64, threadsPerCore: 2, ramGB: 512 },
   storageBackend: 'odf',
+  targetUtilization: 1,
 }
 
 describe('assembleVirtCluster (ODF)', () => {

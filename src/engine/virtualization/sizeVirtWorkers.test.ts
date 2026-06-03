@@ -15,6 +15,7 @@ function cfg(over: Partial<VirtConfig> = {}): VirtConfig {
     redundancy: 'n+1',
     nodeShape: { physicalCores: 64, threadsPerCore: 2, ramGB: 512 },
     storageBackend: 'odf',
+    targetUtilization: 1,
     ...over,
   }
 }
@@ -49,6 +50,7 @@ describe('sizeVirtWorkers — CPU-bound (dedicated, high-vCPU class)', () => {
       redundancy: 'none',
       nodeShape: { physicalCores: 16, threadsPerCore: 2, ramGB: 256 },
       storageBackend: 'external-rwx',
+      targetUtilization: 1,
     })
     expect(r.baseNodes).toBe(28)
     expect(r.limitingResource).toBe('cpu')
@@ -63,8 +65,32 @@ describe('sizeVirtWorkers — density-bound (many tiny VMs)', () => {
       redundancy: 'none',
       nodeShape: { physicalCores: 64, threadsPerCore: 2, ramGB: 512 },
       storageBackend: 'odf',
+      targetUtilization: 1,
     })
     expect(r.baseNodes).toBe(3) // ceil(600/250)
     expect(r.limitingResource).toBe('density')
+  })
+})
+
+describe('sizeVirtWorkers — target utilization headroom', () => {
+  it('default 0.8 needs more nodes than full pack and lowers RAM utilization', () => {
+    const full = sizeVirtWorkers(cfg({ targetUtilization: 1 }))
+    const headroom = sizeVirtWorkers(cfg({ targetUtilization: 0.8 }))
+    expect(headroom.baseNodes).toBeGreaterThan(full.baseNodes)
+    expect(headroom.ramUtilizationPct).toBeLessThan(full.ramUtilizationPct)
+    expect(headroom.ramUtilizationPct).toBeLessThan(80)
+    expect(headroom.limitingResource).toBe('ram')
+  })
+
+  it('3-class baseline at 0.8 → 7 base nodes (+1 spare = 8)', () => {
+    const r = sizeVirtWorkers(cfg({ targetUtilization: 0.8 }))
+    expect(r.baseNodes).toBe(7)
+    expect(r.totalNodes).toBe(8)
+  })
+
+  it('undefined targetUtilization falls back to the 0.8 default', () => {
+    const explicit = sizeVirtWorkers(cfg({ targetUtilization: 0.8 }))
+    const fallback = sizeVirtWorkers(cfg({ targetUtilization: undefined }))
+    expect(fallback.baseNodes).toBe(explicit.baseNodes)
   })
 })
