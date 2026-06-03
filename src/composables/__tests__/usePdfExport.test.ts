@@ -226,6 +226,17 @@ describe('buildPdfTableData — VM Storage rows', () => {
     expect(body).toContainEqual(['VM Storage (usable)', '—', '—', '—', '15300'])
     expect(body).toContainEqual(['VM Storage (raw, replica-3 @ 85%)', '—', '—', '—', '54000'])
   })
+  it('external-rwx → single usable row, provider-managed label', () => {
+    const { body } = buildPdfTableData({
+      ...baseSizing(),
+      virtStorage: { usableGB: 15300, rawGB: 54000, backend: 'external-rwx' },
+    })
+    expect(body).toContainEqual([
+      'VM Storage (usable, provider-managed array)',
+      '—', '—', '—', '15300',
+    ])
+    expect(body.filter((r) => r[0]?.startsWith('VM Storage'))).toHaveLength(1)
+  })
   it('no virtStorage → no storage rows', () => {
     const { body } = buildPdfTableData(baseSizing())
     expect(body.some((r) => r[0]?.startsWith('VM Storage'))).toBe(false)
