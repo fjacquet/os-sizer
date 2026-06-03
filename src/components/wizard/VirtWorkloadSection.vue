@@ -23,6 +23,7 @@
   }
   const overcommitOptions = [1, 4, 10]
   const redundancyOptions = ['none', 'n+1', 'n+2'] as const
+  const targetPct = computed(() => Math.round((virt.value.targetUtilization ?? 0.8) * 100))
 </script>
 
 <template>
@@ -101,6 +102,22 @@
           {{ r === 'none' ? t('virt.redNone') : r === 'n+1' ? t('virt.redN1') : t('virt.redN2') }}
         </button>
       </div>
+    </div>
+
+    <div class="space-y-2">
+      <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {{ t('virt.targetUtilization') }}
+      </p>
+      <NumberSliderInput
+        :model-value="targetPct"
+        :label="t('virt.targetUtilization')"
+        unit="%"
+        :min="50"
+        :max="95"
+        :step="5"
+        @update:model-value="(v: number) => patch({ targetUtilization: v / 100 })"
+      />
+      <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('virt.targetUtilizationHelp') }}</p>
     </div>
   </div>
 </template>
