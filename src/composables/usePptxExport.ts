@@ -22,7 +22,7 @@ interface TableCell {
 type TableRow = TableCell[]
 
 // ── Color constants (sourced from the shared PPTX theme) ─────────────────────
-const RH_RED = PPTX_COLORS.rhRed
+const NAVY = PPTX_COLORS.navy
 const HEADER_BG = PPTX_COLORS.headerBg
 const WHITE = PPTX_COLORS.white
 
@@ -206,7 +206,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
   const slide = pptx.addSlide()
 
   // ── Title band ──────────────────────────────────────────────────────────
-  slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+  slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
   slide.addText('OpenShift Sizing Report — ' + cluster.name, {
     x: 0.3,
     y: 0,
@@ -236,8 +236,8 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
       y: kpiY,
       w: kpiBoxW,
       h: kpiBoxH,
-      fill: { color: RH_RED },
-      line: { color: RH_RED },
+      fill: { color: NAVY },
+      line: { color: NAVY },
     })
     slide.addText(kpi.label, {
       x: kx,
@@ -295,7 +295,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
     showValue: true,
     dataLabelPosition: 'outEnd' as const,
     dataLabelFontFace: PPTX_FONT.metric,
-    chartColors: [RH_RED],
+    chartColors: [NAVY],
   })
   slide.addChart('bar', nodeCountData, makeNodeChartOpts())
 
@@ -323,7 +323,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
         legendPos: 'b' as const,
         legendFontFace: PPTX_FONT.body,
         showValue: false,
-        chartColors: [...PPTX_COLORS.vcpuSeries],
+        chartColors: [...PPTX_COLORS.series],
       })
       slide.addChart('bar', vcpuData, makeVcpuChartOpts())
     }
@@ -379,7 +379,7 @@ export async function generatePptxReport(): Promise<void> {
     const aggSlide = pptx.addSlide()
 
     // Title band
-    aggSlide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+    aggSlide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
     aggSlide.addText('Aggregate Summary', {
       x: 0.3,
       y: 0,
@@ -429,7 +429,7 @@ export async function generatePptxReport(): Promise<void> {
     const slide = pptx.addSlide()
 
     // ── Title band ──────────────────────────────────────────────────────────
-    slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: RH_RED } })
+    slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
     slide.addText('OpenShift Sizing Report — ' + cluster.name, {
       x: 0.3,
       y: 0,
@@ -460,8 +460,8 @@ export async function generatePptxReport(): Promise<void> {
         y: kpiY,
         w: kpiBoxW,
         h: kpiBoxH,
-        fill: { color: RH_RED },
-        line: { color: RH_RED },
+        fill: { color: NAVY },
+        line: { color: NAVY },
       })
       slide.addText(kpi.label, {
         x: kx,
@@ -511,7 +511,7 @@ export async function generatePptxReport(): Promise<void> {
       showLegend: false,
       showValue: true,
       dataLabelPosition: 'outEnd' as const,
-      chartColors: [RH_RED],
+      chartColors: [NAVY],
     })
     slide.addChart('bar', nodeCountData, makeNodeChartOpts())
 

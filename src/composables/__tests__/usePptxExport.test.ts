@@ -152,7 +152,7 @@ describe('buildBomTableRows', () => {
     const sizing = makeSizing()
     const rows = buildBomTableRows(sizing)
     const header = rows[0]
-    expect(header[0].options?.fill?.color).toBe('E8E8E8')
+    expect(header[0].options?.fill?.color).toBe('E8ECF7')
   })
 
   it('returns 6 rows (header + 5 node types) when all NodeSpecs are non-null', () => {

@@ -9,13 +9,15 @@ export const PPTX_FONT = {
   metric: 'Consolas',
 } as const
 
-// Bare hex (NO # prefix) — pptxgenjs convention.
+// Bare hex (NO # prefix) — pptxgenjs convention. Executive Navy palette (shared with vatlas).
 export const PPTX_COLORS = {
-  rhRed: 'EE0000',
-  headerBg: 'E8E8E8',
+  navy: '1E2761', // title bands, KPI fills, primary chart series
+  navyLight: '5566C9',
+  gold: 'F9B935', // factual accent (never a verdict colour)
+  headerBg: 'E8ECF7', // light navy tint for table headers
   white: 'FFFFFF',
-  black: '000000',
-  border: 'CCCCCC',
-  /** Stacked vCPU chart shades (darkening reds). */
-  vcpuSeries: ['EE0000', 'CC0000', 'AA0000', '880000', '660000', '440000', '220000'],
+  black: '0F172A', // ink
+  border: 'CBD5E1',
+  /** Navy chart series (darkening → lightening navy/blue). */
+  series: ['1E2761', '3245B7', '5566C9', '819AE9', 'B0C2F9', 'CDD9F5', 'E3EAFC'],
 } as const
