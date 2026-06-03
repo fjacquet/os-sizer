@@ -58,7 +58,7 @@ describe('virtualization store bindings', () => {
   })
 
   it('exposes the target utilization i18n label', async () => {
-    const en = (await import('@/i18n/locales/en.json')).default as Record<string, Record<string, string>>
+    const en = (await import('@/i18n/locales/en.json')).default as { virt: Record<string, string> }
     expect(en.virt.targetUtilization).toBe('Target utilization')
   })
 })
