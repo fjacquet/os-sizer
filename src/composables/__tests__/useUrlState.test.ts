@@ -236,3 +236,32 @@ describe('generateShareUrl', () => {
     expect(url).not.toContain('should-not-appear-in-url')
   })
 })
+
+describe('ClusterConfigSchema — mode + virt', () => {
+  it("old config without mode defaults to 'container' and gets a virt default", () => {
+    const parsed = ClusterConfigSchema.parse({ name: 'Legacy' })
+    expect(parsed.mode).toBe('container')
+    expect(parsed.virt.storageBackend).toBe('odf')
+    expect(parsed.virt.vmClasses).toEqual([])
+  })
+
+  it('round-trips a virtualization cluster', () => {
+    const input = {
+      name: 'Virt',
+      mode: 'virtualization',
+      virt: {
+        vmClasses: [{ id: 'm', name: 'Medium', vcpu: 4, ramGB: 16, diskGB: 100, count: 60 }],
+        cpuOvercommitRatio: 4,
+        redundancy: 'n+2',
+        nodeShape: { physicalCores: 32, threadsPerCore: 2, ramGB: 256 },
+        storageBackend: 'external-rwx',
+      },
+    }
+    const parsed = ClusterConfigSchema.parse(input)
+    expect(parsed.mode).toBe('virtualization')
+    expect(parsed.virt.cpuOvercommitRatio).toBe(4)
+    expect(parsed.virt.redundancy).toBe('n+2')
+    expect(parsed.virt.vmClasses[0]?.count).toBe(60)
+    expect(parsed.virt.storageBackend).toBe('external-rwx')
+  })
+})
