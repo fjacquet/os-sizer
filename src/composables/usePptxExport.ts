@@ -256,6 +256,61 @@ export function buildVirtMetricsData(m: VirtWorkerSizing): { label: string; valu
 // ── Private helper: render one cluster slide ──────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+function addVmClassSlide(
+  pptx: any,
+  name: string,
+  vmClasses: VmClass[],
+  metrics: VirtWorkerSizing | null,
+): void {
+  const slide = pptx.addSlide()
+  slide.addShape('rect', { x: 0, y: 0, w: 13.33, h: 0.6, fill: { color: NAVY } })
+  slide.addText('VM Class Breakdown — ' + name, {
+    x: 0.3,
+    y: 0,
+    w: 13.0,
+    h: 0.6,
+    fontSize: 20,
+    bold: true,
+    color: WHITE,
+    valign: 'middle',
+    fontFace: PPTX_FONT.body,
+  })
+  slide.addTable(buildVmClassBreakdownRows(vmClasses), {
+    x: 0.5,
+    y: 1.0,
+    w: 8.0,
+    border: { type: 'solid', color: PPTX_COLORS.border, pt: 0.5 },
+    fontFace: PPTX_FONT.body,
+    fontSize: 11,
+    rowH: 0.35,
+  })
+  if (metrics) {
+    buildVirtMetricsData(metrics).forEach((it, i) => {
+      const y = 1.0 + i * 1.0
+      slide.addText(it.label, {
+        x: 9.0,
+        y,
+        w: 3.8,
+        h: 0.3,
+        fontSize: 10,
+        color: PPTX_COLORS.black,
+        fontFace: PPTX_FONT.body,
+      })
+      slide.addText(it.value, {
+        x: 9.0,
+        y: y + 0.3,
+        w: 3.8,
+        h: 0.5,
+        fontSize: 18,
+        bold: true,
+        color: NAVY,
+        fontFace: PPTX_FONT.metric,
+      })
+    })
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSizing): void {
   const slide = pptx.addSlide()
 
@@ -427,6 +482,9 @@ export async function generatePptxReport(): Promise<void> {
       const sizing = result.sizing
       clusterTotals.push(sizing.totals)
       addClusterSlide(pptx, cluster, sizing)
+      if (cluster.mode === 'virtualization' && cluster.virt) {
+        addVmClassSlide(pptx, cluster.name, cluster.virt.vmClasses, sizing.virtMetrics ?? null)
+      }
     }
 
     // ── Aggregate summary slide ─────────────────────────────────────────────
@@ -599,10 +657,14 @@ export async function generatePptxReport(): Promise<void> {
       y: contentY,
       w: tableW,
       colW: [2.0, 0.8, 0.9, 0.9, 1.03],
-      border: { type: 'solid', color: 'CCCCCC', pt: 0.5 },
+      border: { type: 'solid', color: PPTX_COLORS.border, pt: 0.5 },
       fontSize: 9,
       rowH: 0.28,
     })
+
+    if (cluster.mode === 'virtualization' && cluster.virt) {
+      addVmClassSlide(pptx, cluster.name, cluster.virt.vmClasses, sizing.virtMetrics ?? null)
+    }
 
     const filename = `os-sizer-${cluster.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pptx`
     await pptx.writeFile({ fileName: filename })
