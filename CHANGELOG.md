@@ -7,9 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-### Added
-- Virtualization mode: configurable **target utilization** (default 80%, RAM + CPU) so virt-worker sizing leaves operational headroom instead of packing to ~95% RAM.
-- Virtualization mode: dedicated **VM Storage** line (usable + raw) in BOM, CSV, PDF, and PPTX exports — the VM disk requirement is no longer hidden behind the per-node OS disk.
+---
+
+## [2.3.0] — 2026-06-03
+
+### Added — Virtualization (OVE) headroom & storage visibility
+- Configurable **target utilization** (default 80%, RAM + CPU) so virt-worker sizing leaves operational headroom instead of packing to ~95% RAM. Exposed as a slider on the Architecture step (50–95%), persisted in the URL/session schema, and applied in `sizeVirtWorkers` while utilization metrics stay measured against true capacity.
+- Dedicated **VM Storage** line (usable + raw) in BOM, CSV, PDF, and PPTX exports — the VM disk requirement is no longer hidden behind the per-node OS disk. ODF shows usable + raw (replica-3 @ 85%); external-RWX shows usable (provider-managed array).
+
+See ADR-0009.
 
 ---
 
