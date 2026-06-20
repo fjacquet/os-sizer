@@ -1,5 +1,8 @@
 # os-sizer
 
+[![CI](https://github.com/fjacquet/os-sizer/actions/workflows/ci.yml/badge.svg)](https://github.com/fjacquet/os-sizer/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/fjacquet/os-sizer?sort=semver)](https://github.com/fjacquet/os-sizer/releases/latest)
+
 Browser-based OpenShift cluster sizing tool. Guides users through a 3-step wizard (Environment, Workload, Architecture) and produces a Bill of Materials exportable as CSV, PPTX, or PDF.
 
 ## Features
