@@ -13,7 +13,8 @@
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint src --ext .ts,.vue",
     "format": "biome format --write . && prettier --write \"src/**/*.vue\"",
-    "format:check": "biome format . && prettier --check \"src/**/*.vue\""
+    "format:check": "biome format . && prettier --check \"src/**/*.vue\"",
+    "test:pptx": "node scripts/pptx-smoke.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.2",
@@ -25,7 +26,7 @@
     "jspdf-autotable": "^5.0.7",
     "lz-string": "^1.5.0",
     "pinia": "^3.0.4",
-    "pptxgenjs": "^4.0.1",
+    "pptxgenjs-plus": "^4.3.1",
     "tailwindcss": "^4.2.2",
     "vite": "^8.0.3",
     "vue": "^3.5.31",

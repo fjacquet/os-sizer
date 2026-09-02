@@ -138,6 +138,18 @@ export interface PptxChartSeries {
   values: number[]
 }
 
+// pptxgenjs-plus types chart categories as `string[][]` (multi-level categories),
+// where upstream pptxgenjs 4.0.1 used a flat `string[]`. The pure helpers above
+// keep producing one flat level — and their tests assert that shape — so the
+// nesting is applied here, at the library boundary.
+function toChartData(series: PptxChartSeries[]): Array<{
+  name: string
+  labels: string[][]
+  values: number[]
+}> {
+  return series.map((s) => ({ name: s.name, labels: [s.labels], values: s.values }))
+}
+
 // Private helper — inline version of useChartData.buildChartRows
 // Kept here to avoid circular imports and maintain pure-function testability
 function buildChartRowsSync(sizing: ClusterSizing): Array<{ label: string; spec: NodeSpec }> {
@@ -424,7 +436,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
     dataLabelFontFace: PPTX_FONT.metric,
     chartColors: [NAVY],
   })
-  slide.addChart('bar', nodeCountData, makeNodeChartOpts())
+  slide.addChart('bar', toChartData(nodeCountData), makeNodeChartOpts())
 
   // ── Stacked vCPU chart ───────────────────────────────────────────────────
   if (showVcpuChart) {
@@ -452,7 +464,7 @@ function addClusterSlide(pptx: any, cluster: { name: string }, sizing: ClusterSi
         showValue: false,
         chartColors: [...PPTX_COLORS.series],
       })
-      slide.addChart('bar', vcpuData, makeVcpuChartOpts())
+      slide.addChart('bar', toChartData(vcpuData), makeVcpuChartOpts())
     }
   }
 
@@ -477,7 +489,7 @@ export async function generatePptxReport(): Promise<void> {
   const calc = useCalculationStore()
 
   // Dynamic import — pptxgenjs stays out of main bundle
-  const { default: PptxGenJS } = await import('pptxgenjs')
+  const { default: PptxGenJS } = await import('pptxgenjs-plus')
   const pptx = new PptxGenJS()
 
   // Presentation-wide default font (Arial) — overridden per-element for metric values.
@@ -643,7 +655,7 @@ export async function generatePptxReport(): Promise<void> {
       dataLabelPosition: 'outEnd' as const,
       chartColors: [NAVY],
     })
-    slide.addChart('bar', nodeCountData, makeNodeChartOpts())
+    slide.addChart('bar', toChartData(nodeCountData), makeNodeChartOpts())
 
     if (showVcpuChart) {
       const vcpuData = buildVcpuStackedChartData(sizing)
@@ -665,7 +677,7 @@ export async function generatePptxReport(): Promise<void> {
           showValue: false,
           chartColors: ['EE0000', 'CC0000', 'AA0000', '880000', '660000', '440000', '220000'],
         })
-        slide.addChart('bar', vcpuData, makeVcpuChartOpts())
+        slide.addChart('bar', toChartData(vcpuData), makeVcpuChartOpts())
       }
     }
 
