@@ -44,25 +44,21 @@
     return all
   })
 
-  const chartData = computed(
-    (): ChartData<'doughnut'> => ({
-      labels: rows.value.map((r) => t(r.labelKey)),
-      datasets: [
-        {
-          data: rows.value.map((r) => r.spec.count * r.spec.storageGB),
-          backgroundColor: rows.value.map((_, i) => COLORS[i % COLORS.length]),
-        },
-      ],
-    }),
-  )
+  const chartData = computed((): ChartData<'doughnut'> => ({
+    labels: rows.value.map((r) => t(r.labelKey)),
+    datasets: [
+      {
+        data: rows.value.map((r) => r.spec.count * r.spec.storageGB),
+        backgroundColor: rows.value.map((_, i) => COLORS[i % COLORS.length]),
+      },
+    ],
+  }))
 
-  const chartOptions = computed(
-    (): ChartOptions<'doughnut'> => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: true, position: 'right' }, tooltip: { enabled: true } },
-    }),
-  )
+  const chartOptions = computed((): ChartOptions<'doughnut'> => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: true, position: 'right' }, tooltip: { enabled: true } },
+  }))
 </script>
 
 <template>
