@@ -44,36 +44,32 @@
     return all
   })
 
-  const chartData = computed(
-    (): ChartData<'bar'> => ({
-      labels: rows.value.map((r) => t(r.labelKey)),
-      datasets: [
-        {
-          label: t('results.charts.ram'),
-          data: rows.value.map((r) => r.spec.count * r.spec.ramGB),
-          backgroundColor: 'rgba(37,99,235,0.7)',
-          borderColor: 'rgba(37,99,235,1)',
-          borderWidth: 1,
-        },
-      ],
-    }),
-  )
-
-  const chartOptions = computed(
-    (): ChartOptions<'bar'> => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: true } },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { color: 'rgb(75,85,99)' },
-          grid: { color: 'rgba(156,163,175,0.3)' },
-        },
-        x: { ticks: { color: 'rgb(75,85,99)' }, grid: { color: 'rgba(156,163,175,0.3)' } },
+  const chartData = computed((): ChartData<'bar'> => ({
+    labels: rows.value.map((r) => t(r.labelKey)),
+    datasets: [
+      {
+        label: t('results.charts.ram'),
+        data: rows.value.map((r) => r.spec.count * r.spec.ramGB),
+        backgroundColor: 'rgba(37,99,235,0.7)',
+        borderColor: 'rgba(37,99,235,1)',
+        borderWidth: 1,
       },
-    }),
-  )
+    ],
+  }))
+
+  const chartOptions = computed((): ChartOptions<'bar'> => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { enabled: true } },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { color: 'rgb(75,85,99)' },
+        grid: { color: 'rgba(156,163,175,0.3)' },
+      },
+      x: { ticks: { color: 'rgb(75,85,99)' }, grid: { color: 'rgba(156,163,175,0.3)' } },
+    },
+  }))
 </script>
 
 <template>
