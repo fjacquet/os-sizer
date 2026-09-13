@@ -9,6 +9,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.3.3] — 2026-09-13
+
+### Security
+- Replaced `pptxgenjs` with `pptxgenjs-plus`, dropping the two HIGH advisories against the
+  transitive `image-size@1.2.1` (**GHSA-5p2g-fcmc-qvqq**, **GHSA-w3rx-r6r6-pgpr**), which had no
+  fixed version upstream. `image-size` leaves the dependency tree entirely.
+- Bumped `postcss-selector-parser` to 7.1.5, resolving **GHSA-w9m9-85wc-3x92** (LOW).
+
+### Changed
+- Resynced `biome.json`'s `$schema` with the installed Biome CLI version (config only; no source
+  reformat).
+
+---
+
 ## [2.3.0] — 2026-06-03
 
 ### Added — Virtualization (OVE) headroom & storage visibility
