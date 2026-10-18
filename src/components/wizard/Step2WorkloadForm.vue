@@ -31,7 +31,7 @@
   function addOnField(key: keyof typeof activeCluster.value.addOns) {
     return computed({
       get: () => activeCluster.value.addOns[key],
-      set: (val: boolean | number) => {
+      set: (val: boolean | number | string) => {
         const c = input.clusters[input.activeClusterIndex]
         if (c) input.updateCluster(c.id, { addOns: { ...c.addOns, [key]: val } })
       },

@@ -1,0 +1,10 @@
+# OSV-Scanner configuration.
+# https://google.github.io/osv-scanner/configuration/
+
+[[PackageOverrides]]
+name = "braces"
+version = "3.0.3"
+ecosystem = "npm"
+vulnerability.ignore = true
+effectiveUntil = 2026-12-31
+reason = "Dev-only (GHSA-vfj7-8cjw-p6xm): no fixed version exists upstream; not shipped"
