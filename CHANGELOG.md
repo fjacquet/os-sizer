@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Security
+
+- Full npm refresh: `dompurify` 3.4.16, `brace-expansion` 5.0.12 and others (7 of 8 OSV findings). `braces` 3.0.3 (GHSA-vfj7-8cjw-p6xm) has no fix and is waived as dev-only until 2026-12-31 in `osv-scanner.toml`.
+
+### Fixed
+
+- The `addOnField` setter in `Step2WorkloadForm.vue` accepted only `boolean | number`, but the GPU mode, GPU model and MIG profile selects assign strings. vue-tsc 3.3.13 reported it.
+
 ---
 
 ## [2.3.3] — 2026-09-13
