@@ -8,3 +8,13 @@ ecosystem = "npm"
 vulnerability.ignore = true
 effectiveUntil = 2026-12-31
 reason = "Dev-only (GHSA-vfj7-8cjw-p6xm): no fixed version exists upstream; not shipped"
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2027-01-30
+reason = """
+minimatch globparts amplification DoS (published 2026-10-30, fixed in 11.0.1 only). Dev-only:
+eslint 10 and typescript-estree require minimatch ^10, and no released parent accepts >=11.0.1.
+Not reachable: patterns come from repo-owned lint config, never from untrusted input; worst case
+is a hung local build. Re-check at expiry; drop once the toolchain accepts minimatch >=11.0.1.
+"""
